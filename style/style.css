@@ -136,7 +136,8 @@ body {
     display: flex; align-items: flex-start;
     background: var(--cmd-bg); border: 1px solid var(--cmd-border);
     border-left: 3px solid var(--nav-active-bg);
-    border-radius: 4px; padding: 6px 8px; margin-bottom: 8px;
+    border-radius: 4px; padding: 6px 8px; 
+    margin-bottom: 5px;
     position: relative;
     /* 居中 */
     align-items: center;
