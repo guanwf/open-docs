@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>help</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .nav {
+            background-color: #f0f0f0;
+            padding: 15px;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .nav a {
+            margin: 0 5px;
+            padding: 10px 15px;
+            text-decoration: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav a:hover {
+            background-color: #45a049;
+        }
+        .section {
+            min-height: 100vh; /* 最小高度为一屏，内容少时占满一屏 */
+            height: auto;      /* 内容多时，高度自动撑开 */
+            
+            padding: 2px;
+            padding-top: 65px;
+            margin-top: 40px;
+            border-bottom: 1px solid #ddd;
+            overflow: hidden; /* 可选：防止内部元素浮动导致的高度塌陷，虽然你用了flex但加上保险 */
+
+        }
+        #shell { background-color: #e6f3ff; }
+        #net { background-color: #f0fff0; }
+        #database { background-color: #fff0f0; }
+        #k8s { background-color: #f0fff0; }
+        #nginx { background-color: #e6f3ff; }
+        #nacos { background-color: #fff0f0; }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <a href="#shell">shell</a>
+        <a href="#net">net</a>
+        <a href="#database">database</a>
+        <a href="#k8s">k8s</a>
+        <a href="#nginx">nginx</a>
+        <a href="#nacos">nacos</a>
+        <a href="#link">link</a>
+        <a href="#fs-link">fs-link</a>
+    </div>
+
+    <div id="shell" class="section">
+        <h2>Shell 技术专区</h2>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+查看系统版本
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;">cat /etc/os-release | grep "^ID=" | awk -F= '{print $2}' | tr -d [:punct:]
+cat /etc/os-release | grep "VERSION_ID=" | awk -F= '{print $2}' | tr -d [:punct:]</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;">
+系统信息
+查看内核信息
+uname -r
+查看 CPU 信息
+cat /proc/cpuinfo   
+查看内存使用情况
+lscpu
+free -h
+cat /proc/meminfo
+查看系统运行时间
+uptime
+who -b   # 最近一次启动时间
+
+dos2unix file
+:set ff=unix
+
+</pre>
+</div>
+
+
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;">find / -size +500M          <code>找出最大文件</code></pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;">du -h --max-depth=1 /XXX          <code>查看某个目录下 每个文件的大小.</code></pre>
+</div>
+
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;">查找大量小文件的目录
+<code># 查看哪些目录下文件数量最多（需要在/vdb1分区内执行）
+cd /vdb1
+for dir in */; do echo -n "$dir: "; find "$dir" -type f | wc -l; done</code>
+
+# 清理30天前的临时文件（请确认路径正确性）
+find /vdb1/tmp -type f -mtime +30 -delete
+
+# 清理旧日志（谨慎操作，确保不影响系统运行）
+find /vdb1/var/log -name "*.log.*" -type f -delete
+
+# 清理无用的镜像和卷
+docker system prune -a
+
+一键清理所有无效资源（推荐）
+docker image prune -a
+docker system prune
+docker ps -a --filter "status=exited"
+docker system prune -f --volumes
+docker system prune --volumes
+docker images -f "dangling=true"
+
+docker images | grep aeon | awk '{print $3}' | xargs docker rmi -f
+
+</pre>
+</div>
+
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;">建立用户<code>
+mkdir -p /data/pos-work
+
+groupadd posgroup
+useradd -g posgroup pos -d /data/pos-work
+passwd pos
+密码: Pos&Dev&2025
+
+这是目录权限
+chown -R pos:posgroup /data/pos-work
+
+sudo visudo -c && echo "pos ALL=(ALL:ALL) ALL" | tee -a /etc/sudoers && echo "pos ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers
+
+生成49位随机数
+cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 49;echo
+
+docker cp [本地文件/目录路径] [容器名或容器ID]:[容器内目标路径]
+
+
+  </code></pre>
+</div>
+
+    </div>
+
+
+    <div id="net" class="section">
+        <h2>net zone</h2>
+
+    <!-- 部署名：普通输入框 -->
+    <label>ip：
+      <input id="ipaddress" type="text" placeholder="192.168.0.1" value="192.168.0.1" style="width:160px;">
+    </label>
+    &nbsp;&nbsp;
+    <label>port：
+      <input id="ipport" type="text" placeholder="port" value="9999" style="width:160px;">
+    </label>
+    &nbsp;&nbsp;
+    <button onclick="replaceCmd()">Replace</button>
+  </p>
+
+<!-- 命令展示区（按钮与命令同一行，按钮最左） -->
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('firewall-cmd').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;">firewall-cmd --zone=public --add-port=9999/tcp --permanent
+firewall-cmd --reload
+
+sudo systemctl start firewalld
+sudo systemctl stop firewalld
+sudo systemctl disable firewalld
+</pre>
+</div>
+
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('firewall-cmd').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;"><code>timeout 10 bash -c "&lt;/dev/tcp/192.168.0.1/8080" 2&gt;/dev/null &amp;&amp; echo "通" || echo "不通"</code>
+</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('firewall-cmd').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;"><code>nc -v 192.168.0.1 8080</code>
+</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('firewall-cmd').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;"><code>telnet 192.168.0.1 8080</code>
+</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('firewall-cmd').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;"><code>主要用于诊断网络连接问题：  tracepath [目标主机/IP]
+			traceroute  [目标主机/IP]</code>
+
+curl -H "http://39.103.177.212:30082/tools/libcrypto.so.10    " -so "fastdeploy-linux"
+curl -so /lib64/libssl.so.10 http://39.103.177.212:30082/tools/libssl.so.10
+curl -so /lib64/libcrypto.so.10 http://39.103.177.212:30082/tools/libcrypto.so.10
+
+tracepath 
+
+网卡详情
+ifconfig -a
+对于window: ipconfig -a 
+
+DHCP 拿到的详细信息（DNS、domain、router 等）
+ipconfig getpacket en0      # en0 通常是 Wi-Fi，有线可能是 en1
+
+查询域名解析
+nslookup 域名
+nslookup itor.westlakeerp.com 8.8.8.8
+
+路由追踪前 10 跳
+traceroute -n -m 10 域名
+对应 Windows 的 tracert -d -h 10
+
+</pre>
+</div>
+
+
+</div>
+    <div id="database" class="section">
+        <h2>Database 技术专区</h2>
+        <p>这里是关于数据库技术的内容...</p>
+
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <pre id="firewall-cmd" style="margin:0;white-space:pre-wrap;flex:1;">分配权限<code>
+GRANT SELECT, INSERT,UPDATE,DELETE,CREATE,INDEX,ALTER,CREATE VIEW,SHOW VIEW ON reportdb.* TO roc;
+查看所有连接
+select * from information_schema.processlist;
+kill id值
+
+会话状态
+SELECT * FROM information_schema.SESSION_STATUS;
+
+根据ip看连接
+SELECT LEFT(HOST, INSTR(HOST, ':')-1) client_ip, COUNT(*) cnt FROM information_schema.processlist GROUP BY client_ip ORDER BY cnt DESC;
+
+设置超时时间：
+单位：微秒
+SET ob_query_timeout=20000000;
+60秒
+set global ob_query_timeout=60000000;
+120秒
+set global ob_query_timeout=120000000;
+300秒
+set global ob_query_timeout=3000000000;
+查看
+SHOW VARIABLES LIKE 'ob_query_timeout';
+
+  </code></pre>
+</div>
+
+    </div>
+
+    <div id="k8s" class="section">
+        <h2>k8s zone</h2>
+
+<!-- 输入区 -->
+  <p>
+
+    <!-- 命名空间：下拉可编辑 -->
+    <label for="envSelect">namespace：</label>
+<!--       <input id="nsInput" list="nsOptions" placeholder="pbs" value="pbs" style="width:120px;">
+       <datalist id="nsOptions">
+        <option value="pbs">
+        <option value="default">
+        <option value="kube-system">
+        <option value="dev">
+        <option value="prod">
+      </datalist>
+    </label> -->
+
+	<select id="envSelect">
+	  <option value="pbs">pbs</option>
+	  <option value="roc-sit">roc-sit</option>
+	  <option value="roc-dev">roc-dev</option>
+	  <option value="roc-v2-test" selected>roc-v2-test</option>
+	  <option value="roc-uat" selected>roc-uat</option>
+	  <option value="roc-prod">roc-prod</option>
+	   <option value="pos-sit">pos-sit</option>
+	   <option value="pos-uat">pos-uat</option>
+	   <option value="pos-prod">pos-prod</option>
+	   <option value="wms-uat">wms-uat</option>
+	   <option value="wms-prod">wms-prod</option>
+	   <option value="myshop-uat">myshop-uat</option>
+	   <option value="myshop-prod">myshop-prod</option>
+	</select>
+    &nbsp;&nbsp;
+
+    <!-- 部署名：普通输入框 -->
+    <label>pod-name：
+      <input id="deployInput" type="text" placeholder="roc-goods" value="roc-goods" style="width:160px;">
+    </label>
+    &nbsp;&nbsp;
+    <label>版本号：
+      <input id="imageVersionId" type="text" placeholder="版本号" value="版本号" style="width:160px;">
+    </label>
+    &nbsp;&nbsp;
+    <button onclick="replaceCmd()">Replace</button>
+  </p>
+
+<!-- 命令展示区（按钮与命令同一行，按钮最左） -->
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('k8s-cmd-restart-deploy').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="k8s-cmd-restart-deploy" style="margin:0;white-space:pre-wrap;flex:1;">kubectl rollout restart deploy -n roc-uat roc-goods  </pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 2px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('k8s-cmd-scale').innerText)" style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="k8s-cmd-scale" style="margin:0;white-space:pre-wrap;flex:1;">kubectl -n roc-uat scale deployment roc-goods --replicas=1</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 2px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('k8s-cmd-update-image-versionid').innerText)" style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="k8s-cmd-update-image-versionid" style="margin:0;white-space:pre-wrap;flex:1;">kubectl -n roc-uat set image deployment roc-goods roc-goods=版本号</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 2px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('k8s-cmd-update-image-versionid').innerText)" style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="k8s-cmd-update-image-versionid" style="margin:0;white-space:pre-wrap;flex:1;">kubectl -n roc-uat logs -f --tail --n 200 roc-goods</pre>
+</div>
+
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 2px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('k8s-cmd-update-image-versionid').innerText)" style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="k8s-cmd-update-image-versionid" style="margin:0;white-space:pre-wrap;flex:1;">kubectl -n roc-uat logs -f --tail 200 roc-goods</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 2px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('k8s-cmd-update-image-versionid').innerText)" style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="k8s-cmd-update-image-versionid" style="margin:0;white-space:pre-wrap;flex:1;">kubectl -n roc-uat get pods |grep Evicted | awk '{print $1}' | xargs kubectl -n roc-uat delete pod<code>  删除大量evicted的pod</code></pre> 
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 2px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('k8s-cmd-update-image-versionid').innerText)" style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="k8s-cmd-update-image-versionid" style="margin:0;white-space:pre-wrap;flex:1;">docker cp ab5593917446:/home/admin/logs/supervisor/error.log ./    从容器中复制文件到本地
+  </pre>
+</div>
+
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 2px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('k8s-cmd-update-image-versionid').innerText)" style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+<pre id="k8s-cmd-update-image-versionid"><code>kubectl cp &lt;namespace&gt;/&lt;pod&gt;:&lt;root_dir&gt;/&lt;parent_dir&gt;/&lt;file_name&gt; ./&lt;file_name&gt; 从 pod 容器复制文件到本地
+</code></pre>
+</div>
+
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 2px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('k8s-cmd-update-image-versionid').innerText)" style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+<pre id="k8s-cmd-update-image-versionid"><code>kubectl cp ./&lt;file_name&gt; &lt;namespace&gt;/&lt;pod&gt;:/&lt;root_dir&gt;/&lt;parent_dir&gt;/&lt;file_name&gt;   从本地复制到 pod 容器
+
+批量删除这些标签为none的镜像
+docker rmi $(docker images -f "dangling=true" -q)
+docker rmi -f $(docker images -f "dangling=true" -q)
+
+kubectl -n pos-uat exec -it pos-pay-68f6497f55-kpqvj  -- curl http://roc-card-api.roc-uat:80/ocm-valuecard-webin/rest?method=efuture.ocm.info.main.auth
+{"timestamp":"2025-08-29T02:29:07.782+00:00","status":405,"error":"Method Not Allowed","message":"","path":"/ocm-valuecard-webin/rest"}[root@cce-ec-test-nodepool-61711-akhzj ~]# 
+
+echo 'alias kb="kubectl"' >> ~/.bashrc && source ~/.bashrc
+
+kubectl -n pos-uat delete pod pos-order-5b58966559-5f5sp --grace-period=0 --force --wait=false
+
+批量生成需要重启的pod命令
+kubectl get pods -n roc-uat -o=jsonpath='{range .items[*]}{"kubectl rollout restart deploy -n roc-uat "}{.metadata.labels.app}{"\n"}' > pod-restart.log
+
+kubectl get pods -n wms-prod -o=jsonpath='{range .items[*]}{"kubectl rollout restart deploy -n wms-prod "}{.metadata.labels.app}{"\n"}'
+
+kb -n pos-prod top pod --sort-by=memory
+kb -n pos-pbs top pod --sort-by=memory
+kb -n pos-prod top pod --sort-by=memory | tail -n +2 | sort -k3 -h
+
+kubectl -n roc-uat exec -it msc-datalink-7455d5b9bf-gfwkm --  timeout 10 bash -c "</dev/tcp/10.10.16.164/22" 2>/dev/null && echo "通" || echo "不通"
+
+kubectl -n pos-prod get cm conf-env-center -o jsonpath='{.data.CONFIG_SKYWALKING_ENABLE}'
+kubectl -n pos-prod patch configmap conf-env-center -p '{"data":{"CONFIG_SKYWALKING_ENABLE":"true"}}'
+
+</code></pre>
+</div>
+
+
+
+</div>
+
+    <div id="nginx" class="section">
+        <h2>nginx zone</h2>
+
+    <!-- 部署名：普通输入框 -->
+    <label>ip：
+      <input id="ipaddress" type="text" placeholder="192.168.0.1" value="192.168.0.1" style="width:160px;">
+    </label>
+    &nbsp;&nbsp;
+    <label>port：
+      <input id="ipport" type="text" placeholder="port" value="9999" style="width:160px;">
+    </label>
+    &nbsp;&nbsp;
+    <button onclick="replaceCmd()">Replace</button>
+  </p>
+
+<div>
+link
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('roc-nginx').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="roc-nginx" style="margin:0;white-space:pre-wrap;flex:1;">    server {
+        listen       9999;
+        server_name  localhost;
+	charset utf-8;
+        location ~ / {
+                  proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+                  expires -1;
+                  proxy_pass http://192.168.0.1;
+        }
+    }</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('nacos-nginx').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="nacos-nginx" style="margin:0;white-space:pre-wrap;flex:1;">    server {
+        listen       9092;
+        server_name  localhost;
+        location ~ /nacos {
+                  proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+                  expires -1;
+                  proxy_pass http://192.168.0.1;
+        }
+    }</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('xxljob-nginx').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="xxljob-nginx" style="margin:0;white-space:pre-wrap;flex:1;">    server {
+        listen       9093;
+        server_name  localhost;
+        location ~ /xxl-job-admin {
+                  proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+                  expires -1;
+                  proxy_pass http://192.168.0.1;
+        }
+    }</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('minio-nginx').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="minio-nginx" style="margin:0;white-space:pre-wrap;flex:1;">    server {
+        listen       6901;
+        server_name  localhost;
+        location ~ / {
+                  proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+                  expires -1;
+                  proxy_pass http://192.168.0.1;
+        }
+    }</pre>
+</div>
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('rocketmq-nginx').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="rocketmq-nginx" style="margin:0;white-space:pre-wrap;flex:1;">    server {
+        listen       7298;
+        server_name  localhost;
+        location ~ /rocketmq {
+                  proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+                  expires -1;
+                  proxy_pass http://192.168.0.1;
+        }
+    }</pre>
+</div>
+
+
+<div style="display:flex;align-items:center;background:#f7f7f7;border:1px solid #ddd;border-radius:2px;padding:2px;font-family:Consolas,Monaco,'Andale Mono',monospace;margin-top: 5px;">
+  <!-- 复制按钮 -->
+  <button onclick="navigator.clipboard.writeText(document.getElementById('rocketmq-nginx').innerText)"
+          style="margin-right:8px;border:none;background:#007bff;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;white-space:nowrap;">
+    复制
+  </button>
+  <!-- 命令行 -->
+  <pre id="rocketmq-nginx" style="margin:0;white-space:pre-wrap;flex:1;">    server {
+       listen       9192;
+       server_name  localhost;
+       location / {
+           root /data/sftp;
+           autoindex on;
+           autoindex_exact_size off;
+           autoindex_localtime on;
+           charset utf-8;
+         }
+      }</pre>
+</div>
+
+
+    <div id="nacos" class="section">
+        <h2>nacos zone</h2>
+        <p>这里是关于数据库技术的内容...</p>
+    </div>
+
+
+    <div id="link" class="section">
+        <h2>Link zone</h2>
+        <ol>
+
+		<li>
+		<a href="https://cip.cc/" target="_blank" rel="noopener noreferrer">查看出口ip</a>
+		</li>
+
+		<li>
+		<a href="https://centralops.net/" target="_blank" rel="noopener noreferrer">centralops-DNS-Domain -Check-Traceroute</a>
+		</li>
+
+		<li>
+		<a href="https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh" target="_blank" rel="noopener noreferrer">nginx升级方法</a> <code>4N11294&</code>
+		</li>
+
+		<li>
+		<a href="https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe"target="_blank" rel="noopener noreferrer">k8s日常操作  - </a> <code>418#48r5</code>
+		</li>
+		
+		<li>
+		<a href="https://support.huaweicloud.com/intl/zh-cn/usermanual-cce/cce_10_0107.html"target="_blank" rel="noopener noreferrer">通过kubectl连接集群-hw-cce</a>
+		</li>
+		
+		<li>
+		<a href="https://www.davidc.net/sites/default/subnets/subnets.html"target="_blank" rel="noopener noreferrer">Visual Subnet Calculator</a>
+		</li>
+
+		<li>
+		<a href="./passwd.html"target="_blank" rel="noopener noreferrer">generate password</a>
+		</li>
+
+		<li>
+		<a href="https://www.ip138.com/"target="_blank" rel="noopener noreferrer">ip check</a>
+		</li>
+
+		<li>
+		<a href="https://1024tools.com/uuid "target="_blank" rel="noopener noreferrer">生成一个 UUIDv4</a>
+		</li>
+
+		<li>
+		<a href="https://www.ssllabs.com/ssltest/analyze.html"target="_blank" rel="noopener noreferrer">ssl-check</a>
+		</li>
+
+		<li>
+		<a href="https://www.yamllint.com/"target="_blank" rel="noopener noreferrer">yaml check</a>
+		</li>
+
+		<li>
+		<a href="https://www.perfcode.com/linux/kali/password-dictionary"target="_blank" rel="noopener noreferrer">perfcode</a>
+		</li>
+
+		<li>
+		<a href="https://www.windy.com"target="_blank" rel="noopener noreferrer">windy</a>
+		</li>
+
+		<li>
+		<a href="https://kubernetes.io/zh-cn/docs/setup/best-practices/cluster-large/"target="_blank" rel="noopener noreferrer">Kubernetes|大规模集群的注意事项</a>
+		</li>
+
+		<li>
+		<a href="https://hackmd.io/@QI-AN/What-happens-when-the-number-of-K8S-Pods-exceeds-110#15-%E6%9F%A5%E7%9C%8B%E7%8B%80%E6%85%8B%E7%82%BA-Running-%E7%9A%84-Pod-%E6%98%AF%E5%90%A6%E6%9C%89%E8%A2%AB%E5%BD%B1%E9%9F%BF"target="_blank" rel="noopener noreferrer">測試 K8S Pod 數量超過 110 會發生甚麼事?</a>
+		</li>
+
+		<li>
+		<a href="https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/"target="_blank" rel="noopener noreferrer">Kubernetes|kubelet-config:</a>
+		</li>
+
+
+		<li>
+		<a href="https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/"target="_blank" rel="noopener noreferrer">Kubernetes|tool-reference:</a>
+		</li>
+
+		<li>
+		<a href="https://koomu.cn/k8s-modify-node-pods-limits/"target="_blank" rel="noopener noreferrer">Kubernetes|K8S 修改节点 pod 上限</a>
+		</li>
+
+		<li>
+		<a href="https://whatismyipaddress.com/"target="_blank" rel="noopener noreferrer">whatismyipaddress</a>
+		</li>
+
+		<li>
+		<a href="http://8.220.217.46:8000/"target="_blank" rel="noopener noreferrer">Docker Image Hub</a>
+		</li>
+
+		<li>
+		<a href="https://docker.aityp.com/"target="_blank" rel="noopener noreferrer">docker.aityp</a>
+		</li>
+
+		<li>
+		<a href="https://owasp.org/www-project-dependency-check/"target="_blank" rel="noopener noreferrer">OWASP Dependency-Check-项目依赖及漏洞扫描</a>
+		</li>
+
+		<li>
+		<a href="https://start.spring.io/"target="_blank" rel="noopener noreferrer">start-spring-io</a>
+		</li>
+
+		<li>
+		<a href="https://www.bejson.com/devtools/properties2yaml/"target="_blank" rel="noopener noreferrer">properties2yaml-在线格式转换</a>
+		</li>
+
+		<li>
+		<a href="https://kubernetes.io/zh-cn/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/"target="_blank" rel="noopener noreferrer">K8S-配置存活、就绪和启动探针</a>
+		</li>
+
+    <li>
+      <a href="https://www.wireguard.com/quickstart/"target="_blank" rel="noopener noreferrer">wireguard</a>
+    </li>
+
+      
+    
+
+
+
+
+		<br/>
+		
+</ol>
+
+</div>
+
+<div id="fs-link" class="section">
+<h2>Link zone</h2>
+<ol>
+		<li>
+		<a href="https://www.bloomberg.com/"target="_blank" rel="noopener noreferrer">Bloomberg（彭博社）</a>
+		<div>全球知名的金融新闻与数据分析平台，以全面、专业、深入的报道闻名。网站提供金融市场新闻、数据、研究报告等多种服务，被广泛认为是全球最权威的财经信息来源之一。</div>
+		</li>
+
+		<li>
+		<a href="https://www.reuters.com/"target="_blank" rel="noopener noreferrer">Reuters（路透社）</a>
+		<div>有近200年历史的全球性新闻机构，主要覆盖财经、、科技等领域。网站除了提供新闻报道外，还有金融市场数据、投资者工具等各种内容。</div>
+		</li>
+
+		<li>
+		<a href="https://www.ft.com/"target="_blank" rel="noopener noreferrer">Financial Times（金融时报）</a>
+		<div>英国著名的财经报纸，是全球最重要的商业新闻机构之一。该网站的报道覆盖了全球的金融市场、商业、经济和等方面的新闻。</div>
+		</li>
+
+		<li>
+		<a href="https://www.wsj.com/"target="_blank" rel="noopener noreferrer">Wall Street Journal（华尔街日报） </a>
+		<div>美国最有影响力的财经报纸之一，涵盖了股票、债券、商品、房地产等领域的报道。其网站提供实时市场数据、金融新闻、分析和评论等服务。</div>
+		</li>
+
+		<li>
+		<a href="https://www.cnbc.com/"target="_blank" rel="noopener noreferrer">CNBC</a>
+		<div>全球领先的商业新闻与财经信息平台，主要报道股票、债券、外汇、商品、房地产等方面的新闻。网站除了提供实时市场数据外，还有专家分析、财经节目等各种内容。</div>
+		</li>
+
+		<li>
+		<a href="https://www.marketwatch.com/"target="_blank" rel="noopener noreferrer">MarketWatch</a>
+		</li>
+		<li>
+		<a href="https://www.investing.com/"target="_blank" rel="noopener noreferrer"> investing.com</a>
+		<div>一家全球性的投资者门户网站，提供多种金融工具和服务，包括实时市场报价、图表分析、新闻报道、财经日历等。</div>
+		</li>
+
+		<li>
+		<a href="https://www.barrons.com/"target="_blank" rel="noopener noreferrer"> Barron’s（巴伦周刊）</a>
+		<div>美国知名的财经杂志，主要关注股票、债券、基金、证券市场等领域的新闻和分析。其网站提供实时市场数据、研究报告、专栏文章等服务。</div>
+		</li>
+		<li>
+		<a href="https://www.economist.com/"target="_blank" rel="noopener noreferrer"> The Economist（经济学人）</a>
+		<div>英国知名的综合性新闻杂志，涵盖了全球的、经济、商业和科技等领域。该网站提供有关全球经济和金融市场的深入分析和报道。</div>
+		</li>
+
+		<li>
+		<a href="https://www.forbes.com/"target="_blank" rel="noopener noreferrer"> Forbes（福布斯）</a>
+		<div>美国知名的商业新闻杂志，主要报道商业、金融、科技、创新和创业等领域的新闻。其网站提供实时市场数据、分析报告、专栏文章等服务。</div>
+		</li>
+
+		<li>
+		<a href="https://www.caixin.com/"target="_blank" rel="noopener noreferrer"> 财新网</a>
+		<div>国内顶尖的财经媒体，以深度调查和原创报道闻名。</div>
+		</li>
+
+		<li>
+		<a href="https://cn.wsj.com/"target="_blank" rel="noopener noreferrer"> 华尔街日报</a>
+		<div>华尔街日报</div>
+		</li>
+
+		<li>
+		<a href="https://finviz.com/"target="_blank" rel="noopener noreferrer"> finviz</a>
+		<div>finviz</div>
+		</li>
+
+		<li>
+		<a href="https://www.cnyes.com/"target="_blank" rel="noopener noreferrer"> cnyes</a>
+		<div>cnyes</div>
+		</li>
+
+
+
+		<li>
+		<a href="https://jirancaijing.com/"target="_blank" rel="noopener noreferrer">计然财经</a>
+		<div>计然财经</div>
+		</li>
+
+		<li>
+		<a href="http://www.pbc.gov.cn/"target="_blank" rel="noopener noreferrer"> 中国人民银行</a>
+		<div>中国人民银行</div>
+		</li>
+
+		<li>
+		<a href="https://www.stats.gov.cn/"target="_blank" rel="noopener noreferrer"> 国家统计局</a>
+		<div>国家统计局</div>
+		</li>
+
+		<li>
+		<a href="https://api3.cls.cn/quote/toplist?app=cailianpress&sv=842&os=android"target="_blank" rel="noopener noreferrer"> 热点-toplist-30</a>
+		<div>热点-toplist-30</div>
+		</li>
+
+
+		<li>
+		<a href="http://www.stcn.com/"target="_blank" rel="noopener noreferrer"> 证券时报网</a>
+		<div>中国最早的证券类媒体之一，报道涵盖股票、债券、期货、基金等市场动态以及金融政策、宏观经济、行业分析等内容。网站还提供实时行情、数据查询和专家点评等服务。</div>
+		</li>
+
+		<li>
+		<a href="https://www.eeo.com.cn/"target="_blank" rel="noopener noreferrer"> 经济观察网</a>
+		<div>致力于提供独立深入的经济新闻与分析，主要关注中国经济、产业和企业等领域的报道。网站还设有专题和研究报告等栏目，提供更加深入的分析和报道。
+
+		<li>
+		<a href="http://finance.ce.cn/"target="_blank" rel="noopener noreferrer"> 财经网</a>
+		<div>全面覆盖股票、基金、债券、外汇、期货等各种金融市场动态的门户网站，提供实时行情、数据分析、投资建议等服务。同时，该网站也关注宏观经济和行业动态等方面的报道。</div>
+		</li>
+
+		<li>
+		<a href="http://www.jrj.com.cn/"target="_blank" rel="noopener noreferrer"> 金融界</a>
+		<div>拥有独立的采编团队和大量高端读者的财经媒体，主要报道股票、基金、债券、期货等市场动态以及宏观经济、行业分析等内容。网站还设有投资顾问和财富管理等专栏，提供更加个性化的服务。</div>
+		</li>
+
+		<li>
+		<a href="http://www.cnstock.com/"target="_blank" rel="noopener noreferrer">中国证券网</a>
+		<div>中国证监会授权的证券信息服务平台，是全国最大的股票、基金等证券市场信息门户之一。该网站提供实时行情、公司研究、新闻资讯、投资策略等服务。</div>
+		</li>
+
+		<li>
+		<a href="https://xueqiu.com/"target="_blank" rel="noopener noreferrer">雪球财经</a>
+		<div>一家社交型财经网站，旨在为广大投资者提供互动交流和投资建议。网站提供实时行情、投资组合、数据分析、投资观点等服务，同时也关注市场热点和投资策略等方面的报道。</div>
+		</li>
+
+		<li>
+		<a href="http://www.cs.com.cn/"target="_blank" rel="noopener noreferrer">同花顺</a>
+		<div>由中证信用评级有限公司运营的财经门户网站，主要覆盖债券、基金、信托、ABS等领域的新闻和分析。网站还提供实时行情、数据查询和研究报告等服务。</div>
+		</li>
+		<li>
+		<a href="http://www.hexun.com/"target="_blank" rel="noopener noreferrer">和讯网</a>
+		<div>一家综合性财经门户网站，涵盖了股票、基金、债券、期货、外汇等多种市场数据和工具。网站还设有行业研究、投资策略和财富管理等专栏，提供更加全面的服务。</div>
+		</li>
+
+
+		<li>
+		<a href="https://eastmoney.com/"target="_blank" rel="noopener noreferrer">东方财富</a>
+		<div>国务院发展研究中心主管的综合性财经门户网站，主要报道宏观经济、产业政策和企业动态等方面的新闻和分析。网站还提供实时数据、专题报道和研究报告等服务。</div>
+		</li>
+
+		<li>
+		<a href="https://www.yicai.com/"target="_blank" rel="noopener noreferrer">第一财经</a>
+		<div>致力于打造全球领先的金融信息平盖股票、基金、债券、期货、外汇等多个市场。网站提供实时行情、数据查询、专家点评等服务，同时也关注宏观经济和行业动态等方面的报道。</div>
+		</li>
+
+		<li>
+		<a href="https://www.csrc.gov.cn/csrc/index.shtml"target="_blank" rel="noopener noreferrer">中国证监会</a>
+		<div>中国证监会</div>
+		</li>
+
+		<li>
+		<a href="https://www.szse.cn/index/index.html"target="_blank" rel="noopener noreferrer">深圳证券交易所</a>
+		<div>深圳证券交易所</div>
+		</li>
+
+		<li>
+		<a href="https://www.sse.com.cn/"target="_blank" rel="noopener noreferrer">上海证券交易所 </a>
+		<div>上海证券交易所 </div>
+		</li>
+</ol>
+
+</div>
+ 
+		
+
+
+
+
+    </div>
+
+    </div>
+
+	  <!-- 替换脚本 -->
+  <script>
+    function replaceCmd() {
+      const ns   = document.getElementById('envSelect').value.trim()   || 'roc-uat';
+      const name = document.getElementById('deployInput').value.trim() || 'roc-goods';
+      const versionId = document.getElementById('imageVersionId').value.trim() || '版本号';
+	  
+	  //
+      const newCmd = `kubectl rollout restart deploy -n ${ns} ${name}`;
+      document.getElementById('k8s-cmd-restart-deploy').innerText = newCmd;
+	  //
+	  const newCmd2=`kubectl -n ${ns} scale deployment ${name} --replicas=1`;
+      document.getElementById('k8s-cmd-scale').innerText = newCmd2;
+   	  //
+	  const newCmd3=`kubectl -n ${ns} set image deployment ${name} ${name}=${versionId}`;	  
+      document.getElementById('k8s-cmd-update-image-versionid').innerText = newCmd3;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fs-link</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav {
+            background-color: #f0f0f0;
+            padding: 15px;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav a {
+            margin: 0 5px;
+            padding: 10px 15px;
+            text-decoration: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav a:hover {
+            background-color: #45a049;
+        }
+
+        .section {
+            min-height: 100vh;
+            /* 最小高度为一屏，内容少时占满一屏 */
+            height: auto;
+            /* 内容多时，高度自动撑开 */
+
+            padding: 2px;
+            padding-top: 65px;
+            margin-top: 40px;
+            border-bottom: 1px solid #ddd;
+            overflow: hidden;
+            /* 可选：防止内部元素浮动导致的高度塌陷，虽然你用了flex但加上保险 */
+
+        }
+
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="nav">
+        <a href="#fs-link">fs-link</a>
+    </div>
+
+
+    <div id="fs-link" class="section">
+        <h2>Link zone</h2>
+        <ol>
+            <li>
+                <a href="https://www.bloomberg.com/" target="_blank" rel="noopener noreferrer">Bloomberg（彭博社）</a>
+                <div>全球知名的金融新闻与数据分析平台，以全面、专业、深入的报道闻名。网站提供金融市场新闻、数据、研究报告等多种服务，被广泛认为是全球最权威的财经信息来源之一。</div>
+            </li>
+
+            <li>
+                <a href="https://www.reuters.com/" target="_blank" rel="noopener noreferrer">Reuters（路透社）</a>
+                <div>有近200年历史的全球性新闻机构，主要覆盖财经、、科技等领域。网站除了提供新闻报道外，还有金融市场数据、投资者工具等各种内容。</div>
+            </li>
+
+            <li>
+                <a href="https://www.ft.com/" target="_blank" rel="noopener noreferrer">Financial Times（金融时报）</a>
+                <div>英国著名的财经报纸，是全球最重要的商业新闻机构之一。该网站的报道覆盖了全球的金融市场、商业、经济和等方面的新闻。</div>
+            </li>
+
+            <li>
+                <a href="https://www.wsj.com/" target="_blank" rel="noopener noreferrer">Wall Street Journal（华尔街日报）
+                </a>
+                <div>美国最有影响力的财经报纸之一，涵盖了股票、债券、商品、房地产等领域的报道。其网站提供实时市场数据、金融新闻、分析和评论等服务。</div>
+            </li>
+
+            <li>
+                <a href="https://www.cnbc.com/" target="_blank" rel="noopener noreferrer">CNBC</a>
+                <div>全球领先的商业新闻与财经信息平台，主要报道股票、债券、外汇、商品、房地产等方面的新闻。网站除了提供实时市场数据外，还有专家分析、财经节目等各种内容。</div>
+            </li>
+
+            <li>
+                <a href="https://www.marketwatch.com/" target="_blank" rel="noopener noreferrer">MarketWatch</a>
+            </li>
+            <li>
+                <a href="https://www.investing.com/" target="_blank" rel="noopener noreferrer"> investing.com</a>
+                <div>一家全球性的投资者门户网站，提供多种金融工具和服务，包括实时市场报价、图表分析、新闻报道、财经日历等。</div>
+            </li>
+
+            <li>
+                <a href="https://www.barrons.com/" target="_blank" rel="noopener noreferrer"> Barron’s（巴伦周刊）</a>
+                <div>美国知名的财经杂志，主要关注股票、债券、基金、证券市场等领域的新闻和分析。其网站提供实时市场数据、研究报告、专栏文章等服务。</div>
+            </li>
+            <li>
+                <a href="https://www.economist.com/" target="_blank" rel="noopener noreferrer"> The
+                    Economist（经济学人）</a>
+                <div>英国知名的综合性新闻杂志，涵盖了全球的、经济、商业和科技等领域。该网站提供有关全球经济和金融市场的深入分析和报道。</div>
+            </li>
+
+            <li>
+                <a href="https://www.forbes.com/" target="_blank" rel="noopener noreferrer"> Forbes（福布斯）</a>
+                <div>美国知名的商业新闻杂志，主要报道商业、金融、科技、创新和创业等领域的新闻。其网站提供实时市场数据、分析报告、专栏文章等服务。</div>
+            </li>
+
+            <li>
+                <a href="https://www.caixin.com/" target="_blank" rel="noopener noreferrer"> 财新网</a>
+                <div>国内顶尖的财经媒体，以深度调查和原创报道闻名。</div>
+            </li>
+
+            <li>
+                <a href="https://cn.wsj.com/" target="_blank" rel="noopener noreferrer"> 华尔街日报</a>
+                <div>华尔街日报</div>
+            </li>
+
+            <li>
+                <a href="https://finviz.com/" target="_blank" rel="noopener noreferrer"> finviz</a>
+                <div>finviz</div>
+            </li>
+
+            <li>
+                <a href="https://www.cnyes.com/" target="_blank" rel="noopener noreferrer"> cnyes</a>
+                <div>cnyes</div>
+            </li>
+
+
+
+            <li>
+                <a href="https://jirancaijing.com/" target="_blank" rel="noopener noreferrer">计然财经</a>
+                <div>计然财经</div>
+            </li>
+
+            <li>
+                <a href="http://www.pbc.gov.cn/" target="_blank" rel="noopener noreferrer"> 中国人民银行</a>
+                <div>中国人民银行</div>
+            </li>
+
+            <li>
+                <a href="https://www.stats.gov.cn/" target="_blank" rel="noopener noreferrer"> 国家统计局</a>
+                <div>国家统计局</div>
+            </li>
+
+            <li>
+                <a href="https://api3.cls.cn/quote/toplist?app=cailianpress&sv=842&os=android" target="_blank"
+                    rel="noopener noreferrer"> 热点-toplist-30</a>
+                <div>热点-toplist-30</div>
+            </li>
+
+
+            <li>
+                <a href="http://www.stcn.com/" target="_blank" rel="noopener noreferrer"> 证券时报网</a>
+                <div>中国最早的证券类媒体之一，报道涵盖股票、债券、期货、基金等市场动态以及金融政策、宏观经济、行业分析等内容。网站还提供实时行情、数据查询和专家点评等服务。</div>
+            </li>
+
+            <li>
+                <a href="https://www.eeo.com.cn/" target="_blank" rel="noopener noreferrer"> 经济观察网</a>
+                <div>致力于提供独立深入的经济新闻与分析，主要关注中国经济、产业和企业等领域的报道。网站还设有专题和研究报告等栏目，提供更加深入的分析和报道。
+
+            <li>
+                <a href="http://finance.ce.cn/" target="_blank" rel="noopener noreferrer"> 财经网</a>
+                <div>全面覆盖股票、基金、债券、外汇、期货等各种金融市场动态的门户网站，提供实时行情、数据分析、投资建议等服务。同时，该网站也关注宏观经济和行业动态等方面的报道。</div>
+            </li>
+
+            <li>
+                <a href="http://www.jrj.com.cn/" target="_blank" rel="noopener noreferrer"> 金融界</a>
+                <div>拥有独立的采编团队和大量高端读者的财经媒体，主要报道股票、基金、债券、期货等市场动态以及宏观经济、行业分析等内容。网站还设有投资顾问和财富管理等专栏，提供更加个性化的服务。</div>
+            </li>
+
+            <li>
+                <a href="http://www.cnstock.com/" target="_blank" rel="noopener noreferrer">中国证券网</a>
+                <div>中国证监会授权的证券信息服务平台，是全国最大的股票、基金等证券市场信息门户之一。该网站提供实时行情、公司研究、新闻资讯、投资策略等服务。</div>
+            </li>
+
+            <li>
+                <a href="https://xueqiu.com/" target="_blank" rel="noopener noreferrer">雪球财经</a>
+                <div>一家社交型财经网站，旨在为广大投资者提供互动交流和投资建议。网站提供实时行情、投资组合、数据分析、投资观点等服务，同时也关注市场热点和投资策略等方面的报道。</div>
+            </li>
+
+            <li>
+                <a href="http://www.cs.com.cn/" target="_blank" rel="noopener noreferrer">同花顺</a>
+                <div>由中证信用评级有限公司运营的财经门户网站，主要覆盖债券、基金、信托、ABS等领域的新闻和分析。网站还提供实时行情、数据查询和研究报告等服务。</div>
+            </li>
+            <li>
+                <a href="http://www.hexun.com/" target="_blank" rel="noopener noreferrer">和讯网</a>
+                <div>一家综合性财经门户网站，涵盖了股票、基金、债券、期货、外汇等多种市场数据和工具。网站还设有行业研究、投资策略和财富管理等专栏，提供更加全面的服务。</div>
+            </li>
+
+
+            <li>
+                <a href="https://eastmoney.com/" target="_blank" rel="noopener noreferrer">东方财富</a>
+                <div>国务院发展研究中心主管的综合性财经门户网站，主要报道宏观经济、产业政策和企业动态等方面的新闻和分析。网站还提供实时数据、专题报道和研究报告等服务。</div>
+            </li>
+
+            <li>
+                <a href="https://www.yicai.com/" target="_blank" rel="noopener noreferrer">第一财经</a>
+                <div>致力于打造全球领先的金融信息平盖股票、基金、债券、期货、外汇等多个市场。网站提供实时行情、数据查询、专家点评等服务，同时也关注宏观经济和行业动态等方面的报道。</div>
+            </li>
+
+            <li>
+                <a href="https://www.csrc.gov.cn/csrc/index.shtml" target="_blank" rel="noopener noreferrer">中国证监会</a>
+                <div>中国证监会</div>
+            </li>
+
+            <li>
+                <a href="https://www.szse.cn/index/index.html" target="_blank" rel="noopener noreferrer">深圳证券交易所</a>
+                <div>深圳证券交易所</div>
+            </li>
+
+            <li>
+                <a href="https://www.sse.com.cn/" target="_blank" rel="noopener noreferrer">上海证券交易所 </a>
+                <div>上海证券交易所 </div>
+            </li>
+        </ol>
+
+    </div>
+    
+    <!-- 替换脚本 -->
+    <script>
+        function replaceCmd() {
+        }
+    </script>
+
+</body>
+
+</html>
