@@ -1,4 +1,4 @@
-// --- 0. 配置数据 (新增：命名空间数组) ---
+// --- 0. 配置数据 (命名空间数组) ---
 const k8sNamespaces = [
     "pbs",
     "roc-sit",
@@ -25,21 +25,73 @@ const database = [
         items: [
             { cmd: "cat /etc/os-release | grep '^ID=' | awk -F= '{print $2}'", desc: "查看系统类型" },
             { cmd: "cat /etc/os-release | grep 'VERSION_ID=' | awk -F= '{print $2}' | tr -d [:punct:]", desc: "查看系统版本" },
-            { cmd: "find / -size +500M", desc: "查找大于500M文件" },
-            { cmd: "docker system prune -a", desc: "清理Docker垃圾" },
-            { cmd: "tail -f /var/log/messages", desc: "实时系统日志" },
-            { cmd: "echo 'alias kb='kubectl'' >> ~/.bashrc && source ~/.bashrc", desc: "建立kb命令." },
             
+            { cmd: "cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 64;echo", desc: "生成64位随机数" },
+
+            { cmd: "uname -r", desc: "查看内核信息" },
+            { cmd: "cat /proc/cpuinfo", desc: "查看CPU信息" },
+            { cmd: "lscpu", desc: "查看CPU信息" },
+            { cmd: "free -h", desc: "查看内存使用情况" },
+            { cmd: "cat /proc/meminfo", desc: "查看内存使用情况" },
+
+            { cmd: "uptime", desc: "查看系统运行时间" },
+            { cmd: "who -b", desc: "最近一次启动时间" },            
+
+            { cmd: "dos2unix filename", desc: "format file" },
+            { cmd: ":set ff=unix", desc: "vi format file" },
+
+            { cmd: "echo 'alias kb='kubectl'' >> ~/.bashrc && source ~/.bashrc", desc: "建立kb命令." },
+            { cmd: "tail -f /var/log/messages", desc: "实时系统日志" },
+
+            { cmd: "find / -size +500M", desc: "#size,查找大于500M文件" },
+            { cmd: "du -h --max-depth=1 /XXX", desc: "#size,查看某个目录下每个文件的大小" },
+            { cmd: `for dir in */; do echo -n "$dir: "; find "$dir" -type f | wc -l; done`, desc: "#size,查看哪些目录下文件数量最多（需要在(具体目录下)/vdb1分区内执行）" },
+
+
+            { cmd: "find /vdb1/tmp -type f -mtime +30 -delete", desc: "#size,清理30天前的临时文件（请确认路径正确性）" },
+            { cmd: `find /vdb1/var/log -name "*.log.*" -type f -delete`, desc: "#size,清理旧日志（谨慎操作，确保不影响系统运行）" },            
+            
+            { cmd: "docker system prune -a", desc: "#docker,清理无用的镜像和卷" },
+            { cmd: "docker image prune -a", desc: "#docker,清理无用的镜像和卷" },
+            { cmd: `docker ps -a --filter "status=exited"`, desc: "#docker,查询" },
+            { cmd: "docker system prune -f --volumes", desc: "#docker,清理无用的镜像和卷" },
+            { cmd: `docker images -f "dangling=true"`, desc: "#docker,查询挂起的" },
+            { cmd: "docker images | grep aeon | awk '{print $3}' | xargs docker rmi -f", desc: "#docker,清理无用的镜像和卷" },
+            
+            { cmd: `建立pos用户,目录，分配权限，切换sudo权限
+mkdir -p /data/pos-work
+groupadd posgroup
+useradd -g posgroup pos -d /data/pos-work
+passwd pos
+密码: 输入自定义密码
+这是目录权限
+chown -R pos:posgroup /data/pos-work
+sudo visudo -c && echo "pos ALL=(ALL:ALL) ALL" | tee -a /etc/sudoers && echo "pos ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers`, desc: "#user,建立pos用户,根据需要调整用户名称，密码，目录." },
+
         ]
     },
     {
         id: "net",
         title: { zh: "网络", en: "Network" },
-        type: "cmd",
+        type: "net",
         items: [
-             { cmd: "firewall-cmd --reload", desc: "防火墙重载" },
-             { cmd: "nc -v -z 127.0.0.1 8080", desc: "探测端口(nc)" },
-             { cmd: "netstat -ntlp", desc: "查看监听端口" }
+            { cmd: `
+firewall-cmd --zone=public --add-port=9999/tcp --permanent
+firewall-cmd --reload
+`, desc: "开防火墙端口" },
+            { cmd: "nc -v -z 192.168.0.1 9999", desc: "探测端口(nc)" },
+            { cmd: "telnet 192.168.0.1 9999", desc: "探测端口" },
+            { cmd: "netstat -ntlp", desc: "查看监听端口" },
+            { cmd: `timeout 10 bash -c "</dev/tcp/192.168.0.1/9999" 2>/dev/null && echo "通" || echo "不通"`, desc: "查看监听端口" },            
+            { cmd: "ifconfig -a", desc: "网卡详情,window: ipconfig -a " },
+            { cmd: "nslookup 域名", desc: "域名解析,nslookup itor.westlakeerp.com 8.8.8.8" },
+            { cmd: "traceroute 192.168.0.1", desc: "traceroute [目标主机/IP],诊断网络连接问题" },
+            { cmd: "traceroute -n -m 10 域名", desc: "路由追踪前10跳,对应Windows的tracert -d -h 10" },
+
+            { cmd: "tracepath  192.168.0.1", desc: "追踪数据包从本机到目标主机所经过的网络路由路径, tracepath [域名]" },
+
+            
+
         ]
     },
     {
@@ -47,9 +99,57 @@ const database = [
         title: { zh: "Nacos", en: "Nacos" },
         type: "cmd",
         items: [
-             { cmd: "firewall-cmd --reload", desc: "防火墙重载" },
-             { cmd: "nc -v -z 127.0.0.1 8080", desc: "探测端口(nc)" },
-             { cmd: "netstat -ntlp", desc: "查看监听端口" }
+             { cmd: 
+                `
+data:
+NAME_SPACE: roc-uat
+JAVA_OPTS: -server -Xms512m -Xmx2048m -Xss1024k -XX:MetaspaceSize=512m -XX:MaxMetaspaceSize=1024m -XX:+UseG1GC
+SKYWALKING_SERVER: 127.0.0.1:11800
+NACOS_SERVER: http://nacos.pbs:8848
+CONFIG_USER_NAME: roc
+CONFIG_PASSWORD: nacos
+DISCOVERY_USER_NAME: roc
+DISCOVERY_PASSWORD: nacos
+
+BAS_DATASOURCE_HOST: 127.0.0.1
+BAS_DATASOURCE_PORT: "2883"
+BAS_DATASOURCE_USERNAME: "roc_db_user"
+BAS_DATASOURCE_PASSWORD: "roc_db_pwd"
+
+STS_DATASOURCE_HOST: 127.0.0.1
+STS_DATASOURCE_PORT: "2883"
+STS_DATASOURCE_USERNAME: "roc_db_user"
+STS_DATASOURCE_PASSWORD: "roc_db_pwd"
+
+RFS_DATASOURCE_HOST: 127.0.0.1
+RFS_DATASOURCE_PORT: "2883"
+RFS_DATASOURCE_USERNAME: "roc_db_user"
+RFS_DATASOURCE_PASSWORD: "roc_db_pwd"
+
+REDIS_HOST: redis.pbs
+REDIS_PASSWORD: efuture
+REDIS_PORT: "6379"
+
+MINIO_URL: http://minio.pbs:6900
+MINIO_ACCESS-KEY: ljaLwA6TQYEw4LuDXnaZ
+MINO_SECRET-KEY: LlS43XbrpAChY10o6pQIMa7eHWKZnOiElcksg3W7
+
+FILE_STORAGE_TYPE: minio
+#fastdfs、minio
+PORTAL_URL: http://127.0.0.1:9999
+
+FDFS_TRACKERLIST: 127.0.0.1:22122
+
+ROCKETMQ_NAME-SERVER: rocketmq-name:9876.pbs
+ROCKETMQ_ACCESS-KEY: mq_pub_key_string
+ROCKETMQ_SECRET-KEY: efuture_rocketmq
+
+SHC_DBTYPE: none
+#none，elasticsearch
+ES_HOSTS: 127.0.0.1:9200
+ES_USERNAME: ""
+ES_PASSWORD: ""
+ `, desc: "configMap" },
         ]
     },
     {
@@ -57,26 +157,117 @@ const database = [
         title: { zh: "数据库", en: "Database" },
         type: "cmd",
         items: [
-             { cmd: "firewall-cmd --reload", desc: "防火墙重载" },
-             { cmd: "nc -v -z 127.0.0.1 8080", desc: "探测端口(nc)" },
-             { cmd: "netstat -ntlp", desc: "查看监听端口" }
+             { cmd: "GRANT SELECT, INSERT,UPDATE,DELETE,CREATE,INDEX,ALTER,CREATE VIEW,SHOW VIEW ON reportdb.* TO roc;", desc: "分配权限" },
+             { cmd: "select * from information_schema.processlist;", desc: "查看所有连接,kill id值" },
+             { cmd: "SELECT * FROM information_schema.SESSION_STATUS;", desc: "会话状态" },
+             { cmd: "ELECT LEFT(HOST, INSTR(HOST, ':')-1) client_ip, COUNT(*) cnt FROM information_schema.processlist GROUP BY client_ip ORDER BY cnt DESC;;", desc: "根据ip看连接" },
+             { cmd: `
+单位：微秒
+SET ob_query_timeout=20000000;
+60秒
+set global ob_query_timeout=60000000;
+120秒
+set global ob_query_timeout=120000000;
+300秒
+set global ob_query_timeout=3000000000;
+查看
+SHOW VARIABLES LIKE 'ob_query_timeout';
+             `, desc: "设置超时时间" },
+
         ]
     },            
     {
         id: "nginx",
         title: { zh: "Nginx", en: "Nginx" },
-        type: "code",
+        type: "nginx",
         items: [
             { 
-                desc: "反向代理 (Proxy Pass)",
-                cmd: `server {
+                desc: "portal proxy",
+                cmd: `
+#portal
+server {
     listen       9999;
     server_name  localhost;
-    location / {
+    charset utf-8;
+    location ~ / {
+        proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+        expires -1;
         proxy_pass http://192.168.0.1;
     }
 }` 
-            }
+            },
+            {
+                desc: "nacos proxy",
+                cmd: `
+#nacos
+server {
+    listen       9092;
+    server_name  localhost;
+    location ~ /nacos {
+                proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+                expires -1;
+                proxy_pass http://192.168.0.1;
+    }
+}` 
+            },
+            { 
+                desc: "xxl-job-admin proxy",
+                cmd: `
+#xxljob
+server {
+    listen       9093;
+    server_name  localhost;
+    location ~ /xxl-job-admin {
+                proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+                expires -1;
+                proxy_pass http://192.168.0.1;
+    }
+}` 
+            },
+            { 
+                desc: "minio proxy",
+                cmd: `
+#minio
+server {
+    listen       6901;
+    server_name  localhost;
+    location ~ / {
+                proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+                expires -1;
+                proxy_pass http://192.168.0.1;
+    }
+}` 
+            },
+            { 
+                desc: "rocketmq proxy",
+                cmd: `
+#rocketmq
+server {
+    listen       7298;
+    server_name  localhost;
+    location ~ /rocketmq {
+                proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+                expires -1;
+                proxy_pass http://192.168.0.1;
+    }
+}` 
+            },
+            { 
+                desc: "pos-sftp proxy",
+                cmd: `
+#pos-sftp
+server {
+    listen       9192;
+    server_name  localhost;
+    location / {
+        root /data/sftp;
+        autoindex on;
+        autoindex_exact_size off;
+        autoindex_localtime on;
+        charset utf-8;
+        }
+    }` 
+            },
         ]
     },            
     {
@@ -89,9 +280,9 @@ const database = [
             { cmd: "kubectl -n roc-uat set image deployment roc-goods roc-goods=版本号", desc: "更新pod版本." },
             { cmd: "kubectl -n roc-uat logs -f --tail 200 roc-goods", desc: "查看日志",doc:"" },
             { cmd: "kubectl -n roc-uat get pods |grep Evicted | awk '{print $1}' | xargs kubectl -n roc-uat delete pod", desc: "删除大量evicted的pod.",doc:"" },
-            { cmd: "docker cp ab5593917446:/home/logs/error.log ./", desc: "ab5593917446=容器Id(通过docker ps可以查询到),从容器中复制文件到本地，反之则从本地复制到容器里面.",doc:"" },
-            { cmd: "kubectl cp &lt;namespace&gt;/&lt;pod&gt;:&lt;root_dir&gt;/&lt;parent_dir&gt;/&lt;file_name&gt; ./&lt;file_name&gt;", desc: "从pod复制文件到本地",doc:"" },
-            { cmd: "kubectl cp ./&lt;file_name&gt; &lt;namespace&gt;/&lt;pod&gt;:&lt;root_dir&gt;/&lt;parent_dir&gt;/&lt;file_name&gt;", desc: "从本地复制到pod.",doc:"" },
+            { cmd: "docker cp ab5593917446:/home/logs/error.log ./", desc: "ab5593917446=容器Id(通过docker ps可以查询到),从容器中复制文件到本地，反之则从本地复制到容器里面. >> docker cp [本地文件/目录路径] [容器名或容器ID]:[容器内目标路径]",doc:"" },
+            { cmd: "kubectl cp <namespace>/<pod>:<root_dir>/<parent_dir>/<file_name> ./<file_name>", desc: "从pod复制文件到本地",doc:"" },
+            { cmd: "kubectl cp ./<file_name> <namespace>/<pod>:<root_dir>/<parent_dir>/<file_name>", desc: "从本地复制到pod.",doc:"" },
 
             { cmd: "docker rmi $(docker images -f 'dangling=true' -q)", desc: "批量删除这些标签为none的镜像",doc:"" },
             { cmd: "kubectl -n roc-uat exec -it roc-goods  -- curl http://www.baidu.com", desc: "通过pod临时访问外部地址，测试是否能联通.",doc:"" },
@@ -104,10 +295,15 @@ const database = [
             { cmd: "kubectl -n roc-uat top pod --sort-by=memory", desc: "根据内存排序",doc:"" },
             
             { cmd: "kubectl -n roc-uat top pod --sort-by=memory | tail -n +2 | sort -k3 -h", desc: "根据内存-升序",doc:"" },
-  
+            { cmd: "kubectl -n roc-uat top pod --sort-by=memory | tail -n +2 | sort -k3 -h -r", desc: "根据内存-降序",doc:"" },
             
 
-
+            { cmd: "kubectl -n roc-uat get configmap", desc: "#cm,查找configMap-list",doc:"" },
+            { cmd: "kubectl -n roc-uat describe configmap common-config", desc: "#cm,详细查看具体common-config的内容.",doc:"" },
+            
+            { cmd: "kubectl -n roc-uat get configmap common-config -o jsonpath='{.data.NACOS_SERVER}'", desc: "#cm,查询configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"" },
+            { cmd: `kubectl -n roc-uat patch configmap common-config -p '{"data":{"NACOS_SERVER":"http://nacos.pbs:8848"}}'`, desc: "#cm,设置configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"" },
+            
         ]
     },
     {
@@ -116,16 +312,57 @@ const database = [
         type: "list",
         // 链接数据：包含 category 属性
         items: [
-            { text: "Check IP (cip.cc)", url: "https://cip.cc/", desc: "公网IP", category: "🛠️ 工具类" },
-            { text: "JSON Format", url: "https://www.json.cn/", desc: "JSON解析", category: "🛠️ 工具类" },
-            { text: "Base64 Encode", url: "https://base64.us/", desc: "Base64转换", category: "🛠️ 工具类" },
+            { category: "🛠️工具类",text:"查看出口ip", url: "https://cip.cc/", desc: "公网IP"},
             
-            { text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档", category: "📚 文档类" },
-            { text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档", category: "📚 文档类" },
-            { text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发", category: "📚 文档类" },
+            { category: "🛠️工具类",text:"generate password", url: "./passwd.html", desc: "生产密码"},
+            { category: "🛠️工具类",text:"ip check", url: "https://www.ip138.com/", desc: ""},
+            { category: "🛠️工具类",text:"生成一个UUIDv4", url: "https://1024tools.com/uuid", desc: ""},
+            { category: "🛠️工具类",text:"ssl-check", url: "https://www.ssllabs.com/ssltest/analyze.html", desc: ""},
+            { category: "🛠️工具类",text:"yaml-check", url: "https://www.yamllint.com/", desc: ""},
+            { category: "🛠️工具类",text:"perfcode", url: "https://www.perfcode.com/linux/kali/password-dictionary", desc: ""},
+            { category: "🛠️工具类",text:"windy", url: "https://www.windy.com", desc: ""},
+            { category: "🛠️工具类",text:"通过kubectl连接集群-hw-cce", url: "https://support.huaweicloud.com/intl/zh-cn/usermanual-cce/cce_10_0107.html", desc: ""},
+            { category: "🛠️工具类",text:"whatismyipaddress", url: "https://whatismyipaddress.com/", desc: ""},
             
-            { text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘", category: "📊 监控类" },
-            { text: "Grafana", url: "http://grafana.local", desc: "图表展示", category: "📊 监控类" },                   
+            { category: "🛠️工具类",text:"Docker-Image-Hub", url: "http://8.220.217.46:8000/", desc: ""},
+            
+            { category: "🛠️工具类",text:"docker-aityp", url: "https://docker.aityp.com/", desc: "docker research"},
+            
+            { category: "🛠️工具类",text:"Dependency-Check", url: "https://owasp.org/www-project-dependency-check/", desc: "项目依赖及漏洞扫描"},
+            
+            { category: "🛠️工具类",text:"start-spring-io", url: "https://start.spring.io/", desc: "generate java projects"},
+            
+            { category: "🛠️工具类",text:"properties2yaml-在线格式转换", url: "https://www.bejson.com/devtools/properties2yaml/", desc: ""},
+            { category: "🛠️工具类",text:"icon-getemoji", url: "https://getemoji.com/", desc: "icon"},
+            
+
+            { category:"📚文档类",text:"FastDeploy&FastLink", url: "https://xd20al46gl.feishu.cn/docx/Hkhvdh1CkoHkYGxhe4Hc3oWqn7Z", desc: ""},
+            { category:"📚文档类",text:"Nginx升级方法", url: "https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh", desc: "4N11294&"},
+            { category: "📚文档类",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
+            { category: "📚文档类",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
+
+
+            { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
+            { category: "❄️K8s",text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档"},
+            { category: "❄️K8s",text:"Kubernetes|大规模集群的注意事项", url: "https://kubernetes.io/zh-cn/docs/setup/best-practices/cluster-large/", desc: ""},
+            { category: "❄️K8s",text:"測試 K8S Pod 數量超過 110 會發生甚麼事?", url: "https://hackmd.io/@QI-AN/What-happens-when-the-number-of-K8S-Pods-exceeds-110#15-%E6%9F%A5%E7%9C%8B%E7%8B%80%E6%85%8B%E7%82%BA-Running-%E7%9A%84-Pod-%E6%98%AF%E5%90%A6%E6%9C%89%E8%A2%AB%E5%BD%B1%E9%9F%BF", desc: ""},
+            
+            { category: "❄️K8s",text:"Kubernetes|kubelet-config", url: "https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/", desc: ""},
+            { category: "❄️K8s",text:"Kubernetes|tool-reference", url: "https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/", desc: ""},            
+            { category: "❄️K8s",text:"Kubernetes|K8S 修改节点 pod 上限", url: "https://koomu.cn/k8s-modify-node-pods-limits/", desc: ""},
+            
+            { category: "❄️K8s",text:"K8S-配置存活、就绪和启动探针", url: "https://kubernetes.io/zh-cn/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/", desc: ""},
+            
+            {category: "📊监控类", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
+            {category: "📊监控类", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
+
+            { category: "⚽️NetWork",text:"wireguard", url: "https://www.wireguard.com/quickstart/", desc: "vpc"},
+            { category: "⚽️NetWork",text:"centralops-DNS-Domain -Check-Traceroute", url: "https://centralops.net/", desc: ""},
+            { category: "⚽️NetWork",text:"Visual Subnet Calculator", url: "https://www.davidc.net/sites/default/subnets/subnets.html", desc: "子网分配计算"},
+
+            { category: "⚽️NetWork",text:"winMTR", url: "https://sourceforge.net/projects/winmtr/", desc: "network check"},
+            
+            
         ]
     }
 ];
@@ -141,7 +378,9 @@ const app = {
     state: {
         lang: localStorage.getItem('lang') || 'zh',
         theme: localStorage.getItem('theme') || 'light',
-        k8s: { ns: 'roc-uat', pod: 'roc-goods', ver: '版本号' }
+        k8s: { ns: 'roc-uat', pod: 'roc-goods', ver: '版本号' },
+        nginx: { ip: '192.168.0.1' },
+        net: { ip: '192.168.0.1',port: 9999 }
     },
 
     init() {
@@ -160,7 +399,11 @@ const app = {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     },
-    
+    //IP 格式校验函数
+    isValidIP(ip) {
+        const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        return regex.test(ip);
+    },    
     render() {
         const desktopNav = document.getElementById('desktop-nav-container');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -173,7 +416,7 @@ const app = {
 
             // 1. 搜索框
             let searchHtml = '';
-            if (['cmd', 'k8s'].includes(section.type)) {
+            if (['cmd','nginx', 'k8s'].includes(section.type)) {
                 const ph = this.state.lang === 'zh' ? '搜索...' : 'Search...';
                 searchHtml = `
                 <div class="search-wrapper">
@@ -185,6 +428,8 @@ const app = {
 
             // 2. K8S 面板
             let controlHtml = '';
+            const btnText = this.state.lang === 'zh' ? '替换' : 'Replace';
+
             // if (section.type === 'k8s') {
             //     const btnText = this.state.lang === 'zh' ? '替换' : 'Replace';
             //     controlHtml = `
@@ -198,8 +443,6 @@ const app = {
             // }
 
             if (section.type === 'k8s') {
-                const btnText = this.state.lang === 'zh' ? '替换' : 'Replace';
-                
                 // --- 核心修改开始：遍历数组生成 options ---
                 // 逻辑：生成 HTML 字符串，如果当前值等于 state 中的值，则添加 selected 属性
                 const optionsHtml = k8sNamespaces.map(ns => 
@@ -209,11 +452,24 @@ const app = {
 
                 controlHtml = `
                 <div class="control-panel">
-                    <label>NS:</label>
+                    <label>NameSpace:</label>
                     <select id="k8s-ns" style="width:150px">${optionsHtml}</select> 
-                    <label>Pod:</label> <input id="k8s-pod" value="roc-goods" style="width:150px">
-                    <label>Ver:</label> <input id="k8s-ver" value="版本号" style="width:300px;">
+                    <label>PodName:</label> <input id="k8s-pod" value="roc-goods" style="width:150px">
+                    <label>VersionId:</label> <input id="k8s-ver" value="版本号" style="width:300px;">
                     <button class="action-btn" onclick="app.replaceK8sCmd()">${btnText}</button>
+                </div>`;
+            }else if (section.type === 'nginx'){
+                controlHtml = `
+                <div class="control-panel">
+                    <label>ip address:</label> <input id="nginx-ip" placeholder="e.g. 10.0.0.1" value="192.168.0.1" style="width:150px">
+                    <button class="action-btn" onclick="app.replaceNginxCmd()">${btnText}</button>
+                </div>`;
+            }else if (section.type === 'net'){
+                controlHtml = `
+                <div class="control-panel">
+                    <label>ip address:</label> <input id="net-ip" placeholder="e.g. 10.0.0.1" value="192.168.0.1" style="width:150px">
+                    <label>port:</label> <input id="net-ip-port" placeholder="e.g. 10.0.0.1" value="9999" style="width:100px">
+                    <button class="action-btn" onclick="app.replaceNetCmd()">${btnText}</button>
                 </div>`;
             }
 
@@ -247,9 +503,15 @@ const app = {
             } else {
                 // --- 命令行渲染 ---
                 contentHtml = section.items.map((item, index) => {
-                    const cmdText = typeof item === 'string' ? item : item.cmd;
+                    // const cmdText = typeof item === 'string' ? item : item.cmd;
                     const descText = (typeof item === 'object' && item.desc) ? item.desc : '';
                     
+                    const rawCmd = typeof item === 'string' ? item : item.cmd;
+
+                    // 🔴 第二步：在这里调用 escapeHtml ！！！
+                    // 这样 < 和 > 就会变成 &lt; 和 &gt;，浏览器就能正确显示了
+                    const cmdText = app.escapeHtml(rawCmd); 
+
                     // 新增：详情链接渲染逻辑
                     const docUrl = (typeof item === 'object' && item.doc) ? item.doc : '';
                     const docHtml = docUrl ? `<a href="${docUrl}" target="_blank" class="cmd-doc-link">📖 详情</a>` : '';
@@ -257,12 +519,18 @@ const app = {
                     // 将 docHtml 放入备注中
                     const descHtml = descText ? `<div class="cmd-desc">// ${descText} ${docHtml}</div>` : '';
                     
+ // [Update] 如果是 nginx 类型，也应用 code-mode 样式 (保留缩进)
+//  const extraClass = (section.type === 'code' || section.type === 'nginx') ? 'code-mode' : '';
+//  const searchText = (rawCmd + ' ' + descText).toLowerCase();
+ 
+ 
                     const numHtml = section.type === 'code' ? '' : `<div class="cmd-num">#${index + 1}</div>`;
-                    const extraClass = section.type === 'code' ? 'code-mode' : '';
+                    const extraClass = ( section.type === 'code' || section.type === 'net' || section.type === 'nginx' ) ? 'code-mode' : '';
                     const searchText = (cmdText + ' ' + descText).toLowerCase();
                     
+                    // <div class="cmd-box ${extraClass}" data-filter="${searchText}">
                     return `
-                    <div class="cmd-box ${extraClass}" data-filter="${searchText}">
+                    <div class="cmd-box ${extraClass}" data-filter="${app.escapeHtml(searchText)}">                    
                         ${numHtml}
                         <div class="cmd-wrapper">
                             <pre>${cmdText}</pre>
@@ -325,6 +593,54 @@ const app = {
             pre.innerText = txt;
         });
         this.state.k8s = { ns, pod, ver };
+    },
+
+    // [New] Nginx IP 替换逻辑
+    replaceNginxCmd() {
+        const newIP = document.getElementById('nginx-ip').value.trim();
+        const msg = this.state.lang === 'zh' ? '请输入有效的 IP 地址!' : 'Please enter a valid IP address!';
+        
+        // 校验 IP
+        if (!this.isValidIP(newIP)) {
+            alert(msg);
+            return;
+        }
+
+        // 执行替换
+        document.querySelectorAll('#nginx pre').forEach(pre => {
+            let txt = pre.innerText;
+            // 全局替换旧 IP 为新 IP
+            txt = txt.split(this.state.nginx.ip).join(newIP);
+            pre.innerText = txt;
+        });
+
+        // 更新状态，以便下次替换知道旧值是什么
+        this.state.nginx = { ip: newIP };
+    },
+
+    // replaceNetCmd
+    replaceNetCmd() {
+        const newIP = document.getElementById('net-ip').value.trim();
+        const newIpPort = document.getElementById('net-ip-port').value.trim();
+        const msg = this.state.lang === 'zh' ? '请输入有效的 IP 地址!' : 'Please enter a valid IP address!';
+        
+        // 校验 IP
+        if (!this.isValidIP(newIP)) {
+            alert(msg);
+            return;
+        }
+
+        // 执行替换
+        document.querySelectorAll('#net pre').forEach(pre => {
+            let txt = pre.innerText;
+            // 全局替换旧 IP 为新 IP
+            txt = txt.split(this.state.net.ip).join(newIP);
+            txt = txt.split(this.state.net.port).join(newIpPort);
+            pre.innerText = txt;
+        });
+
+        // 更新状态，以便下次替换知道旧值是什么
+        this.state.net = { ip: newIP ,port: newIpPort};
     },
 
     // --- 设置与通知 ---
