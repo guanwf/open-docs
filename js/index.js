@@ -305,7 +305,10 @@ server {
             
             { cmd: "kubectl -n roc-uat get configmap common-config -o jsonpath='{.data.NACOS_SERVER}'", desc: "#cm,查询configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"" },
             { cmd: `kubectl -n roc-uat patch configmap common-config -p '{"data":{"NACOS_SERVER":"http://nacos.pbs:8848"}}'`, desc: "#cm,设置configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"" },
+         
+            { cmd: "kubectl port-forward --address 0.0.0.0 svc/kube-prometheus-stack-alertmanager -n monitoring 9093:9093", desc: "根据service直接代理给k8s-master机器的端口访问，如：http://192.168.227.102:9093/#/alerts",doc:"" },
             
+
         ]
     },
     {
@@ -318,7 +321,7 @@ server {
             
             { category: "🛠️工具类",text:"generate password", url: "./passwd.html", desc: "生产密码"},
             { category: "🛠️工具类",text:"ip check", url: "https://www.ip138.com/", desc: ""},
-            { category: "🛠️工具类",text:"生成一个UUIDv4", url: "https://1024tools.com/uuid", desc: ""},
+            { category: "🛠️工具类",text:"1024tools", url: "https://1024tools.com/uuid", desc: "json,base64,各种编码格式转换,加解密,网络工具..."},
             { category: "🛠️工具类",text:"ssl-check", url: "https://www.ssllabs.com/ssltest/analyze.html", desc: ""},
             { category: "🛠️工具类",text:"yaml-check", url: "https://www.yamllint.com/", desc: ""},
             { category: "🛠️工具类",text:"perfcode", url: "https://www.perfcode.com/linux/kali/password-dictionary", desc: ""},
@@ -575,14 +578,78 @@ const app = {
     },
     toggleMenu() { document.getElementById('mobile-menu').classList.toggle('open'); },
     closeMenu() { document.getElementById('mobile-menu').classList.remove('open'); },
+    // copy(btn) {
+    //     const pre = btn.previousElementSibling.querySelector('pre');
+    //     if(!pre) return;
+    //     navigator.clipboard.writeText(pre.innerText).then(() => {
+    //         const orig = btn.innerText; btn.innerText = "✓";
+    //         setTimeout(() => btn.innerText = orig, 1000);
+    //     });
+    // },
+    // --- 兼容手机和 HTTP 环境的复制函数 ---
     copy(btn) {
-        const pre = btn.previousElementSibling.querySelector('pre');
-        if(!pre) return;
-        navigator.clipboard.writeText(pre.innerText).then(() => {
-            const orig = btn.innerText; btn.innerText = "✓";
-            setTimeout(() => btn.innerText = orig, 1000);
-        });
-    },
+        // 1. 获取要复制的文本
+        // 根据之前的 HTML 结构：button 的前一个兄弟元素是 wrapper，wrapper 里有 pre
+        const wrapper = btn.previousElementSibling;
+        const pre = wrapper ? wrapper.querySelector('pre') : null;
+        
+        if (!pre) return;
+        const text = pre.innerText;
+
+        // 定义成功的 UI 反馈
+        const showSuccess = () => {
+            const original = btn.innerText;
+            btn.innerText = "✓";
+            setTimeout(() => btn.innerText = original, 1000);
+        };
+
+        // 2. 尝试使用现代 API (需要 HTTPS 或 localhost)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text)
+                .then(showSuccess)
+                .catch(() => {
+                    // 如果现代 API 失败（例如在 HTTP 下），转入兼容模式
+                    legacyCopy(text);
+                });
+        } else {
+            // 如果浏览器不支持现代 API，直接用兼容模式
+            legacyCopy(text);
+        }
+
+        // 3. 定义兼容模式 (老式方法，支持 HTTP)
+        function legacyCopy(txt) {
+            const textArea = document.createElement("textarea");
+            textArea.value = txt;
+            
+            // 防止在手机上拉起键盘或造成页面抖动
+            textArea.style.position = "fixed"; 
+            textArea.style.left = "-9999px";
+            textArea.style.top = "0";
+            textArea.setAttribute("readonly", ""); // 防止 iOS 弹键盘
+            
+            document.body.appendChild(textArea);
+            
+            // 选中文本
+            textArea.focus();
+            textArea.select();
+            textArea.setSelectionRange(0, 99999); // 专门针对 iOS 的兼容写法
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showSuccess();
+                } else {
+                    alert("复制失败，请长按文本手动复制");
+                }
+            } catch (err) {
+                console.error("无法复制", err);
+                alert("复制功能被拦截，请手动复制");
+            }
+
+            // 清理临时元素
+            document.body.removeChild(textArea);
+        }
+    },    
     replaceK8sCmd() {
         const ns = document.getElementById('k8s-ns').value;
         const pod = document.getElementById('k8s-pod').value;
