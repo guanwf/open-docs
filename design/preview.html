@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>页面预览 (Runtime)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: sans-serif;
+        }
+
+        /* 注意：这里没有任何编辑器的 CSS（如 dashed border） */
+    </style>
+</head>
+
+<body>
+
+    <div id="app"></div>
+
+    <script>
+        // ==========================================
+        // 运行时引擎 (Runtime Engine)
+        // ==========================================
+
+        // 1. 获取数据 (Load)
+        const rawData = localStorage.getItem('page_schema');
+        const pageData = rawData ? JSON.parse(rawData) : [];
+
+        const app = document.getElementById('app');
+
+        // 2. 渲染函数 (Render) - 与设计器不同，这里是纯净的
+        function renderRuntime() {
+            if (pageData.length === 0) {
+                app.innerHTML = '<p>页面为空</p>';
+                return;
+            }
+
+            pageData.forEach(node => {
+                // 区别 1: 不再创建 wrapper div，直接创建组件
+                let el;
+
+                if (node.type === 'text') {
+                    el = document.createElement('p');
+                    el.innerText = node.content;
+                } else if (node.type === 'button') {
+                    el = document.createElement('button');
+                    el.innerText = node.content;
+
+                    // 区别 2: 绑定真实的业务事件
+                    // 在设计器里点击是选中，在这里点击是执行逻辑
+                    el.onclick = () => {
+                        alert('运行时逻辑被触发：你点击了按钮！');
+                    };
+                } else if (node.type === 'image') {
+                    el = document.createElement('img');
+                    el.src = node.src;
+                }
+
+                // 3. 应用样式
+                // 注意：在真实项目中，这里通常会处理 className 而不是 style
+                el.style = node.style;
+
+                // 4. 挂载
+                app.appendChild(el);
+            });
+        }
+
+        // 初始化
+        renderRuntime();
+
+    </script>
+</body>
+
+</html>

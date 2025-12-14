@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // 1. 模拟从服务器获取的 AST 数据
+        // 注意：这里可能包含事件配置 (events)
+        const astData = {
+            type: 'root',
+            children: [
+                {
+                    type: 'element',
+                    tagName: 'h1',
+                    properties: { style: 'color: blue' },
+                    children: [{ type: 'text', value: '运行时页面' }]
+                },
+                {
+                    type: 'element',
+                    tagName: 'button',
+                    properties: { 
+                        className: ['btn'],
+                        // 关键：在 AST 中存储的是函数名字符串
+                        events: { click: 'handleAlert' } 
+                    },
+                    children: [{ type: 'text', value: '点击触发业务逻辑' }]
+                }
+            ]
+        };
+
+        // 2. 业务逻辑库 (Action Context)
+        // 这是运行时特有的，设计器里没有。
+        const actions = {
+            handleAlert: function(e) {
+                alert('运行时逻辑被执行：提交成功！');
+                console.log('Event context:', e);
+            },
+            navigateToHome: function() {
+                window.location.href = '/';
+            }
+        };
+
+        // 3. 运行时解释器 (Runtime Interpreter)
+        function renderAST(node, container) {
+            // A. 文本渲染
+            if (node.type === 'text') {
+                container.appendChild(document.createTextNode(node.value));
+                return;
+            }
+
+            // B. 容器/根节点处理
+            if (node.type === 'root') {
+                node.children.forEach(child => renderAST(child, container));
+                return;
+            }
+
+            // C. 元素渲染
+            if (node.type === 'element') {
+                const el = document.createElement(node.tagName);
+
+                // 属性映射
+                if (node.properties) {
+                    // 处理样式和类名
+                    if (node.properties.style) el.style = node.properties.style;
+                    if (node.properties.className) el.className = node.properties.className.join(' ');
+                    
+                    // 关键：事件绑定 (Event Binding)
+                    if (node.properties.events) {
+                        for (const [eventName, actionName] of Object.entries(node.properties.events)) {
+                            // 从 actions 对象中找到对应的真实函数
+                            if (actions[actionName]) {
+                                el.addEventListener(eventName, actions[actionName]);
+                            }
+                        }
+                    }
+                }
+
+                // 递归渲染子节点
+                if (node.children) {
+                    node.children.forEach(child => renderAST(child, el));
+                }
+
+                container.appendChild(el);
+            }
+        }
+
+        // 4. 启动
+        const app = document.getElementById('app');
+        renderAST(astData, app);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>修复版：嵌套拖拽与重排</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; display: flex; height: 100vh; font-family: "Segoe UI", sans-serif; background: #f0f2f5; }
+
+        /* 1. 左侧物料区 */
+        .sidebar {
+            width: 240px; background: #fff; padding: 20px;
+            border-right: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+        .widget {
+            padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px;
+            cursor: grab; display: flex; align-items: center; font-size: 14px; color: #333;
+            transition: all 0.2s;
+        }
+        .widget:hover { border-color: #1890ff; color: #1890ff; background: #e6f7ff; }
+        .widget:active { cursor: grabbing; }
+
+        /* 2. 中间画布 */
+        .workspace { flex: 1; padding: 40px; overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
+        
+        #canvas-root {
+            width: 800px; min-height: 800px; background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 20px;
+            position: relative;
+        }
+
+        /* --- 组件通用样式 --- */
+        .comp-node {
+            position: relative;
+            margin: 5px;
+            transition: background 0.2s, border 0.2s;
+        }
+        
+        /* 选中/悬停态 */
+        .comp-node:hover { outline: 1px dashed #1890ff; }
+        
+        /* 正在被拖拽的元素：变为半透明 */
+        .comp-node.dragging { opacity: 0.4; }
+
+        /* --- 容器组件样式 (Container, Row, Column) --- */
+        /* 关键：给容器足够的内边距，确保鼠标能落在容器内，而不是被子元素占满 */
+        .container-node {
+            border: 1px dashed #ccc;
+            padding: 15px; 
+            min-height: 60px; /* 保证空容器也能被拖入 */
+            background: rgba(0,0,0,0.01);
+        }
+        
+        /* 拖拽进入容器时的激活状态 (HighLight) */
+        .container-node.drag-over-active {
+            background-color: rgba(24, 144, 255, 0.1);
+            border-color: #1890ff;
+            border-style: solid;
+        }
+
+        /* 布局特定样式 */
+        .type-row { display: flex; flex-wrap: wrap; gap: 10px; border-color: #ffadd2; background: #fff0f6; }
+        .type-column { flex: 1; min-width: 50px; border-color: #b7eb8f; background: #f6ffed; }
+        .type-container { border-color: #d9d9d9; }
+
+        /* --- 基础原子组件样式 --- */
+        .type-button { display: inline-block; padding: 8px 16px; background: #1890ff; color: white; border-radius: 4px; cursor: move; }
+        .type-text { padding: 5px; cursor: move; }
+
+        /* 调试面板 */
+        .debug-panel { position: fixed; bottom: 10px; right: 10px; background: #333; color: lime; padding: 10px; font-size: 12px; border-radius: 4px; opacity: 0.8; max-height: 200px; overflow: auto; width: 300px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h4>📦 布局容器</h4>
+        <div class="widget" draggable="true" data-type="container" data-is-container="true">Container (普通容器)</div>
+        <div class="widget" draggable="true" data-type="row" data-is-container="true">Row (行 - 横向)</div>
+        <div class="widget" draggable="true" data-type="column" data-is-container="true">Column (列 - 纵向)</div>
+        
+        <h4>🧩 基础组件</h4>
+        <div class="widget" draggable="true" data-type="button">Button (按钮)</div>
+        <div class="widget" draggable="true" data-type="text">Text (文本)</div>
+    </div>
+
+    <div class="workspace">
+        <!-- 根节点也是一个容器 -->
+        <div id="canvas-root" data-id="root" class="container-node"></div>
+    </div>
+
+    <div class="debug-panel" id="debug-info">JSON Tree Preview...</div>
+
+    <script>
+        // ==========================================
+        // 1. 数据模型 (Tree Model)
+        // ==========================================
+        let treeData = {
+            id: 'root',
+            type: 'container',
+            isContainer: true,
+            children: []
+        };
+
+        // ==========================================
+        // 2. 拖拽状态管理
+        // ==========================================
+        let dragSource = null;    // 'sidebar' | 'canvas'
+        let draggedNodeId = null; // 画布内拖拽时的 Node ID
+        let draggedType = null;   // 左侧拖拽时的 Type
+
+        // --- 左侧 Sidebar 拖拽开始 ---
+        document.querySelectorAll('.widget').forEach(w => {
+            w.addEventListener('dragstart', (e) => {
+                dragSource = 'sidebar';
+                draggedType = w.dataset.type;
+                // 传递是否为容器的信息
+                e.dataTransfer.setData('isContainer', w.dataset.isContainer || 'false');
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+
+        // ==========================================
+        // 3. 渲染引擎 (View)
+        // ==========================================
+        const canvasRoot = document.getElementById('canvas-root');
+
+        function render() {
+            canvasRoot.innerHTML = ''; // 清空
+            // 渲染 root 的 children
+            treeData.children.forEach(child => {
+                canvasRoot.appendChild(createNodeDOM(child));
+            });
+            document.getElementById('debug-info').innerText = JSON.stringify(treeData, null, 2);
+        }
+
+        // 递归创建 DOM
+        function createNodeDOM(node) {
+            const el = document.createElement('div');
+            el.dataset.id = node.id;
+            el.classList.add('comp-node');
+            el.classList.add(`type-${node.type}`);
+            
+            // 重要：标记是否为容器，方便后续 Drop 判断
+            if (node.isContainer) {
+                el.classList.add('container-node');
+            }
+
+            // 允许拖拽自身
+            el.draggable = true;
+
+            // 内容渲染
+            if (node.type === 'button') el.innerText = node.content;
+            if (node.type === 'text') el.innerText = node.content;
+
+            // 递归渲染子节点
+            if (node.children && node.children.length > 0) {
+                node.children.forEach(child => {
+                    el.appendChild(createNodeDOM(child));
+                });
+            }
+
+            // --- 绑定事件：画布内组件开始拖拽 ---
+            el.addEventListener('dragstart', (e) => {
+                // ⚡️ 核心修复：停止冒泡。
+                // 如果不停止，你拖 button 时，父级 row 也会触发 dragstart
+                e.stopPropagation(); 
+
+                dragSource = 'canvas';
+                draggedNodeId = node.id;
+                
+                // 视觉效果：让被拖走的元素变淡
+                setTimeout(() => el.classList.add('dragging'), 0);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            el.addEventListener('dragend', (e) => {
+                el.classList.remove('dragging');
+                dragSource = null;
+                draggedNodeId = null;
+                // 清理所有高亮
+                document.querySelectorAll('.drag-over-active').forEach(el => el.classList.remove('drag-over-active'));
+            });
+
+            // --- 绑定事件：作为 Drop 目标 ---
+            if (node.isContainer) {
+                bindDropEvents(el);
+            }
+
+            return el;
+        }
+
+        // 给容器绑定 Drop 相关事件
+        function bindDropEvents(el) {
+            
+            el.addEventListener('dragover', (e) => {
+                e.preventDefault(); // 允许 Drop
+                
+                // ⚡️ 核心修复：阻止冒泡！
+                // 这保证了鼠标在 Row 上时，Row 响应，Container 不响应。
+                e.stopPropagation(); 
+
+                el.classList.add('drag-over-active');
+                e.dataTransfer.dropEffect = 'copy';
+            });
+
+            el.addEventListener('dragleave', (e) => {
+                e.stopPropagation();
+                el.classList.remove('drag-over-active');
+            });
+
+            el.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // ⚡️ 核心修复：Drop 也不要冒泡
+                
+                el.classList.remove('drag-over-active');
+
+                const targetContainerId = el.dataset.id;
+
+                // 1. 如果是从 Sidebar 拖入 (新增)
+                if (dragSource === 'sidebar') {
+                    const newType = draggedType;
+                    const isContainer = e.dataTransfer.getData('isContainer') === 'true';
+                    
+                    const newNode = {
+                        id: newType + '_' + Date.now(),
+                        type: newType,
+                        isContainer: isContainer,
+                        content: newType === 'button' ? 'Button' : 'Some text...',
+                        children: []
+                    };
+                    
+                    addNode(newNode, targetContainerId);
+                } 
+                // 2. 如果是画布内拖动 (移动)
+                else if (dragSource === 'canvas') {
+                    // 防止拖入自己内部
+                    if (draggedNodeId === targetContainerId) return;
+                    
+                    // 移动逻辑：先删后加
+                    const nodeData = findNode(treeData, draggedNodeId);
+                    
+                    // 检查死循环（不能把父级拖到子级里）
+                    if (checkIsChild(nodeData, targetContainerId)) {
+                        alert("无法将组件拖入其子级中！");
+                        return;
+                    }
+
+                    if (nodeData) {
+                        deleteNode(treeData, draggedNodeId);
+                        addNode(nodeData, targetContainerId);
+                    }
+                }
+                
+                render(); // 重绘
+            });
+        }
+
+        // --- 初始化根节点事件 ---
+        // 根节点本身也是个容器，手动绑定一下
+        bindDropEvents(canvasRoot);
+
+
+        // ==========================================
+        // 4. 数据操作辅助函数 (CRUD)
+        // ==========================================
+        
+        // 添加节点到指定父级 ID
+        function addNode(node, parentId) {
+            if (parentId === 'root') {
+                treeData.children.push(node);
+                return;
+            }
+            const parent = findNode(treeData, parentId);
+            if (parent && parent.children) {
+                parent.children.push(node);
+            }
+        }
+
+        // 查找节点
+        function findNode(root, id) {
+            if (root.id === id) return root;
+            if (root.children) {
+                for (let child of root.children) {
+                    const res = findNode(child, id);
+                    if (res) return res;
+                }
+            }
+            return null;
+        }
+
+        // 删除节点
+        function deleteNode(root, id) {
+            if (!root.children) return;
+            const idx = root.children.findIndex(n => n.id === id);
+            if (idx !== -1) {
+                root.children.splice(idx, 1);
+                return;
+            }
+            root.children.forEach(child => deleteNode(child, id));
+        }
+
+        // 检查 targetId 是否是 node 的后代
+        function checkIsChild(node, targetId) {
+            if (!node.children) return false;
+            for (let child of node.children) {
+                if (child.id === targetId) return true;
+                if (checkIsChild(child, targetId)) return true;
+            }
+            return false;
+        }
+
+        // 初次渲染
+        render();
+
+    </script>
+</body>
+</html>

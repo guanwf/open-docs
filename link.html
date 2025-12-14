@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Financial News Portal | 财经导航</title>
+    <style>
+        /* --- 1. 配色系统 (金融蓝风格) --- */
+        :root {
+            /* 明亮模式 */
+            --bg-body: #f5f7fa; 
+            --text-main: #2c3e50;
+            --text-sub: #607d8b;
+            --card-bg: #ffffff;
+            --card-border: #e1e4e8;
+            --primary: #1976d2; /* 金融蓝 */
+            --primary-hover: #1565c0;
+            --header-bg: #ffffff;
+            --header-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        /* 暗黑模式 */
+        [data-theme="dark"] {
+            --bg-body: #121212; 
+            --text-main: #e0e0e0;
+            --text-sub: #a0a0a0;
+            --card-bg: #1e1e1e;
+            --card-border: #333;
+            --primary: #64b5f6; /* 亮蓝 */
+            --primary-hover: #42a5f5;
+            --header-bg: #1e1e1e;
+            --header-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* --- 2. 基础布局 --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0; padding: 0;
+            background-color: var(--bg-body); color: var(--text-main);
+            transition: background 0.3s, color 0.3s;
+            line-height: 1.5;
+            padding-top: 70px; /* 留出头部空间 */
+        }
+
+        /* --- 3. 顶部导航栏 --- */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background: var(--header-bg); box-shadow: var(--header-shadow);
+            z-index: 1000;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; box-sizing: border-box;
+        }
+
+        .brand {
+            font-size: 1.2rem; font-weight: bold; color: var(--primary);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* 搜索框容器 */
+        .search-box {
+            position: relative; flex: 1; max-width: 400px; margin: 0 15px;
+        }
+        .search-input {
+            width: 100%; padding: 8px 35px 8px 15px;
+            border: 1px solid var(--card-border); border-radius: 20px;
+            background: var(--bg-body); color: var(--text-main);
+            outline: none; font-size: 14px; transition: border 0.3s;
+        }
+        .search-input:focus { border-color: var(--primary); }
+        .search-clear {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: var(--text-sub); display: none;
+            font-size: 16px;
+        }
+
+        /* 主题切换按钮 */
+        .theme-btn {
+            background: none; border: 1px solid var(--card-border);
+            color: var(--text-main); padding: 5px 10px; border-radius: 6px;
+            cursor: pointer; font-size: 14px;
+        }
+
+        /* --- 4. 网格布局 (Grid) --- */
+        .container {
+            max-width: 1400px; margin: 0 auto; padding: 20px;
+        }
+
+        .grid-layout {
+            display: grid;
+            /* 响应式 Grid：最小宽度 300px，自动填充 */
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* --- 5. 卡片样式 --- */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+        }
+
+        .card-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 15px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--bg-body);
+        }
+        .card-title {
+            font-size: 1.1rem; font-weight: bold; color: var(--text-main); margin: 0;
+        }
+        .card-icon { font-size: 1.2rem; }
+
+        /* 链接列表 */
+        .link-list {
+            list-style: none; padding: 0; margin: 0;
+        }
+        .link-item {
+            margin-bottom: 10px;
+            display: flex; flex-direction: column;
+        }
+        .link-a {
+            text-decoration: none; color: var(--text-main);
+            font-weight: 500; font-size: 15px;
+            transition: color 0.2s; display: flex; align-items: center; justify-content: space-between;
+        }
+        .link-a:hover { color: var(--primary); }
+        .link-desc {
+            font-size: 12px; color: var(--text-sub); margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .link-arrow { opacity: 0; transition: opacity 0.2s; color: var(--primary); font-size: 12px;}
+        .link-a:hover .link-arrow { opacity: 1; }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .header { padding: 0 15px; }
+            .brand span { display: none; } /* 手机端隐藏标题文字，只留图标 */
+            .search-box { margin: 0 10px; }
+            .grid-layout { grid-template-columns: 1fr; } /* 手机端单列 */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部 -->
+    <header class="header">
+        <div class="brand">
+            <i>📈</i> <span>Finance</span>
+        </div>
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索财经新闻、数据..." oninput="app.search()">
+            <span class="search-clear" id="searchClear" onclick="app.clearSearch()">✕</span>
+        </div>
+        <button class="theme-btn" onclick="app.toggleTheme()">🌓</button>
+    </header>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <div id="grid-container" class="grid-layout"></div>
+    </div>
+
+    <script>
+        // --- 1. 财经数据中心 ---
+        const financeLinks = [
+            // === 国际财经 ===
+            { name: "Bloomberg", url: "https://www.bloomberg.com/", desc: "全球商业、金融信息和新闻领导者", category: "🌍 国际宏观" },
+            { name: "Reuters", url: "https://www.reuters.com/", desc: "路透社，国际突发新闻与深度报道", category: "🌍 国际宏观" },
+            { name: "WSJ", url: "https://www.wsj.com/", desc: "华尔街日报，美国金融市场风向标", category: "🌍 国际宏观" },
+            { name: "Financial Times", url: "https://www.ft.com/", desc: "英国金融时报，欧洲视角", category: "🌍 国际宏观" },
+            { name: "CNBC", url: "https://www.cnbc.com/", desc: "实时市场报道与商业新闻", category: "🌍 国际宏观" },
+
+            // === 国内财经 ===
+            { name: "财新网", url: "https://www.caixin.com/", desc: "高质量原创深度财经报道", category: "🇨🇳 国内财经" },
+            { name: "东方财富", url: "https://www.eastmoney.com/", desc: "门户网站，实时行情与股吧", category: "🇨🇳 国内财经" },
+            { name: "证券时报", url: "https://www.stcn.com/", desc: "中国资本市场主流媒体", category: "🇨🇳 国内财经" },
+            { name: "雪球", url: "https://xueqiu.com/", desc: "聪明的投资者社区", category: "🇨🇳 国内财经" },
+            { name: "巨潮资讯", url: "http://www.cninfo.com.cn/", desc: "证监会指定信息披露平台", category: "🇨🇳 国内财经" },
+
+            // === 行情与工具 ===
+            { name: "TradingView", url: "https://www.tradingview.com/", desc: "全球最佳看盘图表工具", category: "📊 数据工具" },
+            { name: "Investing.com", url: "https://www.investing.com/", desc: "全球金融门户，经济日历", category: "📊 数据工具" },
+            { name: "Yahoo Finance", url: "https://finance.yahoo.com/", desc: "美股历史数据查询首选", category: "📊 数据工具" },
+            { name: "金十数据", url: "https://www.jin10.com/", desc: "7x24小时全球财经快讯", category: "📊 数据工具" },
+
+            // === 央行与政策 ===
+            { name: "PBOC (人行)", url: "http://www.pbc.gov.cn/", desc: "中国人民银行官网", category: "🏛️ 政策监管" },
+            { name: "FED (美联储)", url: "https://www.federalreserve.gov/", desc: "美国联邦储备系统", category: "🏛️ 政策监管" },
+            { name: "国家统计局", url: "https://www.stats.gov.cn/", desc: "中国宏观经济数据发布", category: "🏛️ 政策监管" },
+            { name: "证监会", url: "http://www.csrc.gov.cn/", desc: "中国证券监督管理委员会", category: "🏛️ 政策监管" },
+
+            // === 加密货币与Fintech ===
+            { name: "CoinMarketCap", url: "https://coinmarketcap.com/", desc: "加密货币市值排名", category: "🪙 Crypto & Tech" },
+            { name: "CoinDesk", url: "https://www.coindesk.com/", desc: "区块链新闻资讯", category: "🪙 Crypto & Tech" },
+            { name: "36Kr", url: "https://36kr.com/", desc: "新经济与创投新闻", category: "🪙 Crypto & Tech" }
+        ];
+
+        // --- 2. 应用逻辑 ---
+        const app = {
+            theme: localStorage.getItem('theme') || 'light',
+
+            init() {
+                this.applyTheme();
+                this.render(financeLinks);
+            },
+
+            // 渲染函数：支持过滤
+            render(data) {
+                const container = document.getElementById('grid-container');
+                container.innerHTML = '';
+
+                // 1. 数据分组
+                const groups = {};
+                data.forEach(item => {
+                    const cat = item.category || 'Other';
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(item);
+                });
+
+                // 2. 生成 HTML
+                // 如果没有数据，显示空状态
+                if (Object.keys(groups).length === 0) {
+                    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#999;padding:50px;">未找到相关结果</div>';
+                    return;
+                }
+
+                for (const [cat, items] of Object.entries(groups)) {
+                    // 构建列表项
+                    const listHtml = items.map(item => `
+                        <li class="link-item">
+                            <a href="${item.url}" target="_blank" class="link-a">
+                                <span>${item.name}</span>
+                                <span class="link-arrow">↗</span>
+                            </a>
+                            <div class="link-desc">${item.desc}</div>
+                        </li>
+                    `).join('');
+
+                    // 构建卡片
+                    const cardHtml = `
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">${cat}</span>
+                            </div>
+                            <ul class="link-list">${listHtml}</ul>
+                        </div>
+                    `;
+                    
+                    container.innerHTML += cardHtml;
+                }
+            },
+
+            // 搜索功能
+            search() {
+                const input = document.getElementById('searchInput');
+                const term = input.value.toLowerCase().trim();
+                const clearBtn = document.getElementById('searchClear');
+                
+                clearBtn.style.display = term.length > 0 ? 'block' : 'none';
+
+                if (!term) {
+                    this.render(financeLinks);
+                    return;
+                }
+
+                // 过滤数据
+                const filtered = financeLinks.filter(item => 
+                    item.name.toLowerCase().includes(term) || 
+                    item.desc.toLowerCase().includes(term) ||
+                    item.category.toLowerCase().includes(term)
+                );
+
+                this.render(filtered);
+            },
+
+            clearSearch() {
+                const input = document.getElementById('searchInput');
+                input.value = '';
+                this.search(); // 重新渲染所有
+                input.focus();
+            },
+
+            // 主题切换
+            toggleTheme() {
+                this.theme = this.theme === 'light' ? 'dark' : 'light';
+                localStorage.setItem('theme', this.theme);
+                this.applyTheme();
+            },
+
+            applyTheme() {
+                document.documentElement.setAttribute('data-theme', this.theme);
+            }
+        };
+
+        // 启动
+        app.init();
+    </script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 # open-docs
 open-docs
 
+https://aistudio.google.com/prompts/1LgDWpy-9_pbVB_HMrLoaRE85npqdcOwf
+
 2025-12-13
 
 # 使用 npx 直接运行 terser

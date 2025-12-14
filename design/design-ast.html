@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>基于 AST 的设计器原理</title>
+    <style>
+        body { display: flex; height: 100vh; margin: 0; font-family: monospace; }
+        .sidebar { width: 200px; background: #f0f0f0; padding: 20px; }
+        .component { background: #fff; padding: 10px; margin-bottom: 10px; cursor: grab; border: 1px solid #ccc;}
+        
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .canvas { flex: 1; background: #e5e5e5; padding: 20px; overflow: auto; }
+        .render-root { background: white; min-height: 100%; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        
+        /* 源码预览区 */
+        .code-panel { height: 150px; background: #282c34; color: #abb2bf; padding: 15px; overflow: auto; border-top: 5px solid #444; }
+        
+        /* 设计时的辅助框 */
+        [data-editor-id]:hover { outline: 2px solid #61dafb; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h3>AST 组件库</h3>
+        <div class="component" draggable="true" data-tag="h1">H1 标题</div>
+        <div class="component" draggable="true" data-tag="p">段落文本</div>
+        <div class="component" draggable="true" data-tag="button">原生按钮</div>
+        <div class="component" draggable="true" data-tag="div">容器 (Div)</div>
+    </div>
+
+    <div class="main">
+        <div class="canvas">
+            <div id="render-target" class="render-root"></div>
+        </div>
+        <div class="code-panel">
+            <h4>Generated Code (Codegen):</h4>
+            <pre id="code-output"></pre>
+        </div>
+        <div class="code-panel" style="background: #1e1e1e;">
+            <h4>AST Structure:</h4>
+            <pre id="ast-output"></pre>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. AST 数据结构 (The State)
+        // ==========================================
+        // 初始化一个 Root 节点，这是 HAST 的标准起点
+        let ast = {
+            type: 'root',
+            children: []
+        };
+
+        // ==========================================
+        // 2. AST 节点工厂 (Factory)
+        // ==========================================
+        // 创建符合 HAST 规范的节点
+        function createASTNode(tagName) {
+            debugger;
+            const nodeId = 'node-' + Math.random().toString(36).substr(2, 9);
+            
+            // 基础 Element 节点结构
+            const node = {
+                type: 'element',
+                tagName: tagName,
+                properties: {
+                    id: nodeId, // 用于设计器定位
+                    style: "padding: 5px; margin: 5px;"
+                },
+                children: []
+            };
+
+            // 根据标签预填充一些子节点（AST 的嵌套特性）
+            if (tagName === 'h1') {
+                node.children.push({ type: 'text', value: '我是标题' });
+            } else if (tagName === 'p') {
+                node.children.push({ type: 'text', value: '这是一段文本内容...' });
+            } else if (tagName === 'button') {
+                node.properties.className = ['btn', 'btn-primary']; // AST中class通常是数组
+                node.children.push({ type: 'text', value: '点击提交' });
+            } else if (tagName === 'div') {
+                node.properties.style += "border: 1px dashed #999; min-height: 50px;";
+            }
+
+            return node;
+        }
+
+        // ==========================================
+        // 3. 编译器：AST -> DOM (Compiler)
+        // ==========================================
+        // 递归函数：将 AST 树转换成真实的 DOM 树
+        function compileASTtoDOM(node) {
+            debugger;
+            // A. 处理文本节点
+            if (node.type === 'text') {
+                return document.createTextNode(node.value);
+            }
+
+            // B. 处理根节点 (Fragment)
+            if (node.type === 'root') {
+                const fragment = document.createDocumentFragment();
+                node.children.forEach(child => {
+                    fragment.appendChild(compileASTtoDOM(child));
+                });
+                return fragment;
+            }
+
+            // C. 处理元素节点 (Element)
+            if (node.type === 'element') {
+                const el = document.createElement(node.tagName);
+
+                // 处理属性 (Props)
+                if (node.properties) {
+                    for (const [key, value] of Object.entries(node.properties)) {
+                        if (key === 'className' && Array.isArray(value)) {
+                            el.className = value.join(' ');
+                        } else if (key === 'style') {
+                            el.style = value;
+                        } else {
+                            el.setAttribute(key, value);
+                        }
+                    }
+                    // 标记 ID 用于后续交互
+                    el.dataset.editorId = node.properties.id; 
+                }
+
+                // 递归处理子节点
+                if (node.children) {
+                    node.children.forEach(child => {
+                        el.appendChild(compileASTtoDOM(child));
+                    });
+                }
+
+                return el;
+            }
+        }
+
+        // ==========================================
+        // 4. 代码生成器：AST -> HTML String (Codegen)
+        // ==========================================
+        // 这一步是 AST 最大的优势，生成代码非常容易
+        function generateCode(node) {
+            debugger;
+            if (node.type === 'root') {
+                return node.children.map(generateCode).join('\n');
+            }
+            if (node.type === 'text') {
+                return node.value;
+            }
+            if (node.type === 'element') {
+                const props = Object.entries(node.properties || {})
+                    .filter(([k]) => k !== 'id') // 生成代码时通常要把内部 ID 去掉
+                    .map(([k, v]) => {
+                        if (k === 'className') return `class="${v.join(' ')}"`;
+                        return `${k}="${v}"`;
+                    }).join(' ');
+                
+                const childrenHTML = node.children.map(generateCode).join('');
+                
+                return `<${node.tagName} ${props}>${childrenHTML}</${node.tagName}>`;
+            }
+        }
+
+        // ==========================================
+        // 5. 渲染管线 (Pipeline)
+        // ==========================================
+        const renderTarget = document.getElementById('render-target');
+        const astOutput = document.getElementById('ast-output');
+        const codeOutput = document.getElementById('code-output');
+
+        function updateView() {
+            debugger;
+            // 1. AST -> DOM (设计视图)
+            renderTarget.innerHTML = ''; 
+            renderTarget.appendChild(compileASTtoDOM(ast));
+
+            // 2. AST -> JSON (调试视图)
+            astOutput.textContent = JSON.stringify(ast, null, 2);
+
+            // 3. AST -> String (源码视图)
+            codeOutput.textContent = generateCode(ast);
+        }
+
+        // ==========================================
+        // 6. 交互逻辑 (Drag & Drop)
+        // ==========================================
+        // 简化逻辑：只允许添加到 Root 的末尾
+        
+        document.querySelectorAll('.component').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('tag', item.dataset.tag);
+            });
+        });
+
+        renderTarget.addEventListener('dragover', e => e.preventDefault());
+
+        renderTarget.addEventListener('drop', (e) => {
+            debugger;
+            e.preventDefault();
+            const tag = e.dataTransfer.getData('tag');
+            if (tag) {
+                // 1. 创建 AST 节点
+                const newNode = createASTNode(tag);
+                
+                // 2. 插入 AST 树 (这里简单 push 到 root children)
+                // 进阶做法是根据鼠标位置找到对应的 parent AST node 插入 children
+                ast.children.push(newNode);
+                
+                // 3. 触发重绘
+                updateView();
+            }
+        });
+
+        // 初始化
+        updateView();
+
+    </script>
+</body>
+</html>

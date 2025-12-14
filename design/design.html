@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>简易HTML设计器原理演示</title>
+    <style>
+        body { margin: 0; display: flex; height: 100vh; font-family: sans-serif; }
+        
+        /* 1. 左侧物料区 */
+        .sidebar {
+            width: 250px;
+            background: #f0f0f0;
+            padding: 20px;
+            border-right: 1px solid #ccc;
+        }
+        .component-item {
+            background: #fff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+        }
+        .component-item:active { cursor: grabbing; }
+
+        /* 2. 中间画布区 */
+        .canvas-container {
+            flex: 1;
+            padding: 40px;
+            background: #e5e5e5;
+            display: flex;
+            justify-content: center;
+        }
+        .canvas {
+            width: 400px;
+            height: 600px;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* 拖拽时的视觉提示 */
+        .canvas.drag-over {
+            border: 2px dashed #007bff;
+            background: #f9fbfd;
+        }
+
+        /* 画布内组件样式 */
+        .render-node {
+            border: 1px dashed transparent;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+        .render-node:hover {
+            border: 1px dashed #007bff; /* 模拟选中效果 */
+        }
+        
+        /* 右侧数据预览区（辅助理解原理） */
+        .json-preview {
+            width: 300px;
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="saveAndPreview()">💾 保存并预览</button>
+
+    <!-- 左侧：组件库 -->
+    <div class="sidebar">
+        <h3>组件库</h3>
+        <!-- draggable="true" 是原生拖拽的关键 -->
+        <div class="component-item" draggable="true" data-type="text">
+            📄 文本组件
+        </div>
+        <div class="component-item" draggable="true" data-type="button">
+            🔘 按钮组件
+        </div>
+        <div class="component-item" draggable="true" data-type="image">
+            🖼️ 图片组件
+        </div>
+    </div>
+
+    <!-- 中间：画布 -->
+    <div class="canvas-container">
+        <div id="canvas" class="canvas">
+            <!-- 这里将由 JS 动态渲染 -->
+        </div>
+    </div>
+
+    <!-- 右侧：JSON 数据模型（展示核心原理） -->
+    <div class="json-preview">
+        <h3>JSON 数据模型 (Schema)</h3>
+        <pre id="json-display"></pre>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. 数据模型 (Model)
+        // ==========================================
+        // 设计器的核心不是 DOM，而是这个数组。
+        let pageData = [];
+
+        // ==========================================
+        // 2. 拖拽引擎 (Engine)
+        // ==========================================
+        
+        const sidebarItems = document.querySelectorAll('.component-item');
+        const canvas = document.getElementById('canvas');
+        const jsonDisplay = document.getElementById('json-display');
+
+        // A. 开始拖拽 (Source)
+        sidebarItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                // 告诉浏览器我们拖的是什么类型（text/button/image）
+                e.dataTransfer.setData('componentType', item.dataset.type);
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+
+        // B. 拖拽经过画布 (Target Over)
+        canvas.addEventListener('dragover', (e) => {
+            // 必须阻止默认行为，否则无法触发 drop 事件
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            canvas.classList.add('drag-over'); // 添加高亮样式
+        });
+
+        canvas.addEventListener('dragleave', () => {
+            canvas.classList.remove('drag-over');
+        });
+
+        // C. 放置 (Drop) - 核心逻辑
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            canvas.classList.remove('drag-over');
+            
+            // 1. 获取拖过来的数据类型
+            const type = e.dataTransfer.getData('componentType');
+            debugger;
+            if (type) {
+                // 2. 创建一个新的节点数据 (Node)
+                const newNode = createNodeData(type);
+                
+                // 3. 更新数据模型 (Model)
+                pageData.push(newNode);
+                
+                // 4. 触发渲染 (View)
+                renderCanvas();
+            }
+        });
+
+        // ==========================================
+        // 3. 辅助函数
+        // ==========================================
+
+        // 工厂函数：根据类型生成 JSON 对象
+        function createNodeData(type) {
+            const id = 'node_' + Date.now();
+            if (type === 'text') {
+                return { id, type: 'text', content: '这里是一段文本', style: 'color: #333; font-size: 16px;' };
+            } else if (type === 'button') {
+                return { id, type: 'button', content: '点击我', style: 'background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px;' };
+            } else if (type === 'image') {
+                return { id, type: 'image', src: 'https://via.placeholder.com/300x150', style: 'width: 100%; display: block;' };
+            }
+        }
+
+        // ==========================================
+        // 4. 渲染器 (Renderer) - 模拟 React/Vue 的工作
+        // ==========================================
+        function renderCanvas() {
+            // 1. 清空画布
+            canvas.innerHTML = '';
+            debugger;
+            // 2. 遍历数据模型生成真实 DOM
+            pageData.forEach(node => {
+                const elWrapper = document.createElement('div');
+                elWrapper.className = 'render-node';
+                
+                let el;
+                if (node.type === 'text') {
+                    el = document.createElement('p');
+                    el.innerText = node.content;
+                } else if (node.type === 'button') {
+                    el = document.createElement('button');
+                    el.innerText = node.content;
+                } else if (node.type === 'image') {
+                    el = document.createElement('img');
+                    el.src = node.src;
+                }
+
+                // 应用样式
+                el.style = node.style;
+                
+                elWrapper.appendChild(el);
+                canvas.appendChild(elWrapper);
+            });
+
+            // 3. 同步更新右侧 JSON 显示
+            jsonDisplay.innerText = JSON.stringify(pageData, null, 2);
+        }
+
+        // 初始化渲染
+        renderCanvas();
+
+        function saveAndPreview() {
+            // 1. 序列化：将 JSON 对象转为字符串
+            const jsonString = JSON.stringify(pageData);
+            
+            // 2. 存储：模拟存入数据库（这里用 LocalStorage 代替）
+            localStorage.setItem('page_schema', jsonString);
+            
+            // 3. 跳转：打开预览页（runtime.html）
+            window.open('preview.html', '_blank');
+        }
+
+    </script>
+</body>
+</html>
