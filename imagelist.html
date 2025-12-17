@@ -37,12 +37,44 @@
 
         h1 {
             color: var(--primary-color);
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .subtitle {
             color: var(--text-sub);
             font-size: 0.9em;
+        }
+
+        /* --- 搜索框样式 --- */
+        .search-container {
+            margin-bottom: 30px;
+            position: relative;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box; /* 确保padding不撑大宽度 */
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 100, 200, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            display: none; /* 默认隐藏 */
         }
 
         /* Whitelist Styles */
@@ -52,6 +84,7 @@
             border-radius: var(--border-radius);
             padding: 20px;
             margin-bottom: 30px;
+            transition: all 0.3s;
         }
 
         .whitelist-title {
@@ -83,6 +116,7 @@
             border: 1px solid #bae7ff;
             color: #0050b3;
             font-size: 0.9em;
+            transition: opacity 0.2s;
         }
 
         /* Grid Styles */
@@ -97,7 +131,7 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             overflow: hidden;
-            transition: transform 0.2s;
+            transition: transform 0.2s, opacity 0.2s;
         }
 
         .card:hover {
@@ -194,7 +228,7 @@
             border-radius: 4px;
             padding: 16px;
             position: fixed;
-            z-index: 1;
+            z-index: 99;
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
@@ -218,6 +252,16 @@
             <!-- <p class="subtitle">Image Registry Dashboard</p> -->
         </header>
 
+        <!-- 搜索栏 -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="搜索镜像版本、名称或域名 (例如: java, nginx, nacos)...">
+        </div>
+
+        <!-- 搜索无结果提示 -->
+        <div id="empty-state" class="empty-state">
+            没有找到匹配的内容
+        </div>
+
         <!-- 白名单挂载点 -->
         <div id="whitelist-container"></div>
 
@@ -230,7 +274,7 @@
     <!-- 核心逻辑脚本 -->
     <script>
         // ==========================================
-        // 1. 配置数据区域 (JSON格式) - 在这里修改数据
+        // 1. 配置数据区域 (JSON格式)
         // ==========================================
         const configData = {
             "whitelist": [
@@ -297,7 +341,7 @@
         };
 
         // ==========================================
-        // 2. 页面渲染逻辑 (无需修改)
+        // 2. 页面渲染与交互逻辑
         // ==========================================
         
         // 渲染白名单
@@ -306,7 +350,7 @@
             if (!configData.whitelist || configData.whitelist.length === 0) return;
 
             const html = `
-                <div class="whitelist-card">
+                <div class="whitelist-card" id="whitelist-card">
                     <div class="whitelist-title">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                         网络白名单域名 (Whitelist Domains)
@@ -329,10 +373,7 @@
 
                 let itemsHtml = '';
                 cat.items.forEach(item => {
-                    // 处理描述字段（如果有）
                     const descHtml = item.desc ? `<span class="desc-text">${item.desc}</span>` : '';
-                    
-                    // 处理URL列表
                     let urlsHtml = '';
                     item.urls.forEach(url => {
                         urlsHtml += `
@@ -365,12 +406,75 @@
             });
         }
 
+        // 核心功能：搜索过滤
+        function filterContent() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase().trim();
+            let hasResults = false;
+
+            // 1. 过滤白名单
+            const whitelistCard = document.getElementById('whitelist-card');
+            const whitelistTags = document.querySelectorAll('.domain-tag');
+            let hasWhitelistMatch = false;
+
+            if (whitelistCard) {
+                whitelistTags.forEach(tag => {
+                    const text = tag.textContent.toLowerCase();
+                    if (text.includes(filter)) {
+                        tag.style.display = "";
+                        hasWhitelistMatch = true;
+                    } else {
+                        tag.style.display = "none";
+                    }
+                });
+
+                // 如果白名单内有匹配，显示卡片；如果搜索为空，也显示卡片；否则隐藏
+                if (hasWhitelistMatch || filter === "") {
+                    whitelistCard.style.display = "";
+                    hasResults = true;
+                } else {
+                    whitelistCard.style.display = "none";
+                }
+            }
+
+            // 2. 过滤镜像卡片
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const groups = card.querySelectorAll('.version-group');
+                let hasCardMatch = false;
+
+                groups.forEach(group => {
+                    const text = group.textContent.toLowerCase();
+                    if (text.includes(filter)) {
+                        group.style.display = "";
+                        hasCardMatch = true;
+                    } else {
+                        group.style.display = "none";
+                    }
+                });
+
+                if (hasCardMatch) {
+                    card.style.display = "";
+                    hasResults = true;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            // 3. 处理空状态
+            const emptyState = document.getElementById('empty-state');
+            if (!hasResults) {
+                emptyState.style.display = "block";
+            } else {
+                emptyState.style.display = "none";
+            }
+        }
+
         // 复制功能
         function copyText(btnElement) {
             const textToCopy = btnElement.previousElementSibling.innerText;
             navigator.clipboard.writeText(textToCopy).then(() => {
                 showToast();
-                // 按钮反馈
                 const originalText = btnElement.innerText;
                 btnElement.innerText = "已复制";
                 btnElement.style.background = "#52c41a";
@@ -397,6 +501,9 @@
         window.onload = function() {
             renderWhitelist();
             renderGrid();
+            
+            // 绑定搜索事件
+            document.getElementById('searchInput').addEventListener('input', filterContent);
         };
     </script>
 </body>
