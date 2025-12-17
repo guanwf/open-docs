@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>镜像仓库管理面板</title>
+    <title>镜像版本列表</title>
     <style>
         :root {
             --primary-color: #0064C8;
@@ -17,20 +17,35 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 20px;
+            line-height: 1.6;
         }
 
-        .container { max-width: 1100px; margin: 0 auto; }
-        
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { color: var(--primary-color); margin-bottom: 5px; }
-        .subtitle { color: var(--text-sub); font-size: 0.9em; margin-bottom: 20px; }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
 
-        /* 白名单样式 */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-sub);
+            font-size: 0.9em;
+        }
+
+        /* Whitelist Styles */
         .whitelist-card {
             background: #e6f7ff;
             border: 1px solid #91d5ff;
@@ -38,67 +53,186 @@
             padding: 20px;
             margin-bottom: 30px;
         }
-        .whitelist-title { font-weight: bold; color: #0050b3; margin-bottom: 12px; display: flex; align-items: center; }
-        .domain-list { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 0; }
-        .domain-tag { background: #fff; padding: 6px 12px; border-radius: 4px; border: 1px solid #bae7ff; font-family: monospace; font-size: 13px; color: #0050b3; }
 
-        /* 网格布局 */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
-        
-        .card { background: var(--card-bg); border-radius: var(--border-radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
-        .card-header { background: var(--primary-color); color: white; padding: 15px; font-weight: bold; font-size: 1.1em; display: flex; justify-content: space-between; }
-        .card-body { padding: 15px; flex-grow: 1; }
-
-        .group-item { margin-bottom: 18px; }
-        .group-item:last-child { margin-bottom: 0; }
-        .label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-        .version-label { font-weight: 600; font-size: 14px; color: #444; }
-        .note-text { font-size: 11px; color: #999; background: #eee; padding: 2px 6px; border-radius: 3px; }
-
-        .url-box { 
-            display: flex; align-items: center; background: var(--code-bg); 
-            padding: 8px 10px; border-radius: 4px; margin-top: 4px; border: 1px solid #eef0f2;
+        .whitelist-title {
+            font-weight: bold;
+            color: #0050b3;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
         }
-        .url-text { font-family: monospace; font-size: 12px; flex-grow: 1; word-break: break-all; color: #444; }
-        
+
+        .whitelist-title svg {
+            margin-right: 8px;
+        }
+
+        .domain-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .domain-tag {
+            background: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            border: 1px solid #bae7ff;
+            color: #0050b3;
+            font-size: 0.9em;
+        }
+
+        /* Grid Styles */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .version-group {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .version-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .version-label {
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 5px;
+            display: block;
+            font-size: 0.95em;
+        }
+
+        .desc-text {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 4px;
+            display: block;
+            font-style: italic;
+        }
+
+        .url-row {
+            display: flex;
+            align-items: center;
+            background: var(--code-bg);
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .url-text {
+            font-family: monospace;
+            font-size: 0.85em;
+            flex-grow: 1;
+            word-break: break-all;
+            color: #2c3e50;
+        }
+
         .copy-btn {
-            background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 3px 8px;
-            cursor: pointer; margin-left: 10px; font-size: 11px; color: var(--primary-color);
-            transition: all 0.2s; white-space: nowrap;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            margin-left: 8px;
+            font-size: 0.8em;
+            color: var(--primary-color);
+            transition: all 0.2s;
+            white-space: nowrap;
         }
-        .copy-btn:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
 
-        #toast {
-            visibility: hidden; min-width: 200px; background-color: #333; color: #fff;
-            text-align: center; border-radius: 4px; padding: 12px; position: fixed;
-            z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); opacity: 0; transition: 0.3s;
+        .copy-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
-        #toast.show { visibility: visible; opacity: 1; }
+
+        /* Toast */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 17px;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h1>镜像版本清单</h1>
-            <!-- <p class="subtitle">通过 JSON 数据自动渲染生成的镜像列表</p> -->
+            <h1>镜像版本列表</h1>
+            <!-- <p class="subtitle">Image Registry Dashboard</p> -->
         </header>
 
         <!-- 白名单挂载点 -->
         <div id="whitelist-container"></div>
 
-        <!-- 镜像卡片挂载点 -->
-        <div id="image-grid" class="grid"></div>
+        <!-- 镜像列表挂载点 -->
+        <div id="grid-container" class="grid"></div>
     </div>
 
-    <div id="toast">复制成功！</div>
+    <div id="toast">已复制到剪贴板！</div>
 
+    <!-- 核心逻辑脚本 -->
     <script>
-        /**
-         * 所有的配置数据存放在这里
-         * 后期增加镜像只需按格式修改这个 JSON 即可
-         */
-        const CONFIG_DATA = {
+        // ==========================================
+        // 1. 配置数据区域 (JSON格式) - 在这里修改数据
+        // ==========================================
+        const configData = {
             "whitelist": [
                 "aliregistry-cn-guangzhou.oss-cn-guangzhou.aliyuncs.com",
                 "dockerauth-cn-guangzhou.aliyuncs.com",
@@ -106,99 +240,164 @@
             ],
             "categories": [
                 {
-                    "name": "Java Base",
-                    "icon": "☕",
+                    "title": "Java Base Images",
+                    "subtitle": "JDK/JRE",
                     "items": [
-                        { "label": "Java 1.8", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:1.8.273"] },
-                        { "label": "Java 11", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:2.11.30"] },
-                        { "label": "Java 17", "note": "openjdk-17+35_linux-x64", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:17.0.0.1"] },
-                        { "label": "Java 21", "urls": [
-                            "registry.cn-guangzhou.aliyuncs.com/rocv2/java-base:21.0.3.1",
-                            "registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:21.0.3.1"
-                        ]}
+                        {
+                            "version": "Java 1.8",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:1.8.273"]
+                        },
+                        {
+                            "version": "Java 11",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:2.11.30"]
+                        },
+                        {
+                            "version": "Java 17",
+                            "desc": "openjdk-17+35_linux-x64_bin.tar.gz",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:17.0.0.1"]
+                        },
+                        {
+                            "version": "Java 21",
+                            "urls": [
+                                "registry.cn-guangzhou.aliyuncs.com/rocv2/java-base:21.0.3.1",
+                                "registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:21.0.3.1"
+                            ]
+                        }
                     ]
                 },
                 {
-                    "name": "Nacos",
-                    "icon": "📦",
+                    "title": "Nacos",
+                    "subtitle": "Middleware",
                     "items": [
-                        { "label": "Version 2.4.3.1", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.1"] },
-                        { "label": "Version 2.4.3.9", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.9"] }
+                        {
+                            "version": "2.4.3.1",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.1"]
+                        },
+                        {
+                            "version": "2.4.3.9",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.9"]
+                        }
                     ]
                 },
                 {
-                    "name": "Nginx",
-                    "icon": "🌐",
+                    "title": "Nginx",
+                    "subtitle": "Web Server",
                     "items": [
-                        { "label": "Version 1.24.0", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.24.0"] },
-                        { "label": "Version 1.28.0", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.28.0"] }
+                        {
+                            "version": "1.24.0",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.24.0"]
+                        },
+                        {
+                            "version": "1.28.0",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.28.0"]
+                        }
                     ]
                 }
             ]
         };
 
-        // 页面渲染引擎
-        function renderPage() {
-            // 1. 渲染白名单
-            const whitelistHtml = `
+        // ==========================================
+        // 2. 页面渲染逻辑 (无需修改)
+        // ==========================================
+        
+        // 渲染白名单
+        function renderWhitelist() {
+            const container = document.getElementById('whitelist-container');
+            if (!configData.whitelist || configData.whitelist.length === 0) return;
+
+            const html = `
                 <div class="whitelist-card">
-                    <div class="whitelist-title">🛠️ 网络白名单域名</div>
+                    <div class="whitelist-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        网络白名单域名 (Whitelist Domains)
+                    </div>
                     <ul class="domain-list">
-                        ${CONFIG_DATA.whitelist.map(domain => `<li class="domain-tag">${domain}</li>`).join('')}
+                        ${configData.whitelist.map(domain => `<li class="domain-tag">${domain}</li>`).join('')}
                     </ul>
                 </div>
             `;
-            document.getElementById('whitelist-container').innerHTML = whitelistHtml;
-
-            // 2. 渲染镜像卡片
-            const gridHtml = CONFIG_DATA.categories.map(cat => `
-                <div class="card">
-                    <div class="card-header">
-                        <span>${cat.icon} ${cat.name}</span>
-                    </div>
-                    <div class="card-body">
-                        ${cat.items.map(item => `
-                            <div class="group-item">
-                                <div class="label-row">
-                                    <span class="version-label">${item.label}</span>
-                                    ${item.note ? `<span class="note-text">${item.note}</span>` : ''}
-                                </div>
-                                ${item.urls.map(url => `
-                                    <div class="url-box">
-                                        <div class="url-text">${url}</div>
-                                        <button class="copy-btn" onclick="copyText('${url}', this)">复制</button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('image-grid').innerHTML = gridHtml;
+            container.innerHTML = html;
         }
 
-        // 复制功能
-        function copyText(text, btn) {
-            navigator.clipboard.writeText(text).then(() => {
-                const toast = document.getElementById("toast");
-                toast.className = "show";
-                
-                const originalText = btn.innerText;
-                btn.innerText = "成功";
-                btn.style.borderColor = "#52c41a";
-                btn.style.color = "#52c41a";
+        // 渲染镜像列表
+        function renderGrid() {
+            const container = document.getElementById('grid-container');
+            
+            configData.categories.forEach(cat => {
+                const card = document.createElement('div');
+                card.className = 'card';
 
-                setTimeout(() => {
-                    toast.className = "";
-                    btn.innerText = originalText;
-                    btn.style.borderColor = "#ddd";
-                    btn.style.color = "var(--primary-color)";
-                }, 1500);
+                let itemsHtml = '';
+                cat.items.forEach(item => {
+                    // 处理描述字段（如果有）
+                    const descHtml = item.desc ? `<span class="desc-text">${item.desc}</span>` : '';
+                    
+                    // 处理URL列表
+                    let urlsHtml = '';
+                    item.urls.forEach(url => {
+                        urlsHtml += `
+                            <div class="url-row">
+                                <div class="url-text">${url}</div>
+                                <button class="copy-btn" onclick="copyText(this)">复制</button>
+                            </div>
+                        `;
+                    });
+
+                    itemsHtml += `
+                        <div class="version-group">
+                            <span class="version-label">${item.version}</span>
+                            ${descHtml}
+                            ${urlsHtml}
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        ${cat.title}
+                        <span style="font-size: 0.8em; opacity: 0.8;">${cat.subtitle || ''}</span>
+                    </div>
+                    <div class="card-body">
+                        ${itemsHtml}
+                    </div>
+                `;
+                container.appendChild(card);
             });
         }
 
-        // 执行初始化渲染
-        renderPage();
+        // 复制功能
+        function copyText(btnElement) {
+            const textToCopy = btnElement.previousElementSibling.innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast();
+                // 按钮反馈
+                const originalText = btnElement.innerText;
+                btnElement.innerText = "已复制";
+                btnElement.style.background = "#52c41a";
+                btnElement.style.color = "#fff";
+                btnElement.style.borderColor = "#52c41a";
+                setTimeout(() => {
+                    btnElement.innerText = originalText;
+                    btnElement.style.background = "white";
+                    btnElement.style.color = "var(--primary-color)";
+                    btnElement.style.borderColor = "#ddd";
+                }, 2000);
+            }).catch(err => {
+                alert("复制失败，请手动复制");
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        // 初始化
+        window.onload = function() {
+            renderWhitelist();
+            renderGrid();
+        };
     </script>
 </body>
 </html>
