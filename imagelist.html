@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜像仓库管理面板</title>
+    <style>
+        :root {
+            --primary-color: #0064C8;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --code-bg: #f0f2f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { color: var(--primary-color); margin-bottom: 5px; }
+        .subtitle { color: var(--text-sub); font-size: 0.9em; margin-bottom: 20px; }
+
+        /* 白名单样式 */
+        .whitelist-card {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .whitelist-title { font-weight: bold; color: #0050b3; margin-bottom: 12px; display: flex; align-items: center; }
+        .domain-list { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; margin: 0; }
+        .domain-tag { background: #fff; padding: 6px 12px; border-radius: 4px; border: 1px solid #bae7ff; font-family: monospace; font-size: 13px; color: #0050b3; }
+
+        /* 网格布局 */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+        
+        .card { background: var(--card-bg); border-radius: var(--border-radius); box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; }
+        .card-header { background: var(--primary-color); color: white; padding: 15px; font-weight: bold; font-size: 1.1em; display: flex; justify-content: space-between; }
+        .card-body { padding: 15px; flex-grow: 1; }
+
+        .group-item { margin-bottom: 18px; }
+        .group-item:last-child { margin-bottom: 0; }
+        .label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .version-label { font-weight: 600; font-size: 14px; color: #444; }
+        .note-text { font-size: 11px; color: #999; background: #eee; padding: 2px 6px; border-radius: 3px; }
+
+        .url-box { 
+            display: flex; align-items: center; background: var(--code-bg); 
+            padding: 8px 10px; border-radius: 4px; margin-top: 4px; border: 1px solid #eef0f2;
+        }
+        .url-text { font-family: monospace; font-size: 12px; flex-grow: 1; word-break: break-all; color: #444; }
+        
+        .copy-btn {
+            background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 3px 8px;
+            cursor: pointer; margin-left: 10px; font-size: 11px; color: var(--primary-color);
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .copy-btn:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+
+        #toast {
+            visibility: hidden; min-width: 200px; background-color: #333; color: #fff;
+            text-align: center; border-radius: 4px; padding: 12px; position: fixed;
+            z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); opacity: 0; transition: 0.3s;
+        }
+        #toast.show { visibility: visible; opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>镜像仓库资产清单</h1>
+            <p class="subtitle">通过 JSON 数据自动渲染生成的镜像列表</p>
+        </header>
+
+        <!-- 白名单挂载点 -->
+        <div id="whitelist-container"></div>
+
+        <!-- 镜像卡片挂载点 -->
+        <div id="image-grid" class="grid"></div>
+    </div>
+
+    <div id="toast">复制成功！</div>
+
+    <script>
+        /**
+         * 所有的配置数据存放在这里
+         * 后期增加镜像只需按格式修改这个 JSON 即可
+         */
+        const CONFIG_DATA = {
+            "whitelist": [
+                "aliregistry-cn-guangzhou.oss-cn-guangzhou.aliyuncs.com",
+                "dockerauth-cn-guangzhou.aliyuncs.com",
+                "registry.cn-guangzhou.aliyuncs.com"
+            ],
+            "categories": [
+                {
+                    "name": "Java Base",
+                    "icon": "☕",
+                    "items": [
+                        { "label": "Java 1.8", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:1.8.273"] },
+                        { "label": "Java 11", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:2.11.30"] },
+                        { "label": "Java 17", "note": "openjdk-17+35_linux-x64", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:17.0.0.1"] },
+                        { "label": "Java 21", "urls": [
+                            "registry.cn-guangzhou.aliyuncs.com/rocv2/java-base:21.0.3.1",
+                            "registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:21.0.3.1"
+                        ]}
+                    ]
+                },
+                {
+                    "name": "Nacos",
+                    "icon": "📦",
+                    "items": [
+                        { "label": "Version 2.4.3.1", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.1"] },
+                        { "label": "Version 2.4.3.9", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.9"] }
+                    ]
+                },
+                {
+                    "name": "Nginx",
+                    "icon": "🌐",
+                    "items": [
+                        { "label": "Version 1.24.0", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.24.0"] },
+                        { "label": "Version 1.28.0", "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.28.0"] }
+                    ]
+                }
+            ]
+        };
+
+        // 页面渲染引擎
+        function renderPage() {
+            // 1. 渲染白名单
+            const whitelistHtml = `
+                <div class="whitelist-card">
+                    <div class="whitelist-title">🛠️ 网络白名单域名</div>
+                    <ul class="domain-list">
+                        ${CONFIG_DATA.whitelist.map(domain => `<li class="domain-tag">${domain}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            document.getElementById('whitelist-container').innerHTML = whitelistHtml;
+
+            // 2. 渲染镜像卡片
+            const gridHtml = CONFIG_DATA.categories.map(cat => `
+                <div class="card">
+                    <div class="card-header">
+                        <span>${cat.icon} ${cat.name}</span>
+                    </div>
+                    <div class="card-body">
+                        ${cat.items.map(item => `
+                            <div class="group-item">
+                                <div class="label-row">
+                                    <span class="version-label">${item.label}</span>
+                                    ${item.note ? `<span class="note-text">${item.note}</span>` : ''}
+                                </div>
+                                ${item.urls.map(url => `
+                                    <div class="url-box">
+                                        <div class="url-text">${url}</div>
+                                        <button class="copy-btn" onclick="copyText('${url}', this)">复制</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('image-grid').innerHTML = gridHtml;
+        }
+
+        // 复制功能
+        function copyText(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById("toast");
+                toast.className = "show";
+                
+                const originalText = btn.innerText;
+                btn.innerText = "成功";
+                btn.style.borderColor = "#52c41a";
+                btn.style.color = "#52c41a";
+
+                setTimeout(() => {
+                    toast.className = "";
+                    btn.innerText = originalText;
+                    btn.style.borderColor = "#ddd";
+                    btn.style.color = "var(--primary-color)";
+                }, 1500);
+            });
+        }
+
+        // 执行初始化渲染
+        renderPage();
+    </script>
+</body>
+</html>

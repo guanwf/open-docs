@@ -359,7 +359,7 @@ server {
             { category:"📚文档类",text:"Nginx升级方法", url: "https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh", desc: "4N11294&"},
             { category: "📚文档类",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
             { category: "📚文档类",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
-
+            { category: "📚文档类",text:"镜像版本列表", url: "./imagelist.html", desc: ""},
 
             { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
             { category: "❄️K8s",text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档"},
@@ -488,8 +488,8 @@ const app = {
                 // 组合控件
                 headerControlsHtml = `
                 <div class="header-controls">
-                    ${searchHtml}
                     ${tagSelectHtml}
+                    ${searchHtml}                    
                 </div>`;
             }
             
