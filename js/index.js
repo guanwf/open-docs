@@ -1,6 +1,8 @@
 // --- 0. 配置数据 (命名空间数组) ---
 const k8sNamespaces = [
     "pbs",
+    "logging",
+    "monitoring",
     "roc-sit",
     "roc-dev",
     "roc-v2-test",
@@ -22,20 +24,22 @@ const database = [
         id: "shell",
         title: { zh: "Shell", en: "Shell" },
         type: "cmd",
+        layout: "grid", // <--- 核心：添加这行，开启一行两个        
         items: [
             { cmd: "cat /etc/os-release | grep '^ID=' | awk -F= '{print $2}'", desc: "查看系统类型" },
             { cmd: "cat /etc/os-release | grep 'VERSION_ID=' | awk -F= '{print $2}' | tr -d [:punct:]", desc: "查看系统版本" },
             
             { cmd: "cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 64;echo", desc: "生成64位随机数" },
 
-            { cmd: "uname -r", desc: "查看内核信息" },
-            { cmd: "cat /proc/cpuinfo", desc: "查看CPU信息" },
+            { cmd: "uname -r", desc: "查看内核信息" ,tags: ["系统", "信息"] },
+            { cmd: "cat /proc/cpuinfo", desc: "查看CPU信息" ,tags: ["系统", "信息"] },
             { cmd: "lscpu", desc: "查看CPU信息" },
-            { cmd: "free -h", desc: "查看内存使用情况" },
+            { cmd: "free -h", desc: "查看内存使用情况;1、总内存：total,2、程序可用内存：available" },
             { cmd: "cat /proc/meminfo", desc: "查看内存使用情况" },
 
             { cmd: "uptime", desc: "查看系统运行时间" },
-            { cmd: "who -b", desc: "最近一次启动时间" },            
+            { cmd: "who -b", desc: "最近一次启动时间" },
+            { cmd: "df -h", desc: "查询磁盘" },
 
             { cmd: "dos2unix filename", desc: "format file" },
             { cmd: ":set ff=unix", desc: "vi format file" },
@@ -68,6 +72,11 @@ passwd pos
 chown -R pos:posgroup /data/pos-work
 sudo visudo -c && echo "pos ALL=(ALL:ALL) ALL" | tee -a /etc/sudoers && echo "pos ALL=(ALL) NOPASSWD: ALL" | tee -a /etc/sudoers`, desc: "#user,建立pos用户,根据需要调整用户名称，密码，目录." },
 
+            { cmd: "iostat -d -x -k 3 3 ", desc: "一秒中被IO消耗的CPU百分比(%)" },
+
+
+
+
         ]
     },
     {
@@ -90,6 +99,8 @@ firewall-cmd --reload
 
             { cmd: "tracepath  192.168.0.1", desc: "追踪数据包从本机到目标主机所经过的网络路由路径, tracepath [域名]" },
 
+            { cmd: "sar -n DEV 1", desc: "查看网卡是否打满." },
+            { cmd: "ethtool -S ens192", desc: "查看网卡数据，其中ens192是网卡名称." },
             
 
         ]
@@ -308,6 +319,9 @@ server {
          
             { cmd: "kubectl port-forward --address 0.0.0.0 svc/kube-prometheus-stack-alertmanager -n monitoring 9093:9093", desc: "根据service直接代理给k8s-master机器的端口访问，如：http://192.168.227.102:9093/#/alerts",doc:"" },
             
+            { cmd: "kubectl -n roc-uat logs -f --since=1h roc-goods > /tmp/roc-goods.log", desc: "#log,取1小时内的日志",doc:"" },
+
+            
 
         ]
     },
@@ -420,17 +434,65 @@ const app = {
             navHtml += `<a href="#${section.id}" onclick="app.closeMenu()">${title}</a>`;
 
             // 1. 搜索框
+            // let searchHtml = '';
+            // if (['cmd','nginx', 'k8s'].includes(section.type)) {
+            //     const ph = this.state.lang === 'zh' ? '搜索...' : 'Search...';
+            //     searchHtml = `
+            //     <div class="search-wrapper">
+            //         <input type="text" class="section-search" placeholder="${ph}" 
+            //             oninput="app.filterCmds(this, '${section.id}')">
+            //         <span class="search-clear" onclick="app.clearSearch(this, '${section.id}')">✕</span>
+            //     </div>`;
+            // }
+
+            // --- 1. 构建头部控件 (搜索框 + 标签下拉) ---
+            let headerControlsHtml = '';
             let searchHtml = '';
-            if (['cmd','nginx', 'k8s'].includes(section.type)) {
+
+            // 仅 cmd, k8s, nginx 类型显示搜索和标签
+            if (['cmd', 'k8s'].includes(section.type)) {
+                
+                // A. 搜索框
                 const ph = this.state.lang === 'zh' ? '搜索...' : 'Search...';
                 searchHtml = `
                 <div class="search-wrapper">
                     <input type="text" class="section-search" placeholder="${ph}" 
-                        oninput="app.filterCmds(this, '${section.id}')">
+                        oninput="app.filterSection('${section.id}')">
                     <span class="search-clear" onclick="app.clearSearch(this, '${section.id}')">✕</span>
                 </div>`;
-            }
 
+                // B. 标签下拉框 (安全处理 tags)
+                let tagSelectHtml = '';
+                const allTags = new Set();
+                if (section.items) {
+                    section.items.forEach(item => {
+                        // [修改点] 增加判断：只有当 item.tags 存在且是数组时才处理
+                        if (item.tags && Array.isArray(item.tags)) {
+                            item.tags.forEach(t => allTags.add(t));
+                        }
+                    });
+                }
+
+                // 只有当该区域确实有标签时，才显示下拉框
+                if (allTags.size > 0) {
+                    const labelAll = this.state.lang === 'zh' ? '全部标签' : 'All Tags';
+                    const options = Array.from(allTags).map(tag => `<option value="${tag}">${tag}</option>`).join('');
+                    
+                    tagSelectHtml = `
+                    <select class="section-tag-select" onchange="app.filterSection('${section.id}')">
+                        <option value="">${labelAll}</option>
+                        ${options}
+                    </select>`;
+                }
+
+                // 组合控件
+                headerControlsHtml = `
+                <div class="header-controls">
+                    ${searchHtml}
+                    ${tagSelectHtml}
+                </div>`;
+            }
+            
             // 2. K8S 面板
             let controlHtml = '';
             const btnText = this.state.lang === 'zh' ? '替换' : 'Replace';
@@ -533,9 +595,14 @@ const app = {
                     const extraClass = ( section.type === 'code' || section.type === 'net' || section.type === 'nginx' ) ? 'code-mode' : '';
                     const searchText = (cmdText + ' ' + descText).toLowerCase();
                     
+                    // [修改点] 容错处理：如果没有 tags，默认为空数组，避免报错
+                    // 如果 item.tags 是 undefined，这里会变成 ""
+                    const tagsStr = (item.tags || []).join(',');
+
                     // <div class="cmd-box ${extraClass}" data-filter="${searchText}">
                     return `
-                    <div class="cmd-box ${extraClass}" data-filter="${app.escapeHtml(searchText)}">                    
+                    <div class="cmd-box ${extraClass}" data-filter="${app.escapeHtml(searchText)}"
+                        data-tags="${tagsStr}">
                         ${numHtml}
                         <div class="cmd-wrapper">
                             <pre>${cmdText}</pre>
@@ -546,14 +613,23 @@ const app = {
                 }).join('');
             }
 
+
+            // [修改点]：检查 section 是否配置了 layout: 'grid'
+            const gridClass = section.layout === 'grid' ? 'grid-2-col' : '';
+
+            // ${searchHtml}
             mainHtml += `
             <div id="${section.id}" class="section">
                 <div class="section-header">
                     <h2>${title}</h2>
-                    ${searchHtml}
+                    
+                    <!-- [核心修复] 使用包含下拉框的完整变量 headerControlsHtml -->
+                    ${headerControlsHtml}
+                    
                 </div>
                 ${controlHtml}
-                <div class="cmd-list-container">${contentHtml}</div>
+                <!-- [修改点]：将 gridClass 添加到这个容器 div 上 -->
+                <div class="cmd-list-container ${gridClass}"">${contentHtml}</div>
             </div>`;
         });
 
@@ -574,7 +650,11 @@ const app = {
     clearSearch(btn, sectionId) {
         const input = btn.previousElementSibling; input.value = ''; btn.style.display = 'none';
         document.querySelectorAll(`#${sectionId} .cmd-box`).forEach(box => box.style.display = 'flex');
-        input.focus();
+
+        // input.focus();
+         // 触发筛选（此时会保留标签的选择状态，只清空了搜索词）
+         app.filterSection(sectionId);
+         input.focus();
     },
     toggleMenu() { document.getElementById('mobile-menu').classList.toggle('open'); },
     closeMenu() { document.getElementById('mobile-menu').classList.remove('open'); },
@@ -748,7 +828,48 @@ const app = {
         document.querySelectorAll('.section').forEach(el => {
             el.style.scrollMarginTop = top;
         });
-    }
+    },
+
+     // --- [核心修改] 统一筛选函数 (同时处理 搜索框 和 标签下拉) ---
+     filterSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        // 1. 获取搜索框的值
+        const searchInput = section.querySelector('.section-search');
+        const term = searchInput ? searchInput.value.toLowerCase() : '';
+        
+        // 控制清除按钮显示
+        if (searchInput) {
+            const clearBtn = section.querySelector('.search-clear');
+            if (clearBtn) clearBtn.style.display = term.length > 0 ? 'block' : 'none';
+        }
+
+        // 2. 获取标签下拉框的值
+        const tagSelect = section.querySelector('.section-tag-select');
+        const selectedTag = tagSelect ? tagSelect.value : '';
+
+        // 3. 遍历并筛选
+        const boxes = section.querySelectorAll('.cmd-box');
+        boxes.forEach(box => {
+            const textMatch = box.getAttribute('data-filter').includes(term);
+            
+            // 标签匹配逻辑：如果选了标签，检查 data-tags 是否包含该标签
+            let tagMatch = true;
+            if (selectedTag) {
+                const boxTags = box.getAttribute('data-tags').split(',');
+                tagMatch = boxTags.includes(selectedTag);
+            }
+
+            // 同时满足才显示
+            if (textMatch && tagMatch) {
+                box.style.display = 'flex';
+            } else {
+                box.style.display = 'none';
+            }
+        });
+    },
+
 };
 
 window.addEventListener('DOMContentLoaded', () => app.init());

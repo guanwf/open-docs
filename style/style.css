@@ -232,3 +232,59 @@ body {
     background: var(--bg-body); color: var(--text-main);
 }
 .action-btn { background: var(--nav-active-bg); color: #fff; border: none; padding: 5px 12px; border-radius: 3px; cursor: pointer; font-size: 12px;}
+
+/* --- 8. 双列布局模式 (新增) --- */
+/* 桌面端：启用双列 Grid */
+.cmd-list-container.grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 1:1 等宽双列 */
+    gap: 12px; /* 盒子之间的间距 */
+}
+
+/* 在 Grid 模式下，去掉盒子原本的下边距，改用 gap 控制 */
+.cmd-list-container.grid-2-col .cmd-box {
+    margin-bottom: 0;
+    height: 100%; /* 让同一行的两个盒子高度对齐（可选） */
+    box-sizing: border-box;
+}
+
+/* 手机端适配：屏幕小于 768px 时强制变回单列 */
+@media (max-width: 768px) {
+    .cmd-list-container.grid-2-col {
+        grid-template-columns: 1fr; /* 强制单列 */
+        gap: 8px;
+    }
+}
+
+/* --- 9. 标签筛选下拉框 (新增) --- */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* 搜索框和下拉框的间距 */
+}
+
+.section-tag-select {
+    padding: 5px 10px;
+    border: 1px solid var(--cmd-border);
+    border-radius: 20px; /* 圆角与搜索框一致 */
+    font-size: 12px;
+    background: var(--bg-body);
+    color: var(--text-main);
+    outline: none;
+    cursor: pointer;
+    max-width: 120px; /* 限制宽度，防止太宽 */
+}
+
+.section-tag-select:focus {
+    border-color: var(--nav-active-bg);
+}
+
+/* 手机端适配：让控件换行或者缩小 */
+@media (max-width: 768px) {
+    .header-controls {
+        gap: 5px;
+    }
+    .section-tag-select {
+        max-width: 80px; /* 手机上窄一点 */
+    }
+}
