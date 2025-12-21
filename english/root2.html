@@ -1,317 +1,197 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>英语词根词缀速记宝典 V3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Roots Learning Dictionary</title>
     <style>
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
-            --accent-color: #27ae60;
-            --bg-color: #f4f6f8;
+            --bg-color: #f4f7f6;
             --card-bg: #ffffff;
             --text-color: #333;
-            --btn-size: 38px;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* 顶部固定栏 */
-        .header-container {
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        /* Control Panel Styles */
+        .controls {
             position: sticky;
             top: 0;
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 1px 10px rgba(0,0,0,0.08);
-            padding: 12px 15px;
+            background: var(--bg-color);
+            padding: 15px;
             width: 100%;
-            box-sizing: border-box;
-            z-index: 1000;
+            max-width: 1200px;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        h1 {
-            font-size: 1.3rem;
-            margin: 0;
-            color: var(--primary-color);
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .controls {
-            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -6px #222;
+            z-index: 100;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
             gap: 10px;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
         }
 
         .search-box {
             flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #e1e4e8;
-            border-radius: 25px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
             font-size: 16px;
-            outline: none;
-            background: #f8f9fa;
-            transition: all 0.3s;
-        }
-
-        .search-box:focus {
-            border-color: var(--secondary-color);
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            min-width: 200px;
         }
 
         .pagination {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        button.page-btn {
+        button {
             background-color: var(--secondary-color);
             color: white;
             border: none;
             padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
+            border-radius: 5px;
             cursor: pointer;
-            white-space: nowrap;
-            font-weight: 500;
+            transition: background 0.3s;
         }
 
-        button.page-btn:disabled {
-            background-color: #e0e0e0;
-            color: #999;
+        button:hover {
+            background-color: #2980b9;
         }
 
-        /* 内容区域 */
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Grid Layout */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
             width: 100%;
-            max-width: 1000px;
-            padding: 15px;
-            box-sizing: border-box;
+            max-width: 1200px;
         }
 
-        /* 卡片样式 */
+        /* Card Styles */
         .card {
             background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            padding: 18px;
-            border-top: 4px solid var(--secondary-color);
-            display: flex;
-            flex-direction: column;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
             transition: transform 0.2s;
+            border-left: 5px solid var(--secondary-color);
         }
 
-        .root-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 12px;
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
 
         .root-title {
-            font-size: 1.6rem;
-            font-weight: 800;
+            font-size: 24px;
+            font-weight: bold;
             color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
         }
 
         .meanings {
-            font-size: 0.95rem;
-            color: #555;
-            background: #eef2f7;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-weight: 500;
+            font-style: italic;
+            color: #7f8c8d;
+            margin-bottom: 15px;
         }
 
         .example-list {
             list-style: none;
             padding: 0;
-            margin: 0;
         }
 
-        /* 单词行样式 */
         .example-item {
             display: flex;
-            flex-direction: column;
-            padding: 10px 0;
-            border-bottom: 1px dashed #eee;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px dotted #eee;
         }
 
         .example-item:last-child {
             border-bottom: none;
         }
 
-        /* 单词主行：单词文字 + 操作按钮 */
-        .word-row-main {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
         .word-text {
-            font-weight: 700;
-            font-size: 1.15rem;
-            color: #2c3e50;
-            word-break: break-all;
+            font-weight: 500;
         }
 
-        /* 按钮组 */
-        .action-btns {
-            display: flex;
-            gap: 6px;
-        }
-
-        .icon-btn {
-            background: white;
-            border: 1px solid #eee;
-            color: #666;
-            width: var(--btn-size);
-            height: var(--btn-size);
-            border-radius: 50%; /* 圆形按钮 */
+        .audio-btn {
+            background: none;
+            border: 1px solid #ddd;
+            color: var(--secondary-color);
+            padding: 2px 8px;
+            font-size: 14px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 16px;
-            text-decoration: none;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        .icon-btn:active {
-            transform: scale(0.92);
-            background: #f5f5f5;
+        .audio-btn:hover {
+            background-color: #ebf5fb;
         }
 
-        .icon-btn.play-btn { color: var(--secondary-color); border-color: #d6eaf8; background: #f4fbff; }
-        .icon-btn.view-btn { color: var(--accent-color); border-color: #d5f5e3; background: #eafaf1; }
-        .icon-btn.link-btn { color: #8e44ad; }
-        .icon-btn.copy-btn { color: #7f8c8d; }
-
-        /* 释义显示区域 */
-        .definition-box {
-            display: none; /* 默认隐藏 */
-            background: #fafafa;
-            border-radius: 8px;
-            padding: 8px 10px;
-            margin-top: 5px;
-            border-left: 3px solid var(--accent-color);
-            font-size: 0.9rem;
-            line-height: 1.4;
-            color: #444;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .definition-box.active {
-            display: block;
-        }
-
-        .ipa {
-            color: #888;
-            font-family: 'Lucida Sans Unicode', sans-serif;
-            margin-bottom: 4px;
-            display: block;
-            font-size: 0.85rem;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 提示框 */
-        #toast {
-            visibility: hidden;
-            min-width: 120px;
-            background-color: rgba(0,0,0,0.8);
-            color: #fff;
+        .no-results {
             text-align: center;
-            border-radius: 50px;
-            padding: 10px 20px;
-            position: fixed;
-            z-index: 2000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s, bottom 0.3s;
-        }
-
-        #toast.show {
-            visibility: visible;
-            opacity: 1;
-            bottom: 60px;
-        }
-
-        /* 手机适配 */
-        @media (max-width: 600px) {
-            .grid-container {
-                grid-template-columns: 1fr;
-                padding: 10px;
-            }
-            .controls {
-                flex-wrap: wrap;
-            }
-            .search-box {
-                order: 2;
-                min-width: 100%;
-            }
-            .pagination {
-                order: 1;
-                width: 100%;
-                justify-content: space-between;
-            }
+            grid-column: 1 / -1;
+            padding: 50px;
+            font-size: 18px;
+            color: #7f8c8d;
         }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <h1>英语词根速记宝典 V3</h1>
-        <div class="controls">
-            <div class="pagination">
-                <button class="page-btn" id="prevBtn" onclick="changePage(-1)">上一页</button>
-                <span id="pageInfo" style="font-size: 14px; color: #666;">1 / 1</span>
-                <button class="page-btn" id="nextBtn" onclick="changePage(1)">下一页</button>
-            </div>
-            <input type="text" id="searchInput" class="search-box" placeholder="搜词根(bio) 或 含义(life)...">
+    <h1>📚 English Roots Dictionary</h1>
+
+    <div class="controls">
+        <input type="text" id="searchInput" class="search-box" placeholder="Search roots (e.g., 'bio') or meanings (e.g., 'life')...">
+        
+        <div class="pagination">
+            <button id="prevBtn" onclick="changePage(-1)">Previous</button>
+            <span id="pageInfo">Page 1</span>
+            <button id="nextBtn" onclick="changePage(1)">Next</button>
         </div>
     </div>
 
     <div id="container" class="grid-container">
-        <!-- 内容动态生成 -->
+        <!-- Cards will be injected here via JavaScript -->
     </div>
 
-    <div id="toast">已复制</div>
-
     <script>
-        // ----------------------------------------------------
-        // 1. 数据源 (完整数据)
-        // ----------------------------------------------------
-        // 注意：为了完整功能，请保持此数据结构
+        // --- 1. The Data (Copied from your JSON) ---
+        // 注意：由于数据在你的问题中，为了代码完整性，我将它放在这个变量里。
         const rootsData = {
   "ab" : {
     "examples" : [ "abbreviate - 6", "abdicate - hs", "aberration - hs", "abject - 8", "abnormal - 5", "absence - 6", "absolute - 6", "abstinence - hs", "abstract - 6", "abundance - 7" ],
@@ -4563,29 +4443,27 @@
   }
 };
 
-        // ----------------------------------------------------
-        // 2. 应用程序逻辑
-        // ----------------------------------------------------
+        // --- 2. Application Logic ---
 
-        const ITEMS_PER_PAGE = 12; 
+        // Config
+        const ITEMS_PER_PAGE = 12;
         let currentPage = 1;
-        let filteredKeys = Object.keys(rootsData);
+        let filteredKeys = Object.keys(rootsData); // Initial list is all keys
 
+        // DOM Elements
         const container = document.getElementById('container');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         const pageInfo = document.getElementById('pageInfo');
         const searchInput = document.getElementById('searchInput');
-        const toast = document.getElementById('toast');
 
-        // 音标和释义缓存
-        const definitionCache = {};
+        // Function: Render Data
+        function renderData() {
+            container.innerHTML = ''; // Clear existing content
 
-        // 渲染函数
-        async function renderData() {
-            container.innerHTML = '';
-            
             const totalPages = Math.ceil(filteredKeys.length / ITEMS_PER_PAGE);
+            
+            // Boundary checks
             if (currentPage < 1) currentPage = 1;
             if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
@@ -4594,232 +4472,81 @@
             const pageKeys = filteredKeys.slice(startIndex, endIndex);
 
             if (pageKeys.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding: 40px; color:#999; grid-column:1/-1;">未找到匹配内容</div>';
-                updatePagination(0);
+                container.innerHTML = '<div class="no-results">No roots found matching your search.</div>';
+                pageInfo.innerText = `Page 0 of 0`;
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
                 return;
             }
 
-            // 构建卡片
-            for (const root of pageKeys) {
+            pageKeys.forEach(root => {
                 const data = rootsData[root];
                 const card = document.createElement('div');
                 card.className = 'card';
-                
-                let exampleListHtml = '';
 
-                for (const ex of data.examples) {
-                    // 清理单词（去掉数字、后缀）
-                    const cleanWord = ex.split('-')[0].split(' ')[0].trim().replace(/[^a-zA-Z]/g, '');
-                    const defBoxId = `def-${cleanWord}-${Math.random().toString(36).substr(2, 5)}`;
-                    
-                    exampleListHtml += `
+                // Build Example List HTML
+                const exampleHtml = data.examples.map(ex => {
+                    // Handle "abbreviate - 6" -> just "abbreviate" for audio
+                    const cleanWord = ex.split('-')[0].trim();
+                    return `
                         <li class="example-item">
-                            <div class="word-row-main">
-                                <span class="word-text">${ex}</span>
-                                <div class="action-btns">
-                                    <button class="icon-btn play-btn" onclick="speak('${cleanWord}')" title="朗读">
-                                        🔊
-                                    </button>
-                                    <button class="icon-btn view-btn" onclick="toggleDefinition('${cleanWord}', '${defBoxId}')" title="查看释义">
-                                        👀
-                                    </button>
-                                    <a href="https://dict.youdao.com/w/${cleanWord}" target="_blank" class="icon-btn link-btn" title="跳转详情">
-                                        🔗
-                                    </a>
-                                    <button class="icon-btn copy-btn" onclick="copyText('${cleanWord}')" title="复制">
-                                        📋
-                                    </button>
-                                </div>
-                            </div>
-                            <div id="${defBoxId}" class="definition-box">
-                                <span style="color:#999">正在加载释义...</span>
-                            </div>
+                            <span class="word-text">${ex}</span>
+                            <button class="audio-btn" onclick="speak('${cleanWord}')" title="Listen">🔊</button>
                         </li>
                     `;
-                }
+                }).join('');
 
                 card.innerHTML = `
-                    <div class="root-header">
-                        <span class="root-title">${root}</span>
-                    </div>
-                    <div class="meanings">${data.meanings.join(', ')}</div>
+                    <div class="root-title">${root}</div>
+                    <div class="meanings">Meanings: ${data.meanings.join(', ')}</div>
                     <ul class="example-list">
-                        ${exampleListHtml}
+                        ${exampleHtml}
                     </ul>
                 `;
                 container.appendChild(card);
-            }
+            });
 
-            updatePagination(totalPages);
+            // Update Controls
+            pageInfo.innerText = `Page ${currentPage} of ${totalPages}`;
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+        }
+
+        // Function: Change Page
+        function changePage(direction) {
+            currentPage += direction;
+            renderData();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function updatePagination(totalPages) {
-            pageInfo.innerText = `第 ${currentPage} 页 / 共 ${totalPages || 1} 页`;
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
-        }
+        // Function: Text to Speech
+        function speak(text) {
+            // Cancel any current speech
+            window.speechSynthesis.cancel();
 
-        // ----------------------------------------------------
-        // 3. 核心功能: 查词 (API + JSONP)
-        // ----------------------------------------------------
-
-        // 用于存放 JSONP 回调
-        window.youdaoCallbacks = {};
-
-        async function toggleDefinition(word, elementId) {
-            const box = document.getElementById(elementId);
+            const msg = new SpeechSynthesisUtterance();
+            msg.text = text;
+            msg.lang = 'en-US';
+            msg.rate = 0.9; // Slightly slower for clarity
             
-            // 如果已经显示，则隐藏
-            if (box.classList.contains('active')) {
-                box.classList.remove('active');
-                return;
-            }
-
-            // 显示并设为加载状态
-            box.classList.add('active');
-            
-            // 检查缓存
-            if (definitionCache[word]) {
-                renderDefinition(box, definitionCache[word]);
-                return;
-            }
-
-            try {
-                // 并行请求：音标(Google API) + 中文(有道 JSONP)
-                const [ipaData, cnData] = await Promise.all([
-                    fetchIPA(word),
-                    fetchYoudaoCN(word)
-                ]);
-
-                const result = {
-                    ipa: ipaData || '',
-                    cn: cnData || '暂无释义'
-                };
-
-                definitionCache[word] = result;
-                renderDefinition(box, result);
-
-            } catch (error) {
-                box.innerHTML = '<span style="color:red">加载失败，请点击跳转链接查看</span>';
-            }
+            window.speechSynthesis.speak(msg);
         }
 
-        function renderDefinition(element, data) {
-            element.innerHTML = `
-                ${data.ipa ? `<span class="ipa">${data.ipa}</span>` : ''}
-                <span>${data.cn}</span>
-            `;
-        }
-
-        // 获取音标 (DictionaryAPI)
-        async function fetchIPA(word) {
-            try {
-                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                if (!res.ok) return null;
-                const data = await res.json();
-                
-                // 优先找 text 属性
-                if (data[0].phonetic) return data[0].phonetic;
-                if (data[0].phonetics) {
-                    const p = data[0].phonetics.find(item => item.text);
-                    return p ? p.text : null;
-                }
-                return null;
-            } catch (e) {
-                return null;
-            }
-        }
-
-        // 获取中文 (有道 JSONP Hack)
-        function fetchYoudaoCN(word) {
-            return new Promise((resolve) => {
-                // 创建唯一回调名
-                const callbackName = 'youdao_cb_' + Math.random().toString(36).substr(2, 9);
-                
-                // 定义回调函数
-                window[callbackName] = (data) => {
-                    delete window[callbackName]; // 清理
-                    document.body.removeChild(script); // 移除 script 标签
-                    
-                    if (data && data.entries && data.entries.length > 0) {
-                        resolve(data.entries[0].explain);
-                    } else {
-                        resolve(null);
-                    }
-                };
-
-                // 创建 Script 标签发起请求
-                const script = document.createElement('script');
-                // 使用有道 suggest 接口
-                script.src = `https://dict.youdao.com/suggest?q=${encodeURIComponent(word)}&num=1&doctype=jsonp&callback=${callbackName}`;
-                script.onerror = () => {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    resolve(null);
-                };
-                document.body.appendChild(script);
-            });
-        }
-
-        // ----------------------------------------------------
-        // 4. 其他工具函数
-        // ----------------------------------------------------
-
-        // 翻页
-        window.changePage = (dir) => {
-            currentPage += dir;
-            renderData();
-        };
-
-        // 搜索
+        // Function: Search/Filter
         searchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
+            
             filteredKeys = Object.keys(rootsData).filter(key => {
                 const rootMatch = key.toLowerCase().includes(term);
-                const meanMatch = rootsData[key].meanings.some(m => m.toLowerCase().includes(term));
-                const wordMatch = rootsData[key].examples.some(ex => ex.toLowerCase().includes(term));
-                return rootMatch || meanMatch || wordMatch;
+                const meaningMatch = rootsData[key].meanings.some(m => m.toLowerCase().includes(term));
+                return rootMatch || meaningMatch;
             });
-            currentPage = 1;
+
+            currentPage = 1; // Reset to first page on search
             renderData();
         });
 
-        // 语音
-        window.speak = (text) => {
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'en-US';
-            u.rate = 0.85;
-            window.speechSynthesis.speak(u);
-        };
-
-        // 复制
-        window.copyText = (text) => {
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).then(showToast);
-            } else {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.style.position = "fixed";
-                textArea.style.left = "-9999px";
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showToast();
-                } catch (err) {}
-                document.body.removeChild(textArea);
-            }
-        };
-
-        function showToast() {
-            toast.className = "show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 1500);
-        }
-
-        // 启动
+        // Initial Render
         renderData();
 
     </script>
