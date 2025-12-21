@@ -422,7 +422,7 @@
         }
 
         // ----------------------------------------------------
-        // 3. 核心功能: 查词 (修复版 - 使用代理解决 CORS 和 SyntaxError)
+        // 3. 核心功能: 查词 (代理模式)
         // ----------------------------------------------------
 
         async function toggleDefinition(word, elementId) {
@@ -432,7 +432,6 @@
                 box.classList.remove('active');
                 return;
             }
-
             box.classList.add('active');
             
             if (definitionCache[word]) {
@@ -441,7 +440,6 @@
             }
 
             try {
-                // 使用 Promise.allSettled 并行请求
                 const [ipaResult, cnResult] = await Promise.allSettled([
                     fetchIPAProxy(word),
                     fetchYoudaoProxy(word)
@@ -451,13 +449,12 @@
                 const cnData = cnResult.status === 'fulfilled' ? cnResult.value : null;
 
                 const result = {
-                    ipa: ipaData || '', // 如果没有音标则留空
+                    ipa: ipaData || '',
                     cn: cnData || '暂无释义 (请点击链接查看)'
                 };
 
                 definitionCache[word] = result;
                 renderDefinition(box, result);
-
             } catch (error) {
                 console.error("Fetch error:", error);
                 box.innerHTML = '<span style="color:red">加载失败，请点击跳转链接查看</span>';
@@ -470,24 +467,16 @@
                 <span>${data.cn}</span>
             `;
         }
-
-        // --- 核心修复：使用 AllOrigins 代理绕过 CORS 和 Origin null 限制 ---
         
-        // 1. 获取音标 (通过代理访问 DictionaryAPI)
+        // 1. 获取音标 (代理)
         async function fetchIPAProxy(word) {
             try {
-                // 目标 URL
                 const targetUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
-                // 代理 URL
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-                
                 const res = await fetch(proxyUrl);
                 const proxyData = await res.json();
-                
-                // 解析代理返回的内容 (contents 字段包含目标服务器的响应文本)
                 if (!proxyData.contents) return null;
                 const data = JSON.parse(proxyData.contents);
-
                 if (Array.isArray(data) && data.length > 0) {
                     if (data[0].phonetic) return data[0].phonetic;
                     if (data[0].phonetics) {
@@ -496,47 +485,28 @@
                     }
                 }
                 return null;
-            } catch (e) {
-                // console.warn("IPA fetch failed:", e); // 屏蔽控制台报错
-                return null;
-            }
+            } catch (e) { return null; }
         }
 
-        // 2. 获取中文 (通过代理访问有道 JSON 接口，不再使用 JSONP)
+        // 2. 获取中文 (代理)
         async function fetchYoudaoProxy(word) {
             try {
-                // 使用 doctype=json 获取纯 JSON 数据，避免 JSONP 的 SyntaxError
                 const targetUrl = `https://dict.youdao.com/suggest?q=${word}&num=1&doctype=json`;
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-
                 const res = await fetch(proxyUrl);
                 const proxyData = await res.json();
-
                 if (!proxyData.contents) return null;
-                
-                // 解析有道返回的 JSON 字符串
                 const youdaoData = JSON.parse(proxyData.contents);
-
-                // 有道 suggest 接口通常返回结构: { data: { entries: [...] } } 或直接 { entries: [...] }
                 let entries = null;
-                if (youdaoData.data && youdaoData.data.entries) {
-                    entries = youdaoData.data.entries;
-                } else if (youdaoData.entries) {
-                    entries = youdaoData.entries;
-                }
-
-                if (entries && entries.length > 0) {
-                    return entries[0].explain;
-                }
+                if (youdaoData.data && youdaoData.data.entries) entries = youdaoData.data.entries;
+                else if (youdaoData.entries) entries = youdaoData.entries;
+                if (entries && entries.length > 0) return entries[0].explain;
                 return null;
-            } catch (e) {
-                // console.warn("Youdao fetch failed:", e); // 屏蔽控制台报错
-                return null;
-            }
+            } catch (e) { return null; }
         }
 
         // ----------------------------------------------------
-        // 4. 其他工具函数
+        // 4. 其他工具函数 (关键修复在 speak 函数)
         // ----------------------------------------------------
 
         window.changePage = (dir) => {
@@ -556,13 +526,38 @@
             renderData();
         });
 
+        // --- 修复版发音函数 ---
         window.speak = (text) => {
+            // 策略：优先使用网络音频 (兼容性最好)，如果失败则降级使用系统语音
+            const playOnlineAudio = () => {
+                // type=2 代表美音，type=1 代表英音
+                const audio = new Audio(`https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`);
+                
+                // 监听错误，如果加载失败则切换到系统语音
+                audio.onerror = () => fallbackSpeak(text);
+                
+                // 尝试播放
+                audio.play().catch(e => {
+                    console.log("Online audio play failed, trying fallback:", e);
+                    fallbackSpeak(text);
+                });
+            };
+
+            playOnlineAudio();
+        };
+
+        // 降级方案：系统自带 TTS
+        function fallbackSpeak(text) {
+            if (!window.speechSynthesis) {
+                showToast("您的浏览器不支持朗读");
+                return;
+            }
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
             u.lang = 'en-US';
             u.rate = 0.85;
             window.speechSynthesis.speak(u);
-        };
+        }
 
         window.copyText = (text) => {
             if (navigator.clipboard && window.isSecureContext) {
@@ -583,7 +578,8 @@
             }
         };
 
-        function showToast() {
+        function showToast(msg) {
+            toast.innerText = msg || "已复制";
             toast.className = "show";
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 1500);
         }
