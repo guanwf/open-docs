@@ -8,6 +8,7 @@ const k8sNamespaces = [
     "roc-v2-test",
     "roc-uat",
     "roc-prod",
+    "pos-pbs",    
     "pos-poc",
     "pos-sit",
     "pos-uat",
@@ -290,6 +291,9 @@ server {
             { cmd: "kubectl -n roc-uat scale deployment roc-goods --replicas=1", desc: "缩容,设置pod为1份." },
             { cmd: "kubectl -n roc-uat set image deployment roc-goods roc-goods=版本号", desc: "更新pod版本." },
             { cmd: "kubectl -n roc-uat logs -f --tail 200 roc-goods", desc: "查看日志",doc:"" },
+            { cmd: "kubectl -n roc-uat exec -it roc-goods  -- sh", desc: "进入pod,如果有多个容器则要加参数 -c [容器名称].",doc:"" },            
+            { cmd: "kubectl -n roc-uat delete pod roc-goods", desc: "删除pod.",doc:"" },
+            { cmd: "kubectl -n roc-uat delete pod roc-goods --grace-period=0 --force --wait=false", desc: "强制删除pod",doc:"" },            
             { cmd: "kubectl -n roc-uat describe pod roc-goods", desc: "查看pod明细",doc:"" },
             { cmd: "kubectl -n roc-uat describe node [nodeName]", desc: "查看node明细",doc:"" },
             { cmd: "kubectl -n roc-uat get pods |grep Evicted | awk '{print $1}' | xargs kubectl -n roc-uat delete pod", desc: "删除大量evicted的pod.",doc:"" },
@@ -302,7 +306,6 @@ server {
 
             { cmd: `kubectl -n roc-uat exec -it roc-goods  -- timeout 10 bash -c "</dev/tcp/192.168.0.1/8080" 2>/dev/null && echo "通" || echo "不通"`, desc: "通过pod测试,192.168.0.1:8080是否能通.",doc:"" },
             
-            { cmd: "kubectl -n roc-uat delete pod roc-goods --grace-period=0 --force --wait=false", desc: "强制删除pod",doc:"" },
             { cmd: `kubectl -n roc-uat get pods -o=jsonpath='{range .items[*]}{"kubectl rollout restart deploy -n roc-uat "}{.metadata.labels.app}{"\\n"}'`, desc: "批量生成需要重启的pod命令.",doc:"" },
 
             { cmd: "kubectl -n roc-uat top pod --sort-by=memory", desc: "根据内存排序",doc:"" },
@@ -320,9 +323,6 @@ server {
             { cmd: "kubectl port-forward --address 0.0.0.0 svc/kube-prometheus-stack-alertmanager -n monitoring 9093:9093", desc: "根据service直接代理给k8s-master机器的端口访问，如：http://192.168.227.102:9093/#/alerts",doc:"" },
             
             { cmd: "kubectl -n roc-uat logs -f --since=1h roc-goods > /tmp/roc-goods.log", desc: "#log,取1小时内的日志",doc:"" },
-
-            
-
         ]
     },
     {
@@ -360,7 +360,7 @@ server {
             { category: "📚文档类",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
             { category: "📚文档类",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
             { category: "📚文档类",text:"镜像版本列表", url: "./imagelist.html", desc: ""},
-
+            
             { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
             { category: "❄️K8s",text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档"},
             { category: "❄️K8s",text:"Kubernetes|大规模集群的注意事项", url: "https://kubernetes.io/zh-cn/docs/setup/best-practices/cluster-large/", desc: ""},
@@ -371,7 +371,8 @@ server {
             { category: "❄️K8s",text:"Kubernetes|K8S 修改节点 pod 上限", url: "https://koomu.cn/k8s-modify-node-pods-limits/", desc: ""},
             
             { category: "❄️K8s",text:"K8S-配置存活、就绪和启动探针", url: "https://kubernetes.io/zh-cn/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/", desc: ""},
-            
+            { category: "❄️K8s",text:"获取yaml文件创建pod", url: "http://39.103.177.212:30008/", desc: "需要vpn"},
+
             {category: "📊监控类", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
             {category: "📊监控类", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
 
