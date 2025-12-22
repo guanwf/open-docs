@@ -287,6 +287,7 @@ server {
         title: { zh: "K8s", en: "K8s" },
         type: "k8s",
         items: [
+            { cmd: "kubectl -n roc-uat get pod | get abc", desc: "get pod,abc 改成需要的.",doc:"" },
             { cmd: "kubectl rollout restart deploy -n roc-uat roc-goods", desc: "滚动重启" ,doc:"https://kubernetes.io/zh-cn/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/" },
             { cmd: "kubectl -n roc-uat scale deployment roc-goods --replicas=1", desc: "缩容,设置pod为1份." },
             { cmd: "kubectl -n roc-uat set image deployment roc-goods roc-goods=版本号", desc: "更新pod版本." },
