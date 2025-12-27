@@ -332,35 +332,32 @@ server {
         type: "list",
         // 链接数据：包含 category 属性
         items: [
-            { category: "🛠️工具类",text:"查看出口ip", url: "https://cip.cc/", desc: "公网IP"},
+            { category: "🛠️Tools",text:"查看出口ip", url: "https://cip.cc/", desc: "公网IP"},
             
-            { category: "🛠️工具类",text:"generate password", url: "./passwd.html", desc: "生产密码"},
-            { category: "🛠️工具类",text:"ip check", url: "https://www.ip138.com/", desc: ""},
-            { category: "🛠️工具类",text:"1024tools", url: "https://1024tools.com/uuid", desc: "json,base64,各种编码格式转换,加解密,网络工具..."},
-            { category: "🛠️工具类",text:"ssl-check", url: "https://www.ssllabs.com/ssltest/analyze.html", desc: ""},
-            { category: "🛠️工具类",text:"yaml-check", url: "https://www.yamllint.com/", desc: ""},
-            { category: "🛠️工具类",text:"perfcode", url: "https://www.perfcode.com/linux/kali/password-dictionary", desc: ""},
-            { category: "🛠️工具类",text:"windy", url: "https://www.windy.com", desc: ""},
-            { category: "🛠️工具类",text:"通过kubectl连接集群-hw-cce", url: "https://support.huaweicloud.com/intl/zh-cn/usermanual-cce/cce_10_0107.html", desc: ""},
-            { category: "🛠️工具类",text:"whatismyipaddress", url: "https://whatismyipaddress.com/", desc: ""},
+            { category: "🛠️Tools",text:"generate password", url: "./passwd.html", desc: "生产密码"},
+            { category: "🛠️Tools",text:"ip check", url: "https://www.ip138.com/", desc: ""},
+            { category: "🛠️Tools",text:"1024tools", url: "https://1024tools.com/uuid", desc: "各种格式转换,加解密,网络工具"},
+            { category: "🛠️Tools",text:"ssl-check", url: "https://www.ssllabs.com/ssltest/analyze.html", desc: ""},
+            { category: "🛠️Tools",text:"yaml-check", url: "https://www.yamllint.com/", desc: ""},
+            { category: "🛠️Tools",text:"perfcode", url: "https://www.perfcode.com/linux/kali/password-dictionary", desc: ""},
+            { category: "🛠️Tools",text:"windy", url: "https://www.windy.com", desc: ""},            
+            { category: "🛠️Tools",text:"whatismyipaddress", url: "https://whatismyipaddress.com/", desc: ""},            
+            { category: "🛠️Tools",text:"Docker-Image-Hub", url: "http://8.220.217.46:8000/", desc: ""},            
+            { category: "🛠️Tools",text:"docker-aityp", url: "https://docker.aityp.com/", desc: "docker research"},            
+            { category: "🛠️Tools",text:"Dependency-Check", url: "https://owasp.org/www-project-dependency-check/", desc: "项目依赖及漏洞扫描"},            
+            { category: "🛠️Tools",text:"start-spring-io", url: "https://start.spring.io/", desc: "generate java projects"},            
+            { category: "🛠️Tools",text:"properties2yaml-在线格式转换", url: "https://www.bejson.com/devtools/properties2yaml/", desc: ""},
+            { category: "🛠️Tools",text:"icon-getemoji", url: "https://getemoji.com/", desc: "icon"},
             
-            { category: "🛠️工具类",text:"Docker-Image-Hub", url: "http://8.220.217.46:8000/", desc: ""},
+            { category:"📚Doc",text:"FastDeploy&FastLink", url: "https://xd20al46gl.feishu.cn/docx/Hkhvdh1CkoHkYGxhe4Hc3oWqn7Z", desc: ""},
+            { category:"📚Doc",text:"Nginx升级方法", url: "https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh", desc: "4N11294&"},
+            { category: "📚Doc",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
+            { category: "📚Doc",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
+            { category: "📚Doc",text:"镜像版本列表", url: "./imagelist.html", desc: ""},
+            { category: "📚Doc",text:"mySQL日常操作", url: "https://xd20al46gl.feishu.cn/docx/HGmndOA03o3zgbxkos6cwBwinNd", desc: "7@e15734"},
+            { category: "📚Doc",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
+            { category: "📚Doc",text:"rocky-os-下载", url: "https://rockylinux.org/zh-CN/download", desc: ""},
             
-            { category: "🛠️工具类",text:"docker-aityp", url: "https://docker.aityp.com/", desc: "docker research"},
-            
-            { category: "🛠️工具类",text:"Dependency-Check", url: "https://owasp.org/www-project-dependency-check/", desc: "项目依赖及漏洞扫描"},
-            
-            { category: "🛠️工具类",text:"start-spring-io", url: "https://start.spring.io/", desc: "generate java projects"},
-            
-            { category: "🛠️工具类",text:"properties2yaml-在线格式转换", url: "https://www.bejson.com/devtools/properties2yaml/", desc: ""},
-            { category: "🛠️工具类",text:"icon-getemoji", url: "https://getemoji.com/", desc: "icon"},
-            
-
-            { category:"📚文档类",text:"FastDeploy&FastLink", url: "https://xd20al46gl.feishu.cn/docx/Hkhvdh1CkoHkYGxhe4Hc3oWqn7Z", desc: ""},
-            { category:"📚文档类",text:"Nginx升级方法", url: "https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh", desc: "4N11294&"},
-            { category: "📚文档类",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
-            { category: "📚文档类",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
-            { category: "📚文档类",text:"镜像版本列表", url: "./imagelist.html", desc: ""},
             
             { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
             { category: "❄️K8s",text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档"},
@@ -373,9 +370,10 @@ server {
             
             { category: "❄️K8s",text:"K8S-配置存活、就绪和启动探针", url: "https://kubernetes.io/zh-cn/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/", desc: ""},
             { category: "❄️K8s",text:"获取yaml文件创建pod", url: "http://39.103.177.212:30008/", desc: "需要vpn"},
+            { category: "❄️K8s",text:"通过kubectl连接集群-hw-cce", url: "https://support.huaweicloud.com/intl/zh-cn/usermanual-cce/cce_10_0107.html", desc: ""},
 
-            {category: "📊监控类", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
-            {category: "📊监控类", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
+            {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
+            {category: "📊Monitor", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
 
             { category: "⚽️NetWork",text:"wireguard", url: "https://www.wireguard.com/quickstart/", desc: "vpc"},
             { category: "⚽️NetWork",text:"centralops-DNS-Domain -Check-Traceroute", url: "https://centralops.net/", desc: ""},
