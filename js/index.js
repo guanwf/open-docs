@@ -41,6 +41,14 @@ const database = [
             { cmd: "uptime", desc: "查看系统运行时间" },
             { cmd: "who -b", desc: "最近一次启动时间" },
             { cmd: "df -h", desc: "查询磁盘" },
+            { cmd: "top", desc: "最常用的交互式系统监控工具,实时动态查看系统的整体运行状态和进程资源占用情况.top -b -n 1 | grep mongod" },
+
+            { cmd: "lsof -c java  # 列出所有java进程打开的文件", desc: "lsof [选项] [文件名/进程名/端口号]；lsof -p 1234  # 列出PID为1234的进程打开的文件" },
+            { cmd: "lsof -i :8080  # 查看8080端口的占用进程", desc: "lsof -i -s TCP:LISTEN; lsof -i TCP:80 # 查看TCP 80端口;lsof -i @192.168.1.1:80" },
+            { cmd: "lsof -u root  # 列出root用户的进程打开的文件;", desc: "lsof -u ^root # 排除root用户" },
+
+            { cmd: "ps -eo pid,comm,lstart,etime | grep mongod", desc: "检查运行时间." },
+            { cmd: "dmesg -T | grep -i 'out of memory'", desc: "检查系统日志是否有OOM记录." },
 
             { cmd: "dos2unix filename", desc: "format file" },
             { cmd: ":set ff=unix", desc: "vi format file" },
@@ -94,14 +102,17 @@ firewall-cmd --reload
             { cmd: "netstat -ntlp", desc: "查看监听端口" },
             { cmd: `timeout 10 bash -c "</dev/tcp/192.168.0.1/9999" 2>/dev/null && echo "通" || echo "不通"`, desc: "查看监听端口" },            
             { cmd: "ifconfig -a", desc: "网卡详情,window: ipconfig -a " },
-            { cmd: "nslookup 域名", desc: "域名解析,nslookup itor.westlakeerp.com 8.8.8.8" },
+            { cmd: "nslookup 域名", desc: "域名解析,example:nslookup itor.westlakeerp.com 8.8.8.8, nslookup g.cn 172.17.1.250",doc:"https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/nslookup"},
             { cmd: "traceroute 192.168.0.1", desc: "traceroute [目标主机/IP],诊断网络连接问题" },
             { cmd: "traceroute -n -m 10 域名", desc: "路由追踪前10跳,对应Windows的tracert -d -h 10" },
 
-            { cmd: "tracepath  192.168.0.1", desc: "追踪数据包从本机到目标主机所经过的网络路由路径, tracepath [域名]" },
+            { cmd: "tracepath  192.168.0.1", desc: "追踪数据包从本机到目标主机所经过的网络路由路径, tracepath [域名]" },    
 
             { cmd: "sar -n DEV 1", desc: "查看网卡是否打满." },
             { cmd: "ethtool -S ens192", desc: "查看网卡数据，其中ens192是网卡名称." },
+            
+            // { cmd: "tracert g.cn", desc: "查看网卡是否打满." },
+            // nslookup g.cn 8.8.8.8
             
 
         ]
