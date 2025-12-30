@@ -100,6 +100,7 @@ firewall-cmd --reload
             { cmd: "nc -v -z 192.168.0.1 9999", desc: "探测端口(nc)" },
             { cmd: "telnet 192.168.0.1 9999", desc: "探测端口" },
             { cmd: "netstat -ntlp", desc: "查看监听端口" },
+            { cmd: "netstat -anop|grep 9999", desc: "查看监听指定端口" },
             { cmd: `timeout 10 bash -c "</dev/tcp/192.168.0.1/9999" 2>/dev/null && echo "通" || echo "不通"`, desc: "查看监听端口" },            
             { cmd: "ifconfig -a", desc: "网卡详情,window: ipconfig -a " },
             { cmd: "nslookup 域名", desc: "域名解析,example:nslookup itor.westlakeerp.com 8.8.8.8, nslookup g.cn 172.17.1.250",doc:"https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/nslookup"},
@@ -113,6 +114,9 @@ firewall-cmd --reload
             
             // { cmd: "tracert g.cn", desc: "查看网卡是否打满." },
             // nslookup g.cn 8.8.8.8
+            
+            { cmd: "docker run --dns 223.5.5.5", desc: "Google的DNS(8.8.8.8或8.8.4.4);阿里公共DNS主DNS：223.5.5.5；辅 DNS：223.6.6.6." },
+
             
 
         ]
@@ -173,6 +177,54 @@ ES_HOSTS: 127.0.0.1:9200
 ES_USERNAME: ""
 ES_PASSWORD: ""
  `, desc: "configMap" },
+ { cmd: 
+    `
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: conf-env-center
+      namespace: wms-uat
+    data:
+      SERVICE_NACOS_USER: "wms"
+      SERVICE_NACOS_PASS: "nacos"
+      SERVICE_NACOS_HOST: "http://nacos.pbs:8848"
+      SERVICE_NACOS_GROUP: "DEFAULT_GROUP"
+      SERVICE_NACOS_NAMESPACE: "wms-uat"
+      CONFIG_SPRING_PROFILES: "default"
+      CONFIG_NAMESPACE_NAME: "wms-uat"
+      CONFIG_SKYWALKING_ENABLE: "false"
+      CONFIG_SKYWALKING_PARAMS: "-javaagent:/opt/agent/skywalking-agent.jar -Dskywalking.agent.service_name=sit-srmp-order-online -Dskywalking.collector.backend_service=10.0.12.94:11800"
+      JAVA_OPTS: "-Drocketmq.namesrv.addr=10.0.14.156:9876"
+    
+      # Portal DB
+      SERVICE_MYSQL_URI: "10.255.100.104:3306"
+      SERVICE_MYSQL_USER: "root"
+      SERVICE_MYSQL_PASS: "密码"
+      SERVICE_MYSQL_DB: "user"
+      SERVICE_MDM_TOKEN: "1592161107706568120"
+      SERVICE_MYSQL_MASTER: "10.255.100.104:3306"
+    
+      # Portal Redis
+      SERVICE_REDIS_MODE: "single"
+      SERVICE_REDIS_HOST: "redis-server.pbs"
+      SERVICE_REDIS_PORT: "6379"
+      SERVICE_REDIS_PASS: "efuture"
+      SERVICE_REDIS_DB: "0"
+    
+      # Public RocketMQ
+      SERVICE_OMNI_MQ: "rocketmq-name.pbs:9876"
+      
+      # Public Mongodb
+      SERVICE_MONGODB_HOST: "mongodb-server.pbs"
+      SERVICE_MONGODB_PORT: "27017"
+      SERVICE_MONGODB_USER: "root"
+      SERVICE_MONGODB_PASS: "passwd"
+    
+      TIME_ZONE: Asia/Shanghai
+      TZ: Asia/Shanghai
+
+`, desc: "configMap" }
+
         ]
     },
     {
@@ -335,6 +387,10 @@ server {
             { cmd: "kubectl port-forward --address 0.0.0.0 svc/kube-prometheus-stack-alertmanager -n monitoring 9093:9093", desc: "根据service直接代理给k8s-master机器的端口访问，如：http://192.168.227.102:9093/#/alerts",doc:"" },
             
             { cmd: "kubectl -n roc-uat logs -f --since=1h roc-goods > /tmp/roc-goods.log", desc: "#log,取1小时内的日志",doc:"" },
+
+            { cmd: "kubectl run -it --rm dns-test --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28 --restart=Never -- nslookup www.baidu.com", desc: "#测试pod访问外网是否正常.镜像2M,用完删除.",doc:"" },
+            
+
         ]
     },
     {
@@ -369,6 +425,8 @@ server {
             { category: "📚Doc",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
             { category: "📚Doc",text:"rocky-os-下载", url: "https://rockylinux.org/zh-CN/download", desc: ""},
             
+            { category: "📚Doc",text:"pdf转换", url: "https://tools.pdf24.org/zh/", desc: "pdf各种转换-免费"},
+            
             
             { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
             { category: "❄️K8s",text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档"},
@@ -390,8 +448,10 @@ server {
             { category: "⚽️NetWork",text:"centralops-DNS-Domain -Check-Traceroute", url: "https://centralops.net/", desc: ""},
             { category: "⚽️NetWork",text:"Visual Subnet Calculator", url: "https://www.davidc.net/sites/default/subnets/subnets.html", desc: "子网分配计算"},
 
-            { category: "⚽️NetWork",text:"winMTR", url: "https://sourceforge.net/projects/winmtr/", desc: "network check"},
-            
+            { category: "⚽️NetWork",text:"WinMTR", url: "https://sourceforge.net/projects/winmtr/", desc: "network check"},
+
+            { category: "⚽️NetWork",text:"Wireshark", url: "https://www.wireshark.org/docs/relnotes/", desc: "抓包分析"},
+            // https://mp.weixin.qq.com/s/47AWj_IBKjoT71eL8dALug
             
         ]
     }
