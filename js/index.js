@@ -70,7 +70,9 @@ const database = [
             { cmd: "docker system prune -f --volumes", desc: "#docker,清理无用的镜像和卷" },
             { cmd: `docker images -f "dangling=true"`, desc: "#docker,查询挂起的" },
             { cmd: "docker images | grep aeon | awk '{print $3}' | xargs docker rmi -f", desc: "#docker,清理无用的镜像和卷" },
-            
+            { cmd: "docker stats containerId", desc: "#docker,实时监控容器资源使用情况;docker stats 3. 监控所有运行中的容器" },
+            { cmd: "docker run -m 512m --memory-swap 1g my_image", desc: "#docker,限制内存使用：可以在创建容器时设置内存限制" },
+
             { cmd: `建立pos用户,目录，分配权限，切换sudo权限
 mkdir -p /data/pos-work
 groupadd posgroup
@@ -83,6 +85,8 @@ sudo visudo -c && echo "pos ALL=(ALL:ALL) ALL" | tee -a /etc/sudoers && echo "po
 
             { cmd: "iostat -d -x -k 3 3 ", desc: "一秒中被IO消耗的CPU百分比(%)" },
 
+            { cmd: "dd if=/dev/zero of=/tmp/test_iops bs=4k count=10000 oflag=direct", desc: "#iops=总操作次数/总耗时; 普通机械硬盘 (HDD): 顺序写入通常在 100 MB/s - 200 MB/s;  SATA SSD: 通常在 450 MB/s - 550 MB/s;  NVMe SSD: 通常在 1500 MB/s - 7000 MB/s。" },
+            { cmd: "fio -name=randwrite -ioengine=libaio -iodepth=1 -rw=randwrite -bs=4k -direct=1 -size=512M -numjobs=1 -runtime=60 -group_reporting", desc: "#iops 测试随机写入 IOPS (4k块大小)" },
 
 
 
@@ -421,11 +425,16 @@ server {
             { category: "📚Doc",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
             { category: "📚Doc",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
             { category: "📚Doc",text:"镜像版本列表", url: "./imagelist.html", desc: ""},
-            { category: "📚Doc",text:"mySQL日常操作", url: "https://xd20al46gl.feishu.cn/docx/HGmndOA03o3zgbxkos6cwBwinNd", desc: "7@e15734"},
             { category: "📚Doc",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
             { category: "📚Doc",text:"rocky-os-下载", url: "https://rockylinux.org/zh-CN/download", desc: ""},
             
             { category: "📚Doc",text:"pdf转换", url: "https://tools.pdf24.org/zh/", desc: "pdf各种转换-免费"},
+            { category: "📚Doc",text:"mySQL-安装方法", url: "https://xd20al46gl.feishu.cn/docx/J05VdQykeotDM5xKE0icDV9Qn4g", desc: "333q31&2"},
+            { category: "📚Doc",text:"mySQL日常操作", url: "https://xd20al46gl.feishu.cn/docx/HGmndOA03o3zgbxkos6cwBwinNd", desc: "7@e15734"},
+
+            { category: "📚Doc",text:"Java所有版本下载", url: "https://adoptium.net/zh-CN/temurin/releases", desc: "Java所有版本下载-LTS"},
+            { category: "📚Doc",text:"磁盘压测", url: "https://xd20al46gl.feishu.cn/docx/CxapdqUGxoF8Vtxi9nacifPonGd", desc: "IOPS压测."},
+            
             
             
             { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
