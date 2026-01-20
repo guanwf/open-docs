@@ -21,7 +21,7 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             line-height: 1.6;
         }
 
@@ -32,7 +32,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
         }
 
         h1 {
@@ -47,9 +47,9 @@
 
         /* --- 搜索框样式 --- */
         .search-container {
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             position: relative;
-            max-width: 600px;
+            max-width: 500px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -82,8 +82,8 @@
             background: #e6f7ff;
             border: 1px solid #91d5ff;
             border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 30px;
+            padding: 5px;
+            margin-bottom: 5px;
             transition: all 0.3s;
         }
 
@@ -142,7 +142,7 @@
         .card-header {
             background: var(--primary-color);
             color: white;
-            padding: 15px;
+            padding: 5px;
             font-weight: bold;
             font-size: 1.1em;
             display: flex;
@@ -155,9 +155,9 @@
         }
 
         .version-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
 
         .version-group:last-child {
@@ -280,79 +280,78 @@
             "whitelist": [
                 "aliregistry-cn-guangzhou.oss-cn-guangzhou.aliyuncs.com",
                 "dockerauth-cn-guangzhou.aliyuncs.com",
-                "registry.cn-guangzhou.aliyuncs.com"
+                "registry.cn-guangzhou.aliyuncs.com",
+                "crpi-3q0ksy2cxvpoocp9.cn-guangzhou.personal.cr.aliyuncs.com"
             ],
             "categories": [
                 {
-                    "title": "Java Base Images",
-                    "subtitle": "JDK/JRE",
+                    "title": "Images List",
+                    "subtitle": "",
                     "items": [
                         {
-                            "version": "Java 1.8",
+                            "version": "busybox-1.28.0",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28"]
+                        },
+                        {
+                            "version": "Java-1.8",
                             "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:1.8.273"]
                         },
                         {
-                            "version": "Java 11",
+                            "version": "Java-11",
                             "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:2.11.30"]
                         },
                         {
-                            "version": "Java 17",
+                            "version": "Java-17",
                             "desc": "openjdk-17+35_linux-x64_bin.tar.gz",
                             "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:17.0.0.1"]
                         },
                         {
-                            "version": "Java 21",
+                            "version": "Java-21",
                             "urls": [
                                 "registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:21.0.3.1"
                             ]
                         },
                         {
-                            "version": "Java 25",
+                            "version": "Java-25",
                             "urls": [
                                 "registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:eclipse-temurin_25.0.1_8-jdk-jammy",
                                 "registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:eclipse-temurin_25.0.1_8-jdk-ubi10-minimal"
                             ]
-                        }                        
-                    ]
-                },
-                {
-                    "title": "Nacos",
-                    "subtitle": "Middleware",
-                    "items": [
-                        {
-                            "version": "2.4.3.1",
-                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.1"]
                         },
                         {
-                            "version": "2.4.3.9",
-                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.9"]
-                        }
-                    ]
-                },
-                {
-                    "title": "Nginx",
-                    "subtitle": "Web Server",
-                    "items": [
+                            "version": "nacos",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.25",
+                                "registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:3.0.2.3",
+                            ]                            
+                        },                      
                         {
-                            "version": "1.24.0",
-                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.24.0"]
+                            "version": "nginx",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.24.0","registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.28.0"]
                         },
-                        {
-                            "version": "1.28.0",
-                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.28.0"]
-                        }
+
                     ]
                 },
-                {
-                    "title": "busybox",
-                    "subtitle": "busybox",
-                    "items": [
-                        {
-                            "version": "1.28.0",
-                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28"]
-                        }
-                    ]
-                }
+                // {
+                //     "title": "Nacos",
+                //     "subtitle": "Middleware",
+                //     "items": [
+
+                //     ]
+                // },
+                // {
+                //     "title": "Nginx",
+                //     "subtitle": "Web Server",
+                //     "items": [
+
+                //     ]
+                // },
+                // {
+                //     "title": "busybox",
+                //     "subtitle": "busybox",
+                //     "items": [
+                        
+                //     ]
+                // }
             ]
         };
 
@@ -369,7 +368,7 @@
                 <div class="whitelist-card" id="whitelist-card">
                     <div class="whitelist-title">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        网络白名单域名 (Whitelist Domains)
+                        Whitelist Domains
                     </div>
                     <ul class="domain-list">
                         ${configData.whitelist.map(domain => `<li class="domain-tag">${domain}</li>`).join('')}
