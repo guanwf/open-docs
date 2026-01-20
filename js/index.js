@@ -41,6 +41,9 @@ const database = [
             { cmd: "uptime", desc: "查看系统运行时间" },
             { cmd: "who -b", desc: "最近一次启动时间" },
             { cmd: "df -h", desc: "查询磁盘" },
+            { cmd: "du --inodes -d 1 /data | sort -nr | head -n 10", desc: "快速扫描一级子目录，前10的" },
+            { cmd: "docker ps -q | xargs docker inspect --format '{{.Name}}, {{.GraphDriver.Data.WorkDir}}' | grep <你的Hash前缀>", desc: "将哈希目录反查为 K8s Pod 名称" },          
+
             { cmd: "top", desc: "最常用的交互式系统监控工具,实时动态查看系统的整体运行状态和进程资源占用情况.top -b -n 1 | grep mongod" },
 
             { cmd: "lsof -c java  # 列出所有java进程打开的文件", desc: "lsof [选项] [文件名/进程名/端口号]；lsof -p 1234  # 列出PID为1234的进程打开的文件" },
@@ -252,6 +255,22 @@ set global ob_query_timeout=3000000000;
 查看
 SHOW VARIABLES LIKE 'ob_query_timeout';
              `, desc: "设置超时时间" },
+             { cmd: `
+select zone,concat(SVR_IP,':',SVR_PORT) observer,
+cpu_capacity_max cpu_total,cpu_assigned_max cpu_assigned,
+cpu_capacity-cpu_assigned_max as cpu_free,
+round(memory_limit/1024/1024/1024,2) as memory_total,
+round((memory_limit-mem_capacity)/1024/1024/1024,2) as system_memory,
+round(mem_assigned/1024/1024/1024,2) as mem_assigned,
+round((mem_capacity-mem_assigned)/1024/1024/1024,2) as memory_free,
+round(log_disk_capacity/1024/1024/1024,2) as log_disk_capacity,
+round(log_disk_assigned/1024/1024/1024,2) as log_disk_assigned,
+round((log_disk_capacity-log_disk_assigned)/1024/1024/1024,2) as log_disk_free,
+round((data_disk_capacity/1024/1024/1024),2) as data_disk,
+round((data_disk_in_use/1024/1024/1024),2) as data_disk_used,
+round((data_disk_capacity-data_disk_in_use)/1024/1024/1024,2) as data_disk_free
+from gv$ob_servers;
+             `, desc: "在sys租户下面查询，查看租户的内存及磁盘使用情况." },
 
         ]
     },            
