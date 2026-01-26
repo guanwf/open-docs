@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>连读“胶水词” Linking Phrases</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --card-bg: #ffffff;
+            
+            /* 颜色编码 */
+            --c-l1: #059669;    /* Emerald - 基础连读 */
+            --c-l2: #2563eb;    /* Royal Blue - 浊化 */
+            --c-l3: #db2777;    /* Pink - 滑音 */
+            --c-l4: #e11d48;    /* Red - H击穿 */
+            --c-exp: #1e293b;   /* Slate - 专家模式 */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px;
+            padding-bottom: 80px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #334155, #1e293b);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        header h1 { margin: 0 0 8px 0; font-size: 1.5rem; }
+        header .subtitle { font-size: 1rem; opacity: 0.8; letter-spacing: 0.5px; margin-bottom: 15px; display: block;}
+        .intro-box {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .intro-highlight { color: #fcd34d; font-weight: bold; }
+
+        /* Section Styling */
+        .level-section { margin-bottom: 40px; }
+        
+        .level-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-color);
+            z-index: 10;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .level-tag {
+            color: white;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-right: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        
+        .level-title { font-size: 1.15rem; font-weight: 800; }
+
+        /* Rule Card */
+        .rule-card {
+            background: white;
+            border-left: 5px solid #ccc;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+        .rule-title { font-weight: bold; display: block; margin-bottom: 5px; font-size: 1rem; }
+        .rule-desc { font-size: 0.9rem; color: var(--text-sub); }
+
+        /* Word Cards */
+        .word-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .word-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .en { font-size: 1.3rem; font-weight: 800; color: var(--text-main); }
+        .cn { font-size: 0.9rem; color: #94a3b8; margin-left: 8px; font-weight: normal; }
+        
+        /* The "Re-write" Visual */
+        .rewrite-box {
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .rewrite-label {
+            font-size: 0.75rem; 
+            color: #64748b; 
+            text-transform: uppercase; 
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .rewrite-val { 
+            font-family: 'Courier New', monospace; /* Monospace for "Pinyin" feel */
+            font-weight: 700; 
+            font-size: 1.1rem;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+        }
+
+        .ipa { 
+            font-family: monospace; 
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .note-box {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 8px;
+            line-height: 1.5;
+        }
+
+        /* Play Button */
+        .play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .play-btn:active { transform: scale(0.9); filter: brightness(0.95); }
+
+        /* Expert Section */
+        .expert-box {
+            background: var(--c-exp);
+            color: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        .training-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .day-title { color: #fcd34d; font-weight: bold; margin-bottom: 10px; display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;}
+        .drill-item { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 8px; 
+            font-size: 0.95rem; 
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            padding-bottom: 5px;
+        }
+        .drill-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .drill-arrow { color: #94a3b8; margin: 0 5px; }
+        .drill-target { font-family: monospace; font-weight: bold; color: #6ee7b7; }
+
+        .breakdown-row { margin-left: 10px; font-size: 0.9rem; color: #cbd5e1; margin-top: 3px; }
+        .challenge-sent { font-size: 1.2rem; font-weight: bold; margin: 10px 0; text-align: center; }
+        .challenge-phon { font-family: monospace; color: #fca5a5; text-align: center; display: block; margin-bottom: 10px; font-size: 0.9rem;}
+
+        /* Dynamic Themes */
+        /* Level 1 */
+        .l1-theme .level-tag { background: var(--c-l1); }
+        .l1-theme .play-btn { color: var(--c-l1); background: #ecfdf5; border: 1px solid #d1fae5; }
+        .l1-theme .rule-card { border-left-color: var(--c-l1); }
+        .l1-theme .rewrite-val { color: var(--c-l1); }
+
+        /* Level 2 */
+        .l2-theme .level-tag { background: var(--c-l2); }
+        .l2-theme .play-btn { color: var(--c-l2); background: #eff6ff; border: 1px solid #dbeafe; }
+        .l2-theme .rule-card { border-left-color: var(--c-l2); }
+        .l2-theme .rewrite-val { color: var(--c-l2); }
+
+        /* Level 3 */
+        .l3-theme .level-tag { background: var(--c-l3); }
+        .l3-theme .play-btn { color: var(--c-l3); background: #fdf2f8; border: 1px solid #fce7f3; }
+        .l3-theme .rule-card { border-left-color: var(--c-l3); }
+        .l3-theme .rewrite-val { color: var(--c-l3); }
+
+        /* Level 4 */
+        .l4-theme .level-tag { background: var(--c-l4); }
+        .l4-theme .play-btn { color: var(--c-l4); background: #fff1f2; border: 1px solid #ffe4e6; }
+        .l4-theme .rule-card { border-left-color: var(--c-l4); }
+        .l4-theme .rewrite-val { color: var(--c-l4); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>连读“胶水词”</h1>
+        <span class="subtitle">Linking Phrases Training</span>
+        <div class="intro-box">
+            核心逻辑：英语讲究<span class="intro-highlight">“省力原则”</span>。<br>
+            像磁铁一样，前一个辅音吸住后一个元音，变成新音节。
+        </div>
+    </header>
+
+    <!-- LEVEL 1: Basic -->
+    <section class="level-section l1-theme">
+        <div class="level-header">
+            <span class="level-tag">Level 1</span>
+            <span class="level-title">基础连读 (辅音+元音)</span>
+        </div>
+        
+        <div class="rule-card">
+            <span class="rule-title">🔌 规则：Consonant + Vowel</span>
+            <span class="rule-desc">前词尾的辅音，搬家到后词头。</span>
+        </div>
+
+        <!-- Check it out -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Check it out</span><span class="cn">去看看</span></div>
+                <button class="play-btn" onclick="playAudio('Check it out')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Che - cki - dout</span>
+            </div>
+            <span class="ipa">/tʃe-kɪ-daʊt/</span>
+            <div class="note-box">
+                解析：k 连上 i，t (浊化为d) 连上 o。
+            </div>
+        </div>
+
+        <!-- Pick it up -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Pick it up</span><span class="cn">捡起来</span></div>
+                <button class="play-btn" onclick="playAudio('Pick it up')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Pi - cki - dup</span>
+            </div>
+            <div class="note-box">
+                解析：感觉像在说一个很长的单词 Pickidup。
+            </div>
+        </div>
+
+        <!-- Wake up -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Wake up</span><span class="cn">醒醒</span></div>
+                <button class="play-btn" onclick="playAudio('Wake up')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Wa - kup</span>
+            </div>
+            <div class="note-box">
+                解析：ke 的 e 不发音，所以是 k 连上 u。
+            </div>
+        </div>
+
+        <!-- Hold on -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Hold on</span><span class="cn">稍等</span></div>
+                <button class="play-btn" onclick="playAudio('Hold on')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Hol - don</span>
+            </div>
+            <div class="note-box">
+                解析：这里的 l 是 Dark L，舌尖抵住上颚，声音很厚。
+            </div>
+        </div>
+
+        <!-- Come in -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Come in</span><span class="cn">进来</span></div>
+                <button class="play-btn" onclick="playAudio('Come in')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Cu - min</span>
+            </div>
+            <div class="note-box">
+                解析：me 的 e 不发音，m 连上 i。
+            </div>
+        </div>
+    </section>
+
+    <!-- LEVEL 2: Flap T/D -->
+    <section class="level-section l2-theme">
+        <div class="level-header">
+            <span class="level-tag">Level 2</span>
+            <span class="level-title">美式浊化 (Flap T/D)</span>
+        </div>
+        
+        <div class="rule-card">
+            <span class="rule-title">🇺🇸 规则：夹在元音间的 T</span>
+            <span class="rule-desc">当 T 或 D 夹在两个元音之间时，变成快速的 /d/。这是“美剧味儿”的来源。</span>
+        </div>
+
+        <!-- Not at all -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Not at all</span><span class="cn">一点也不</span></div>
+                <button class="play-btn" onclick="playAudio('Not at all')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">No - da - dall</span>
+            </div>
+            <span class="ipa">/nɑ-də-dɑːl/</span>
+            <div class="note-box">
+                👑 连读之王：两个 t 全部变成了轻快的 d。
+            </div>
+        </div>
+
+        <!-- Put it on -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Put it on</span><span class="cn">穿上</span></div>
+                <button class="play-btn" onclick="playAudio('Put it on')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Pu - di - don</span>
+            </div>
+            <div class="note-box">
+                解析：所有的 t 都连读并浊化。
+            </div>
+        </div>
+
+        <!-- Get out of here -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Get out of here</span><span class="cn">滚出去</span></div>
+                <button class="play-btn" onclick="playAudio('Get out of here')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Ge-daou-da-here</span>
+            </div>
+            <div class="note-box">
+                解析：Get 的 t 变 d；out 的 t 变 d；of 的 f 有时会省掉。
+            </div>
+        </div>
+
+        <!-- A lot of -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">A lot of</span><span class="cn">许多</span></div>
+                <button class="play-btn" onclick="playAudio('A lot of')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">A - la - da</span>
+            </div>
+            <div class="note-box">
+                解析：这里的 of 在口语中经常弱化成 a (/ə/)。
+            </div>
+        </div>
+
+        <!-- Water -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Water</span><span class="cn">水</span></div>
+                <button class="play-btn" onclick="playAudio('Water')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Wa - der</span>
+            </div>
+            <div class="note-box">
+                解析：虽然是单词内部，但这完美体现了 T 变 D 的规则。
+            </div>
+        </div>
+    </section>
+
+    <!-- LEVEL 3: V+V -->
+    <section class="level-section l3-theme">
+        <div class="level-header">
+            <span class="level-tag">Level 3</span>
+            <span class="level-title">元音+元音 (加滑音)</span>
+        </div>
+        
+        <div class="rule-card">
+            <span class="rule-title">🌊 规则：加 /w/ 或 /j/</span>
+            <span class="rule-desc">圆唇(o, u)后加 /w/；扁唇(i, e)后加 /j/。</span>
+        </div>
+
+        <!-- Do it -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Do it</span><span class="cn">做吧</span></div>
+                <button class="play-btn" onclick="playAudio('Do it')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Do - wit</span>
+            </div>
+            <div class="note-box">
+                解析：嘴巴从 u 到 i 的过程中，自然产生 w 音。
+            </div>
+        </div>
+
+        <!-- Go away -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Go away</span><span class="cn">走开</span></div>
+                <button class="play-btn" onclick="playAudio('Go away')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Go - wa - way</span>
+            </div>
+        </div>
+
+        <!-- I am -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">I am</span><span class="cn">我是</span></div>
+                <button class="play-btn" onclick="playAudio('I am')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">I - yam</span>
+            </div>
+            <div class="note-box">
+                解析：中间加了一个 y 的音。
+            </div>
+        </div>
+    </section>
+
+    <!-- LEVEL 4: H-Dropping -->
+    <section class="level-section l4-theme">
+        <div class="level-header">
+            <span class="level-tag">Level 4</span>
+            <span class="level-title">击穿 H (H-Dropping)</span>
+        </div>
+        
+        <div class="rule-card">
+            <span class="rule-title">🔨 规则：击穿功能词</span>
+            <span class="rule-desc">快速语流中，he, him, her, his 的 h 经常不发音。</span>
+        </div>
+
+        <!-- Tell him -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Tell him</span><span class="cn">告诉他</span></div>
+                <button class="play-btn" onclick="playAudio('Tell him')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Tel - lim</span>
+            </div>
+            <div class="note-box">
+                解析：h 不发音，前面的 l 直接连上 im。
+            </div>
+        </div>
+
+        <!-- Did he -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Did he?</span><span class="cn">是他吗</span></div>
+                <button class="play-btn" onclick="playAudio('Did he')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">Di - dee?</span>
+            </div>
+            <div class="note-box">
+                解析：听起来像 Didi (滴滴)。
+            </div>
+        </div>
+
+        <!-- Ask her -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Ask her</span><span class="cn">问她</span></div>
+                <button class="play-btn" onclick="playAudio('Ask her')">🔊</button>
+            </div>
+            <div class="rewrite-box">
+                <span class="rewrite-label">连读:</span>
+                <span class="rewrite-val">As - ker</span>
+            </div>
+            <div class="note-box">
+                解析：h 不发音，k 直接连上 er。
+            </div>
+        </div>
+    </section>
+
+    <!-- EXPERT TRAINING -->
+    <div class="expert-box">
+        <h2 style="margin-top:0; color:#fcd34d;">🔥 专家实战：拼音重组法</h2>
+        <div style="font-size:0.9rem; opacity:0.8;">千万不要盯着原句读，要盯着重组后的“拼音”读。</div>
+
+        <!-- Day 1 -->
+        <div class="training-card">
+            <div class="day-title">Day 1 练习清单</div>
+            <div class="drill-item">
+                <span>Check it out</span> <span class="drill-arrow">→</span> <span class="drill-target">Che-cki-dout</span>
+            </div>
+            <div class="drill-item">
+                <span>Pick it up</span> <span class="drill-arrow">→</span> <span class="drill-target">Pi-ki-dup</span>
+            </div>
+            <div class="drill-item">
+                <span>Not at all</span> <span class="drill-arrow">→</span> <span class="drill-target">No-da-dall</span>
+            </div>
+            <div class="drill-item">
+                <span>Tell him</span> <span class="drill-arrow">→</span> <span class="drill-target">Tel-lim</span>
+            </div>
+        </div>
+
+        <!-- Day 2 -->
+        <div class="training-card" onclick="playAudio('Can I have a bit of it')">
+            <div class="day-title">Day 2 进阶句子 <span style="font-size:0.8rem; font-weight:normal; float:right;">(点击播放) 🔊</span></div>
+            <div style="font-size:1rem; margin-bottom:5px;">Can I have a bit of it?</div>
+            <div style="font-family:monospace; color:#6ee7b7; font-weight:bold; font-size:1.1rem;">
+                Ca-ni ha-va bi do-vit?
+            </div>
+            <div class="breakdown-row">└ Ca-ni (can+I)</div>
+            <div class="breakdown-row">└ ha-va (have+a)</div>
+            <div class="breakdown-row">└ bi-do-vit (bit+of+it)</div>
+        </div>
+
+        <!-- Final -->
+        <div class="training-card" onclick="playAudio('Pick it up and put it on')">
+            <div class="day-title">终极挑战 <span style="font-size:0.8rem; font-weight:normal; float:right;">(点击播放) 🔊</span></div>
+            <div class="challenge-sent">"Pick it up and put it on."</div>
+            <span class="challenge-phon">Pi-ki-dup-n-pu-di-don</span>
+        </div>
+        
+        <div style="font-size:0.85rem; color:#94a3b8; margin-top:15px; text-align:center;">
+            刚开始舌头打结是正常的！脱口而出 No-da-dall 时，你的语感就成了。
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function playAudio(text) {
+        // 使用有道词典语音API (Type=0 美音)
+        const audioUrl = `https://dict.youdao.com/dictvoice?type=0&audio=${encodeURIComponent(text)}`;
+        const audio = new Audio(audioUrl);
+        audio.play().catch(error => {
+            console.error("播放失败:", error);
+            alert("播放失败，请检查网络连接。");
+        });
+    }
+</script>
+
+</body>
+</html>

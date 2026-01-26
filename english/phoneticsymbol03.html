@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>难点辅音 Consonant Challenges</title>
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --card-bg: #ffffff;
+            
+            /* 颜色编码 */
+            --c-th: #0d9488;  /* Teal */
+            --c-v: #4f46e5;   /* Indigo */
+            --c-r: #e11d48;   /* Red */
+            --c-boss: #b45309;/* Amber */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px;
+            padding-bottom: 80px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: #1e293b;
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        header h1 { margin: 0 0 8px 0; font-size: 1.6rem; }
+        header .subtitle { font-size: 1rem; opacity: 0.8; letter-spacing: 1px; margin-bottom: 15px; display: block;}
+        .intro-box {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Section Styling */
+        .level-section { margin-bottom: 40px; }
+        
+        .level-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-color); /* Sticky header bg */
+            z-index: 10;
+            padding: 10px 0;
+        }
+        
+        .level-tag {
+            color: white;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-right: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .level-title { font-size: 1.2rem; font-weight: 800; }
+
+        /* Action Guide */
+        .action-card {
+            background: white;
+            border-left: 5px solid #ccc;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+        .action-title { font-weight: bold; display: block; margin-bottom: 5px; font-size: 1rem; }
+        .action-desc { font-size: 0.9rem; color: var(--text-sub); }
+
+        /* Word Cards */
+        .word-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .word-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .en { font-size: 1.4rem; font-weight: 800; color: var(--text-main); }
+        .cn { font-size: 0.9rem; color: #94a3b8; margin-left: 8px; font-weight: normal; }
+        .ipa { 
+            font-family: monospace; 
+            background: #f1f5f9; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .note-box {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            border-left: 3px solid #cbd5e1;
+        }
+        .note-box strong { color: var(--text-main); }
+
+        /* Play Button */
+        .play-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .play-btn:active { transform: scale(0.9); background: #e2e8f0; }
+
+        /* Boss Word Special Styling */
+        .boss-breakdown {
+            margin-top: 10px;
+            padding-left: 15px;
+            border-left: 2px dashed var(--c-boss);
+        }
+        .step { font-size: 0.9rem; margin-bottom: 4px; }
+        .step-num { font-weight: bold; color: var(--c-boss); margin-right: 5px; }
+
+        /* Expert Plan */
+        .plan-box {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        .plan-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .plan-item:active { background: rgba(255,255,255,0.1); }
+        .plan-text { flex: 1; margin-right: 10px; }
+
+        /* Dynamic Themes */
+        .th-theme .level-tag { background: var(--c-th); }
+        .th-theme .play-btn { color: var(--c-th); background: #f0fdfa; border: 1px solid #ccfbf1; }
+        .th-theme .action-card { border-left-color: var(--c-th); }
+
+        .v-theme .level-tag { background: var(--c-v); }
+        .v-theme .play-btn { color: var(--c-v); background: #eef2ff; border: 1px solid #e0e7ff; }
+        .v-theme .action-card { border-left-color: var(--c-v); }
+
+        .r-theme .level-tag { background: var(--c-r); }
+        .r-theme .play-btn { color: var(--c-r); background: #fff1f2; border: 1px solid #ffe4e6; }
+        .r-theme .action-card { border-left-color: var(--c-r); }
+
+        .boss-theme .level-tag { background: var(--c-boss); }
+        .boss-theme .play-btn { color: var(--c-boss); background: #fffbeb; border: 1px solid #fef3c7; }
+        .boss-theme .word-card { border: 1px solid #fcd34d; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>难点辅音词</h1>
+        <span class="subtitle">Consonant Challenges</span>
+        <div class="intro-box">
+            元音决定“好不好听”，辅音决定<strong>“准不准确”</strong>。<br>
+            这组词需要像做物理治疗一样，强行训练中文里不存在的肌肉记忆。
+        </div>
+    </header>
+
+    <!-- LEVEL 1: TH -->
+    <section class="level-section th-theme">
+        <div class="level-header">
+            <span class="level-tag">Level 1</span>
+            <span class="level-title">咬舌音 TH (/θ/ & /ð/)</span>
+        </div>
+        
+        <div class="action-card">
+            <span class="action-title">⚠️ 核心要领</span>
+            <span class="action-desc">中国学生No.1难点。记住：舌头不伸出来，这个音绝对发不对。</span>
+        </div>
+
+        <div style="margin: 15px 0 10px 0; font-weight:bold; color:var(--c-th);">🔵 清辅音 /θ/ (只吹气，不震动)</div>
+        
+        <!-- Thank -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Thank</span><span class="cn">谢谢</span></div>
+                <button class="play-btn" onclick="playAudio('thank')">🔊</button>
+            </div>
+            <div class="ipa">/θæŋk/</div>
+            <div class="note-box">
+                练习：对着镜子看，说完这个词，你的舌头应该是在外面还没收回去的。
+            </div>
+        </div>
+
+        <!-- Think -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Think</span><span class="cn">想</span></div>
+                <button class="play-btn" onclick="playAudio('think')">🔊</button>
+            </div>
+            <div class="ipa">/θɪŋk/</div>
+            <div class="note-box">
+                <strong>对比：</strong>别读成 Sink (沉没)。<br>
+                • Sink: 舌头在里面 (S)。<br>
+                • Think: 舌头夹在牙齿间 (TH)。
+            </div>
+        </div>
+
+        <!-- Three -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Three</span><span class="cn">三</span></div>
+                <button class="play-btn" onclick="playAudio('three')">🔊</button>
+            </div>
+            <div class="ipa">/θriː/</div>
+            <div class="note-box">
+                纠错：很多人读成“Free”或“Sree”。
+            </div>
+        </div>
+
+        <!-- Month/Mouth -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Month</span> / <span class="en">Mouth</span></div>
+                <button class="play-btn" onclick="playAudio('month mouth')">🔊</button>
+            </div>
+            <div class="note-box">
+                难点：词尾也要咬舌！不要读成 Mouse (老鼠)。
+            </div>
+        </div>
+
+        <div style="margin: 20px 0 10px 0; font-weight:bold; color:var(--c-th);">🔵 浊辅音 /ð/ (咬舌+震动)</div>
+
+        <!-- This/That -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">This</span> / <span class="en">That</span></div>
+                <button class="play-btn" onclick="playAudio('this that')">🔊</button>
+            </div>
+            <div class="note-box">
+                纠错：最常见的“Dis”和“Dat”错误。一定要咬舌，喉咙像蜜蜂嗡嗡响。
+            </div>
+        </div>
+
+        <!-- Father -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Father</span><span class="cn">父亲</span></div>
+                <button class="play-btn" onclick="playAudio('father')">🔊</button>
+            </div>
+            <div class="ipa">/ˈfɑːðər/</div>
+            <div class="note-box">
+                练习：Fa-ther. 中间舌头要伸缩一下。
+            </div>
+        </div>
+
+        <!-- Breathe -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Breathe</span><span class="cn">呼吸(动)</span></div>
+                <button class="play-btn" onclick="playAudio('breathe')">🔊</button>
+            </div>
+            <div class="ipa">/briːð/</div>
+            <div class="note-box">
+                对比：Breath (名词) 读 /θ/；Breathe (动词) 读 /ð/。
+            </div>
+        </div>
+    </section>
+
+    <!-- LEVEL 2: V -->
+    <section class="level-section v-theme">
+        <div class="level-header">
+            <span class="level-tag">Level 2</span>
+            <span class="level-title">唇齿音 V (/v/)</span>
+        </div>
+
+        <div class="action-card">
+            <span class="action-title">⚠️ 动作要领</span>
+            <span class="action-desc">上牙齿咬下嘴唇（像发F音但震动）。很多人V/W不分，W是撅嘴，V是咬唇。</span>
+        </div>
+
+        <!-- Very -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Very</span><span class="cn">非常</span></div>
+                <button class="play-btn" onclick="playAudio('very')">🔊</button>
+            </div>
+            <div class="ipa">/ˈveri/</div>
+            <div class="note-box">
+                对比：Very (咬唇) vs. Wary (撅嘴)。<br>
+                练习：先发长音 VVVVVV-ery。
+            </div>
+        </div>
+
+        <!-- Visit -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Visit</span><span class="cn">参观</span></div>
+                <button class="play-btn" onclick="playAudio('visit')">🔊</button>
+            </div>
+            <div class="ipa">/ˈvɪzɪt/</div>
+        </div>
+
+        <!-- Seven -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Seven</span><span class="cn">七</span></div>
+                <button class="play-btn" onclick="playAudio('seven')">🔊</button>
+            </div>
+            <div class="ipa">/ˈsevn/</div>
+            <div class="note-box">
+                难点：夹在中间的 V 最容易被忽略，变成 Se-wen。
+            </div>
+        </div>
+
+        <!-- Love -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Love</span><span class="cn">爱</span></div>
+                <button class="play-btn" onclick="playAudio('love')">🔊</button>
+            </div>
+            <div class="ipa">/lʌv/</div>
+            <div class="note-box">
+                纠错：结尾不能直接闭嘴，要保持牙齿咬唇的姿势结束。
+            </div>
+        </div>
+    </section>
+
+    <!-- LEVEL 3: R -->
+    <section class="level-section r-theme">
+        <div class="level-header">
+            <span class="level-tag">Level 3</span>
+            <span class="level-title">美式卷舌音 R (/r/)</span>
+        </div>
+
+        <div class="action-card">
+            <span class="action-title">⚠️ 美音灵魂</span>
+            <span class="action-desc">舌尖向上卷，向后缩，但**绝对不要碰到口腔任何部位**！嘴唇微微撅起。</span>
+        </div>
+
+        <!-- Red -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Red</span><span class="cn">红</span></div>
+                <button class="play-btn" onclick="playAudio('red')">🔊</button>
+            </div>
+            <div class="ipa">/red/</div>
+            <div class="note-box">
+                练习：嘴唇先撅起来准备，再发音。
+            </div>
+        </div>
+
+        <!-- Right -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Right</span><span class="cn">对的</span></div>
+                <button class="play-btn" onclick="playAudio('right')">🔊</button>
+            </div>
+            <div class="ipa">/raɪt/</div>
+            <div class="note-box">
+                <strong>对比：</strong> Right (R) vs. Light (L)。<br>
+                • Right: 舌头不碰上颚。<br>
+                • Light: 舌尖抵住上颚。
+            </div>
+        </div>
+
+        <!-- Car / Door -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Car</span> / <span class="en">Door</span></div>
+                <button class="play-btn" onclick="playAudio('car door')">🔊</button>
+            </div>
+            <div class="note-box">
+                练习：单词结束时，能听到明显的卷舌尾音。
+            </div>
+        </div>
+
+        <!-- Work -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">Work</span><span class="cn">工作</span></div>
+                <button class="play-btn" onclick="playAudio('work')">🔊</button>
+            </div>
+            <div class="ipa">/wɜːrk/</div>
+            <div class="note-box">
+                纠错：不要读成 Walk (/wɔːk/ - 没R)。Work 必须卷舌！
+            </div>
+        </div>
+    </section>
+
+    <!-- LEVEL 4: BOSS -->
+    <section class="level-section boss-theme">
+        <div class="level-header">
+            <span class="level-tag">Level 4</span>
+            <span class="level-title">终极 BOSS 词</span>
+        </div>
+        <div class="action-card">
+            <span class="action-desc">检验发音水平的试金石，混合了多种难点肌肉动作。</span>
+        </div>
+
+        <!-- World -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">1. World</span> <span style="font-size:0.8rem; color:var(--c-boss);">难度⭐⭐⭐⭐⭐</span></div>
+                <button class="play-btn" onclick="playAudio('world')">🔊</button>
+            </div>
+            <div class="ipa">/wɜːrld/</div>
+            <div class="boss-breakdown">
+                <div class="step"><span class="step-num">1.</span> Were (先发卷舌音)</div>
+                <div class="step"><span class="step-num">2.</span> Dark L (舌尖像铲子一样向上翘，抵住上牙龈)</div>
+                <div class="step"><span class="step-num">3.</span> d (轻轻收尾)</div>
+                <div style="margin-top:5px; font-weight:bold;">口诀：Were-old -> World.</div>
+            </div>
+            <div class="note-box" style="margin-top:10px;">
+                很多人读成 Word，区别就在于那个 L 的音有没有顶上去。
+            </div>
+        </div>
+
+        <!-- Girl -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">2. Girl</span> <span style="font-size:0.8rem; color:var(--c-boss);">难度⭐⭐⭐⭐</span></div>
+                <button class="play-btn" onclick="playAudio('girl')">🔊</button>
+            </div>
+            <div class="ipa">/ɡɜːrl/</div>
+            <div class="note-box">
+                练习：Grr (狗叫声) + Dark L (舌尖上顶)。
+            </div>
+        </div>
+
+        <!-- Three -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">3. Three</span> <span style="font-size:0.8rem; color:var(--c-boss);">难度⭐⭐⭐⭐</span></div>
+                <button class="play-btn" onclick="playAudio('three')">🔊</button>
+            </div>
+            <div class="note-box">
+                难点：TH (咬舌) + R (卷舌) 的快速切换。<br>
+                练习：先咬舌吐气，然后迅速把舌头缩回去卷起来。
+            </div>
+        </div>
+
+        <!-- Months -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">4. Months</span> <span style="font-size:0.8rem; color:var(--c-boss);">难度⭐⭐⭐⭐</span></div>
+                <button class="play-btn" onclick="playAudio('months')">🔊</button>
+            </div>
+            <div class="note-box">
+                难点：TH (/θ/) + S (/s/) 连读。舌头先伸出来(th)，再抽回去(s)。
+            </div>
+        </div>
+
+        <!-- Clothes -->
+        <div class="word-card">
+            <div class="word-top">
+                <div><span class="en">5. Clothes</span> <span style="font-size:0.8rem; color:var(--c-boss);">难度⭐⭐⭐</span></div>
+                <button class="play-btn" onclick="playAudio('clothes')">🔊</button>
+            </div>
+            <div class="ipa">/kloʊz/</div>
+            <div class="note-box">
+                说明：标准读法太难(TH+Z)。90%美国人直接读成 <strong>Close</strong> (关门) 的音。你可以直接读 Close，没人算你错。
+            </div>
+        </div>
+    </section>
+
+    <!-- EXPERT PLAN -->
+    <div class="plan-box">
+        <h2 style="margin-top:0; color:#34d399;">🔥 专家训练计划</h2>
+        <div style="font-size:0.9rem; opacity:0.8;">每天5分钟“舌头打结”训练，坚持一周！</div>
+
+        <div class="plan-item" onclick="playAudio('This is the thing that I think')">
+            <div class="plan-text">
+                <div style="color:#34d399; font-weight:bold; font-size:0.9rem;">1. TH 特训</div>
+                <div style="font-size:1.1rem; margin:5px 0;">This is the thing that I think.</div>
+                <div style="font-size:0.85rem; color:#94a3b8;">要求：加粗词必须照镜子看到舌头伸出来。</div>
+            </div>
+            <div style="font-size:1.5rem">🔊</div>
+        </div>
+
+        <div class="plan-item" onclick="playAudio('Very vivid video')">
+            <div class="plan-text">
+                <div style="color:#818cf8; font-weight:bold; font-size:0.9rem;">2. V 特训</div>
+                <div style="font-size:1.1rem; margin:5px 0;">Very vivid video.</div>
+                <div style="font-size:0.85rem; color:#94a3b8;">要求：下嘴唇要被咬麻了才算过关。</div>
+            </div>
+            <div style="font-size:1.5rem">🔊</div>
+        </div>
+
+        <div class="plan-item" onclick="playAudio('The red light on the road')">
+            <div class="plan-text">
+                <div style="color:#fb7185; font-weight:bold; font-size:0.9rem;">3. R & L 对比特训 (最难)</div>
+                <div style="font-size:1.1rem; margin:5px 0;">The red light on the road.</div>
+                <div style="font-size:0.85rem; color:#94a3b8;">要求：R 卷舌不碰顶，L 舌尖必碰顶。</div>
+            </div>
+            <div style="font-size:1.5rem">🔊</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function playAudio(text) {
+        // 使用有道词典语音API (Type=0 美音)
+        const audioUrl = `https://dict.youdao.com/dictvoice?type=0&audio=${encodeURIComponent(text)}`;
+        const audio = new Audio(audioUrl);
+        audio.play().catch(error => {
+            console.error("播放失败:", error);
+            alert("播放失败，请检查网络连接。");
+        });
+    }
+</script>
+
+</body>
+</html>

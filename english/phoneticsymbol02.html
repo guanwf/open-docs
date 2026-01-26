@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>英语“口腔体操”特训 (Tricky Vowels)</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --card-bg: #ffffff;
+            
+            /* 分组主题色 */
+            --g1-color: #2563eb; /* 蓝色: i vs I */
+            --g2-color: #be185d; /* 玫红: æ vs e */
+            --g3-color: #d97706; /* 橙色: ɑː */
+            --g4-color: #7c3aed; /* 紫色: u vs U */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 15px;
+            padding-bottom: 80px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 顶部 */
+        header {
+            background: linear-gradient(135deg, #475569, #1e293b);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        header h1 { margin: 0; font-size: 1.6rem; }
+        header .subtitle { opacity: 0.9; margin-top: 5px; font-size: 1rem; }
+        .intro-list {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .intro-list ul { margin: 0; padding-left: 20px; }
+        .intro-list li { margin-bottom: 5px; }
+
+        /* 通用标题 */
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin: 40px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .section-tag {
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-right: 10px;
+        }
+        .section-title { font-size: 1.2rem; font-weight: 800; }
+
+        /* 动作要领框 */
+        .action-box {
+            background: #fff;
+            border-left: 4px solid #ccc;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .action-box strong { display: block; margin-bottom: 5px; }
+
+        /* 对比卡片 (VS Card) */
+        .vs-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .vs-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 10px;
+        }
+        
+        .vs-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #cbd5e1;
+            font-style: italic;
+        }
+
+        .word-text { font-size: 1.2rem; font-weight: 800; color: var(--text-dark); }
+        .ipa { 
+            font-family: monospace; 
+            color: var(--text-gray); 
+            background: #e2e8f0; 
+            padding: 1px 5px; 
+            border-radius: 4px; 
+            font-size: 0.85rem; 
+            margin: 4px 0;
+        }
+        .word-note { font-size: 0.8rem; color: #64748b; margin-top: 5px; line-height: 1.3; }
+
+        /* 单个单词卡片 (第三组用) */
+        .single-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .single-info { flex: 1; }
+        .single-note { font-size: 0.9rem; color: #64748b; margin-top: 5px; display: block; background: #f1f5f9; padding: 5px; border-radius: 4px;}
+
+        /* 播放按钮 */
+        .play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 5px;
+            transition: transform 0.1s;
+        }
+        .play-btn:active { transform: scale(0.9); }
+
+        /* 句子练习框 */
+        .sentence-box {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sentence-box:active { background: #fef3c7; }
+        .sentence-text { font-weight: 500; font-size: 0.95rem; }
+        .sentence-trans { display: block; font-size: 0.85rem; color: #78716c; margin-top: 2px; }
+
+        /* 专家计划 */
+        .expert-plan {
+            background: #1e1b4b;
+            color: #e0e7ff;
+            padding: 25px;
+            border-radius: 16px;
+            margin-top: 50px;
+        }
+        .expert-plan h2 { color: #818cf8; margin-top: 0; border-bottom: 1px solid #4338ca; padding-bottom: 10px;}
+        .step { margin-bottom: 20px; }
+        .step-title { font-weight: bold; color: #c7d2fe; display: block; margin-bottom: 5px; font-size: 1.1rem; }
+
+        /* 颜色类 */
+        .g1-theme .section-tag { background: var(--g1-color); }
+        .g1-theme .play-btn { background: #eff6ff; color: var(--g1-color); border: 1px solid #dbeafe; }
+        .g1-theme .section-title { color: var(--g1-color); }
+        .g1-theme .action-box { border-left-color: var(--g1-color); }
+
+        .g2-theme .section-tag { background: var(--g2-color); }
+        .g2-theme .play-btn { background: #fdf2f8; color: var(--g2-color); border: 1px solid #fce7f3; }
+        .g2-theme .section-title { color: var(--g2-color); }
+        .g2-theme .action-box { border-left-color: var(--g2-color); }
+
+        .g3-theme .section-tag { background: var(--g3-color); }
+        .g3-theme .play-btn { background: #fff7ed; color: var(--g3-color); border: 1px solid #ffedd5; }
+        .g3-theme .section-title { color: var(--g3-color); }
+        .g3-theme .action-box { border-left-color: var(--g3-color); }
+
+        .g4-theme .section-tag { background: var(--g4-color); }
+        .g4-theme .play-btn { background: #f5f3ff; color: var(--g4-color); border: 1px solid #ede9fe; }
+        .g4-theme .section-title { color: var(--g4-color); }
+        .g4-theme .action-box { border-left-color: var(--g4-color); }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>经典“口腔体操”特训</h1>
+        <div class="subtitle">Tricky Vowels Training</div>
+        <div class="intro-list">
+            <strong>🎯 训练目标：把口腔肌肉彻底拉开</strong>
+            <ul>
+                <li>长音不够长（嘴部肌肉没绷紧）</li>
+                <li>短音不够短（腹部没有急促收缩）</li>
+                <li>大口音张得不够开</li>
+            </ul>
+            <div style="margin-top:10px; font-weight:bold; color:#fbbf24;">⚠️ 请准备好一面镜子，我们开始！</div>
+        </div>
+    </header>
+
+    <!-- 第一组 -->
+    <section class="g1-theme">
+        <div class="section-header">
+            <span class="section-tag">Group 1</span>
+            <span class="section-title">微笑长音 /iː/ vs. 急促短音 /ɪ/</span>
+        </div>
+        
+        <div class="action-box">
+            <strong>🔑 核心动作：</strong>
+            <strong>/iː/ (Smile):</strong> 像拉皮筋，要用力咧嘴笑，嘴角向两边使劲拉。
+            <strong>/ɪ/ (Hiccup):</strong> 像打嗝，腹部收紧，短促有力。
+        </div>
+
+        <!-- Pair 1 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Sheep</div>
+                    <div class="ipa">/ʃiːp/</div>
+                    <div class="word-note">嘴角向两边使劲拉，笑得僵硬</div>
+                    <button class="play-btn" onclick="playAudio('sheep')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">Ship</div>
+                    <div class="ipa">/ʃɪp/</div>
+                    <div class="word-note">声音从喉咙短促发出，像军训喊口号</div>
+                    <button class="play-btn" onclick="playAudio('ship')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pair 2 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Eat</div>
+                    <div class="ipa">/iːt/</div>
+                    <div class="word-note">把“yi”拉长3秒</div>
+                    <button class="play-btn" onclick="playAudio('eat')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">It</div>
+                    <div class="ipa">/ɪt/</div>
+                    <div class="word-note">短得像被针扎了一下</div>
+                    <button class="play-btn" onclick="playAudio('it')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pair 3 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Seat</div>
+                    <div class="ipa">/siːt/</div>
+                    <div class="word-note">慢慢坐 (Please take a seat)</div>
+                    <button class="play-btn" onclick="playAudio('seat')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">Sit</div>
+                    <div class="ipa">/sɪt/</div>
+                    <div class="word-note">命令口吻 (Sit down!)</div>
+                    <button class="play-btn" onclick="playAudio('sit')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pair 4 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Leave</div>
+                    <div class="ipa">/liːv/</div>
+                    <div class="word-note">拖长音</div>
+                    <button class="play-btn" onclick="playAudio('leave')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">Live</div>
+                    <div class="ipa">/lɪv/</div>
+                    <div class="word-note">短音 (居住)<br>注意: 直播读 /laɪv/</div>
+                    <button class="play-btn" onclick="playAudio('live')">🔊</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sentence-box" onclick="playAudio('The sheep is on the ship')">
+            <div>
+                <div class="sentence-text">🐑 The sheep is on the ship.</div>
+                <span class="sentence-trans">那只绵羊在船上。</span>
+            </div>
+            <button class="play-btn">🔊</button>
+        </div>
+        <div class="sentence-box" onclick="playAudio('Please sit in your seat')">
+            <div>
+                <div class="sentence-text">🪑 Please sit in your seat.</div>
+                <span class="sentence-trans">请坐在你的座位上。</span>
+            </div>
+            <button class="play-btn">🔊</button>
+        </div>
+    </section>
+
+    <!-- 第二组 -->
+    <section class="g2-theme">
+        <div class="section-header">
+            <span class="section-tag">Group 2</span>
+            <span class="section-title">夸张梅花音 /æ/ vs. 小口音 /e/</span>
+        </div>
+        
+        <div class="action-box">
+            <strong>🔑 动作要领：</strong>
+            <strong>/æ/ (Butterfly):</strong> 下巴像脱臼一样掉下来，舌尖抵住下齿。
+            <div style="background:#fce7f3; padding:5px; border-radius:4px; margin-top:5px; font-size:0.85rem;">👆 测试标准：嘴里能竖着塞进两根手指。</div>
+            <strong style="margin-top:8px;">/e/ (Bed):</strong> 嘴角微微向两边咧，嘴巴张开一指宽。
+        </div>
+
+        <!-- Pair 1 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Man</div>
+                    <div class="ipa">/mæn/</div>
+                    <div class="word-note">极度夸张，声音很“扁”很“亮”</div>
+                    <button class="play-btn" onclick="playAudio('man')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">Men</div>
+                    <div class="ipa">/men/</div>
+                    <div class="word-note">短促，不夸张</div>
+                    <button class="play-btn" onclick="playAudio('men')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pair 2 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Bad</div>
+                    <div class="ipa">/bæd/</div>
+                    <div class="word-note">嘴巴张大！</div>
+                    <button class="play-btn" onclick="playAudio('bad')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">Bed</div>
+                    <div class="ipa">/bed/</div>
+                    <div class="word-note">嘴巴小</div>
+                    <button class="play-btn" onclick="playAudio('bed')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pair 3 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Dad</div>
+                    <div class="ipa">/dæd/</div>
+                    <div class="word-note">喊爸爸要热情</div>
+                    <button class="play-btn" onclick="playAudio('dad')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">Dead</div>
+                    <div class="ipa">/ded/</div>
+                    <div class="word-note">声音低沉</div>
+                    <button class="play-btn" onclick="playAudio('dead')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sentence-box" onclick="playAudio('The fat cat sat on the mat')">
+            <div>
+                <div class="sentence-text">🐈 The fat cat sat on the mat.</div>
+                <span class="sentence-trans">胖猫坐在垫子上 (下巴要酸才对)。</span>
+            </div>
+            <button class="play-btn">🔊</button>
+        </div>
+    </section>
+
+    <!-- 第三组 -->
+    <section class="g3-theme">
+        <div class="section-header">
+            <span class="section-tag">Group 3</span>
+            <span class="section-title">深喉大口音 /ɑː/ (The Doctor's Aah)</span>
+        </div>
+        
+        <div class="action-box">
+            <strong>🔑 动作要领：</strong>
+            打开口腔后部，像医生让你“张嘴说阿——”。美音特点：很多 'o' 都发这个音。
+        </div>
+
+        <div class="single-card">
+            <div class="single-info">
+                <span class="word-text">Hot</span> <span class="ipa">/hɑːt/</span>
+                <span class="single-note">❌ 不要读“浩特”(圆嘴)<br>✅ 读 H-ah-t (嘴巴长方形)</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('hot')">🔊</button>
+        </div>
+
+        <div class="single-card">
+            <div class="single-info">
+                <span class="word-text">Job</span> <span class="ipa">/dʒɑːb/</span>
+                <span class="single-note">下巴向下掉，读“渣-b”而不是“周-b”</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('job')">🔊</button>
+        </div>
+
+        <div class="single-card">
+            <div class="single-info">
+                <span class="word-text">Stop</span> <span class="ipa">/stɑːp/</span>
+                <span class="single-note">嘴巴张大，声音洪亮</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('stop')">🔊</button>
+        </div>
+
+        <div class="single-card">
+            <div class="single-info">
+                <span class="word-text">Problem</span> <span class="ipa">/ˈprɑːbləm/</span>
+                <span class="single-note">第一个 o 张大嘴 /ɑː/，第二个 e 弱读</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('problem')">🔊</button>
+        </div>
+
+        <div class="sentence-box" onclick="playAudio('It\'s not a job, it\'s a hobby')">
+            <div>
+                <div class="sentence-text">💼 It's not a job, it's a hobby.</div>
+                <span class="sentence-trans">注意 Not, Job, Hobby 都要张大嘴。</span>
+            </div>
+            <button class="play-btn">🔊</button>
+        </div>
+    </section>
+
+    <!-- 第四组 -->
+    <section class="g4-theme">
+        <div class="section-header">
+            <span class="section-tag">Group 4</span>
+            <span class="section-title">圆唇紧音 /uː/ vs. 圆唇松音 /ʊ/</span>
+        </div>
+        
+        <div class="action-box">
+            <strong>🔑 动作要领：</strong>
+            一个要撅嘴用力（亲吻状），一个要放松。
+        </div>
+
+        <!-- Pair 1 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Pool</div>
+                    <div class="ipa">/puːl/</div>
+                    <div class="word-note">嘴唇撅起，向前突出，像吹蜡烛</div>
+                    <button class="play-btn" onclick="playAudio('pool')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">Pull</div>
+                    <div class="ipa">/pʊl/</div>
+                    <div class="word-note">嘴唇只稍微圆一点，腹部用力短促</div>
+                    <button class="play-btn" onclick="playAudio('pull')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pair 2 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Fool</div>
+                    <div class="ipa">/fuːl/</div>
+                    <div class="word-note">长音 (傻瓜)</div>
+                    <button class="play-btn" onclick="playAudio('fool')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">Full</div>
+                    <div class="ipa">/fʊl/</div>
+                    <div class="word-note">短音 (满的)</div>
+                    <button class="play-btn" onclick="playAudio('full')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pair 3 -->
+        <div class="vs-card">
+            <div class="vs-row">
+                <div class="vs-item">
+                    <div class="word-text">Luke</div>
+                    <div class="ipa">/luːk/</div>
+                    <div class="word-note">嘴巴撅得很紧</div>
+                    <button class="play-btn" onclick="playAudio('Luke')">🔊</button>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-item">
+                    <div class="word-text">Look</div>
+                    <div class="ipa">/lʊk/</div>
+                    <div class="word-note">轻松一看</div>
+                    <button class="play-btn" onclick="playAudio('look')">🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sentence-box" onclick="playAudio('Look at the moon')">
+            <div>
+                <div class="sentence-text">🌑 Look at the moon.</div>
+                <span class="sentence-trans">Look (短) vs. Moon (长)</span>
+            </div>
+            <button class="play-btn">🔊</button>
+        </div>
+    </section>
+
+    <!-- 专家计划 -->
+    <div class="expert-plan">
+        <h2>🔥 专家级练习计划</h2>
+        <div style="font-size:0.9rem; margin-bottom:15px; opacity:0.8;">必须照镜子！</div>
+
+        <div class="step">
+            <span class="step-title">Step 1: 做鬼脸 (Warm-up)</span>
+            极度张大嘴读 <strong>/æ/</strong> (Cat)。<br>
+            极度撅起嘴读 <strong>/uː/</strong> (Moon)。<br>
+            极度咧开嘴读 <strong>/iː/</strong> (Cheese)。<br>
+            <small style="color:#fbbf24;">目的：激活平时不用的面部肌肉。</small>
+        </div>
+
+        <div class="step">
+            <span class="step-title">Step 2: 慢动作回放 (Slow Motion)</span>
+            读 <strong>Bad</strong>，看着镜子里的自己，确认能不能塞进两根手指？如果不能，重来。<br>
+            读 <strong>Sheep</strong>，确认嘴角有没有拉到极限？
+        </div>
+
+        <div class="step">
+            <span class="step-title">Step 3: 录音对比 (Recording)</span>
+            用手机录下：<em>"I live to leave."</em> (我活着是为了离开)。<br>
+            回放听一下，<strong>live</strong> 和 <strong>leave</strong> 听起来一样吗？<br>
+            <small style="color:#fbbf24;">如果一样，说明区分度不够，继续夸张化练习。</small>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function playAudio(text) {
+        // 使用有道词典语音API (Type=0 美音)
+        const audioUrl = `https://dict.youdao.com/dictvoice?type=0&audio=${encodeURIComponent(text)}`;
+        const audio = new Audio(audioUrl);
+        audio.play().catch(error => {
+            console.error("播放失败:", error);
+            alert("播放失败，请检查网络连接。");
+        });
+    }
+</script>
+
+</body>
+</html>

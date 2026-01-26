@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Schwa /ə/ 深度训练（完整版）</title>
+    <style>
+        :root {
+            --primary: #059669;       /* 核心绿 */
+            --primary-bg: #ecfdf5;
+            --accent: #d97706;        /* 强调橙 */
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-sub: #4b5563;
+            --ipa-color: #7c3aed;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 15px;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 顶部介绍区 */
+        header {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2);
+        }
+        header h1 { margin: 0 0 5px 0; font-size: 1.4rem; }
+        header .subtitle { font-size: 1rem; opacity: 0.9; font-weight: 500; margin-bottom: 15px; }
+        .intro-box {
+            background: rgba(255,255,255,0.15);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* 级别标题 */
+        .level-header {
+            display: flex;
+            align-items: center;
+            margin: 30px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .level-tag {
+            background: var(--primary);
+            color: white;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .level-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        /* 规律提示 */
+        .rule-card {
+            background-color: var(--primary-bg);
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* 单词卡片 */
+        .word-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .word-info { display: flex; flex-direction: column; }
+        .en-word { font-size: 1.4rem; font-weight: 800; color: var(--text-main); }
+        .cn-word { font-size: 0.9rem; color: #6b7280; }
+        .ipa { 
+            font-family: monospace; 
+            color: var(--ipa-color); 
+            background: #f3e8ff; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.9rem;
+            margin-top: 4px;
+            align-self: flex-start;
+        }
+
+        /* 播放按钮 */
+        .play-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #ecfdf5;
+            border: 1px solid #d1fae5;
+            color: var(--primary);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .play-btn:active { background: #d1fae5; transform: scale(0.95); }
+
+        /* 详细讲解区 - 重点恢复部分 */
+        .explanation {
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: var(--text-sub);
+        }
+        .breakdown { 
+            color: var(--primary); 
+            font-weight: bold; 
+            display: block; 
+            margin-bottom: 6px; 
+        }
+        .practice-tip {
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+        .mnemonic {
+            color: var(--accent);
+            font-weight: bold;
+            font-family: sans-serif;
+            display: block;
+            margin-top: 4px;
+        }
+        
+        /* Level 4 表格样式 */
+        .l4-grid {
+            display: grid;
+            gap: 12px;
+        }
+        .compare-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            background: #f3f4f6;
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+        .example-sentence {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .example-sentence span { font-size: 0.95rem; }
+
+        /* 专家建议 */
+        .expert-box {
+            background: #1f2937;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+        .expert-box h3 { color: #34d399; margin-top: 0; }
+        .expert-box li { margin-bottom: 12px; opacity: 0.9; }
+
+        /* 终极挑战 */
+        .challenge-box {
+            border: 2px dashed var(--primary);
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>第一组：核心“弱读”词</h1>
+        <div class="subtitle">The Schwa /ə/ Group</div>
+        <div class="intro-box">
+            <strong>Schwa 的特点：</strong><br>
+            懒、短、轻、不用力。嘴巴处于完全放松的状态（像发呆一样），轻轻发出类似汉字“额”或“呃”的声音，但非常短促。
+        </div>
+    </header>
+
+    <!-- LEVEL 1 -->
+    <div class="level-header">
+        <span class="level-tag">第一级</span>
+        <span class="level-title">Schwa 在词头 (Prefix)</span>
+    </div>
+    <div class="rule-card">
+        <strong>规律：</strong>很多 a-, o-, su- 开头的词，只要重音在后面，开头都读 /ə/。
+    </div>
+
+    <!-- About -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">About</span>
+                <span class="cn-word">关于</span>
+                <span class="ipa">/əˈbaʊt/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('about')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：a-bout</span>
+            <div class="practice-tip">练法：别读“阿-bout”。开头是很轻的一声“呃”，重音狠狠地落在 bout 上。</div>
+            <span class="mnemonic">口诀：uh-BOUT</span>
+        </div>
+    </div>
+
+    <!-- Again -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Again</span>
+                <span class="cn-word">再一次</span>
+                <span class="ipa">/əˈɡen/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('again')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：a-gain</span>
+            <span class="mnemonic">口诀：uh-GAIN</span>
+        </div>
+    </div>
+
+    <!-- Away -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Away</span>
+                <span class="cn-word">离开</span>
+                <span class="ipa">/əˈweɪ/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('away')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：a-way</span>
+            <span class="mnemonic">口诀：uh-WAY</span>
+        </div>
+    </div>
+
+    <!-- Today -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Today</span>
+                <span class="cn-word">今天</span>
+                <span class="ipa">/təˈdeɪ/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('today')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：to-day</span>
+            <div class="practice-tip">练法：这里的 o 弱化了。不要读“涂-day”，是“特-day”。</div>
+            <span class="mnemonic">口诀：tə-DAY</span>
+        </div>
+    </div>
+
+    <!-- Tomorrow -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Tomorrow</span>
+                <span class="cn-word">明天</span>
+                <span class="ipa">/təˈmɑːroʊ/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('tomorrow')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：to-mor-row</span>
+            <span class="mnemonic">口诀：tə-MOR-row</span>
+        </div>
+    </div>
+
+    <!-- Police -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Police</span>
+                <span class="cn-word">警察</span>
+                <span class="ipa">/pəˈliːs/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('police')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：po-lice</span>
+            <div class="practice-tip">练法：千万别读“普-lice”。p 后面直接滑向 l，中间那个 o 几乎听不见。</div>
+            <span class="mnemonic">口诀：pə-LICE</span>
+        </div>
+    </div>
+
+    <!-- Support -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Support</span>
+                <span class="cn-word">支持</span>
+                <span class="ipa">/səˈpɔːrt/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('support')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：sup-port</span>
+            <span class="mnemonic">口诀：sə-PORT</span>
+        </div>
+    </div>
+
+
+    <!-- LEVEL 2 -->
+    <div class="level-header">
+        <span class="level-tag">第二级</span>
+        <span class="level-title">Schwa 在词尾 (Suffix)</span>
+    </div>
+    <div class="rule-card">
+        <strong>规律：</strong>词尾的 -er, -or, -a, -ous, -tion，在美音中常带卷舌 /ər/ 或纯弱读 /ə/。
+    </div>
+
+    <!-- Teacher -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Teacher</span>
+                <span class="cn-word">老师</span>
+                <span class="ipa">/ˈtiːtʃər/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('teacher')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：tea-cher</span>
+            <div class="practice-tip">练法：重音在前，后面像泄了气一样轻。</div>
+            <span class="mnemonic">口诀：TEA-chər</span>
+        </div>
+    </div>
+
+    <!-- Doctor -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Doctor</span>
+                <span class="cn-word">医生</span>
+                <span class="ipa">/ˈdɑːktər/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('doctor')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：doc-tor</span>
+            <div class="practice-tip">练法：这里的 or 不读“奥”，读音同 teacher 的结尾。</div>
+            <span class="mnemonic">口诀：DOC-tər</span>
+        </div>
+    </div>
+
+    <!-- China -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">China</span>
+                <span class="cn-word">中国</span>
+                <span class="ipa">/ˈtʃaɪnə/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('China')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：Chi-na</span>
+            <div class="practice-tip">练法：结尾不是“拿”，是短促的“呢”。</div>
+            <span class="mnemonic">口诀：CHAI-nə</span>
+        </div>
+    </div>
+
+    <!-- Famous -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Famous</span>
+                <span class="cn-word">著名的</span>
+                <span class="ipa">/ˈfeɪməs/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('famous')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：fa-mous</span>
+            <div class="practice-tip">练法：mous 读起来像 mess (混乱) 的弱读版。</div>
+            <span class="mnemonic">口诀：FA-məs</span>
+        </div>
+    </div>
+
+     <!-- Yoga -->
+     <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Yoga</span>
+                <span class="cn-word">瑜伽</span>
+                <span class="ipa">/ˈjoʊɡə/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('yoga')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：yo-ga</span>
+            <span class="mnemonic">口诀：YO-gə</span>
+        </div>
+    </div>
+
+
+    <!-- LEVEL 3 -->
+    <div class="level-header">
+        <span class="level-tag">第三级</span>
+        <span class="level-title">Schwa 在中间 (Middle)</span>
+    </div>
+    <div class="rule-card">
+        <strong>注意：</strong>这是最难的，因为很容易被忽略或读错。通常出现在多音节单词的非重读位置。
+    </div>
+
+    <!-- Banana -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Banana</span>
+                <span class="cn-word">香蕉</span>
+                <span class="ipa">/bəˈnænə/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('banana')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：ba-nan-a</span>
+            <div class="practice-tip">★ Schwa教科书级别的词：头尾都是弱读，只有中间用力。</div>
+            <span class="mnemonic">口诀：bə-NA-nə</span>
+        </div>
+    </div>
+
+    <!-- Family -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Family</span>
+                <span class="cn-word">家庭</span>
+                <span class="ipa">/ˈfæməli/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('family')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：fam-i-ly</span>
+            <div class="practice-tip">练法：中间的 i 变成了 /ə/，甚至直接被省掉。</div>
+            <span class="mnemonic">口诀：FAM-lee</span>
+        </div>
+    </div>
+
+    <!-- Holiday -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Holiday</span>
+                <span class="cn-word">假期</span>
+                <span class="ipa">/ˈhɑːlədeɪ/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('holiday')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：hol-i-day</span>
+            <div class="practice-tip">练法：中间的 i 读 /ə/，不是 /i/。</div>
+            <span class="mnemonic">口诀：HO-lə-day</span>
+        </div>
+    </div>
+
+    <!-- Beautiful -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Beautiful</span>
+                <span class="cn-word">美丽的</span>
+                <span class="ipa">/ˈbjuːtɪfl/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('beautiful')">🔊</button>
+        </div>
+        <div class="explanation">
+            <div class="practice-tip">练法：中间不要读“提”，要弱化。</div>
+            <span class="mnemonic">口诀：BEAU-tə-ful</span>
+        </div>
+    </div>
+
+    <!-- Elephant -->
+    <div class="word-card">
+        <div class="card-top">
+            <div class="word-info">
+                <span class="en-word">Elephant</span>
+                <span class="cn-word">大象</span>
+                <span class="ipa">/ˈelɪfənt/</span>
+            </div>
+            <button class="play-btn" onclick="playAudio('elephant')">🔊</button>
+        </div>
+        <div class="explanation">
+            <span class="breakdown">拆分：el-e-phant</span>
+            <div class="practice-tip">练法：中间的 e 和后面的 a 都变成了 Schwa。</div>
+            <span class="mnemonic">口诀：E-lə-fənt</span>
+        </div>
+    </div>
+
+
+    <!-- LEVEL 4 -->
+    <div class="level-header">
+        <span class="level-tag">第四级</span>
+        <span class="level-title">功能词弱读 (Function Words)</span>
+    </div>
+    <div class="rule-card">
+        <strong>核心：</strong>这组词单独读时是一个音，但在句子里必须变成 Schwa，否则说话会像机器人。
+    </div>
+
+    <div class="l4-grid">
+        <!-- To -->
+        <div class="word-card">
+            <div class="card-top">
+                <span class="en-word">To</span>
+                <button class="play-btn" onclick="playAudio('to')">🔊</button>
+            </div>
+            <div class="explanation">
+                <div class="compare-row">
+                    <span>强读：/tuː/</span> <span>VS</span> <span style="color:var(--primary); font-weight:bold;">弱读：/tə/</span>
+                </div>
+                <div class="example-sentence" onclick="playAudio('Go to work')">
+                    <div>
+                        <strong>例句：</strong>Go to work.<br>
+                        <span style="color:var(--text-sub)">→ Go <strong>tə</strong> work.</span>
+                    </div>
+                    <span style="font-size:1.2rem;">🔊</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- For -->
+        <div class="word-card">
+            <div class="card-top">
+                <span class="en-word">For</span>
+                <button class="play-btn" onclick="playAudio('for')">🔊</button>
+            </div>
+            <div class="explanation">
+                <div class="compare-row">
+                    <span>强读：/fɔːr/</span> <span>VS</span> <span style="color:var(--primary); font-weight:bold;">弱读：/fər/</span>
+                </div>
+                <div class="example-sentence" onclick="playAudio('This is for you')">
+                    <div>
+                        <strong>例句：</strong>This is for you.<br>
+                        <span style="color:var(--text-sub)">→ This is <strong>fər</strong> you.</span>
+                    </div>
+                    <span style="font-size:1.2rem;">🔊</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- And -->
+        <div class="word-card">
+            <div class="card-top">
+                <span class="en-word">And</span>
+                <button class="play-btn" onclick="playAudio('and')">🔊</button>
+            </div>
+            <div class="explanation">
+                <div class="compare-row">
+                    <span>强读：/ænd/</span> <span>VS</span> <span style="color:var(--primary); font-weight:bold;">弱读：/ən/</span>
+                </div>
+                <div class="example-sentence" onclick="playAudio('Fish and chips')">
+                    <div>
+                        <strong>例句：</strong>Fish and chips.<br>
+                        <span style="color:var(--text-sub)">→ Fish <strong>'n</strong> chips.</span>
+                    </div>
+                    <span style="font-size:1.2rem;">🔊</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Of -->
+        <div class="word-card">
+            <div class="card-top">
+                <span class="en-word">Of</span>
+                <button class="play-btn" onclick="playAudio('of')">🔊</button>
+            </div>
+            <div class="explanation">
+                <div class="compare-row">
+                    <span>强读：/ɒv/</span> <span>VS</span> <span style="color:var(--primary); font-weight:bold;">弱读：/əv/</span>
+                </div>
+                <div class="example-sentence" onclick="playAudio('Cup of tea')">
+                    <div>
+                        <strong>例句：</strong>Cup of tea.<br>
+                        <span style="color:var(--text-sub)">→ Cup-<strong>ə</strong>-tea.</span>
+                    </div>
+                    <span style="font-size:1.2rem;">🔊</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Can -->
+        <div class="word-card">
+            <div class="card-top">
+                <span class="en-word">Can</span>
+                <button class="play-btn" onclick="playAudio('can')">🔊</button>
+            </div>
+            <div class="explanation">
+                <div class="compare-row">
+                    <span>强读：/kæn/</span> <span>VS</span> <span style="color:var(--primary); font-weight:bold;">弱读：/kən/</span>
+                </div>
+                <div class="example-sentence" onclick="playAudio('I can do it')">
+                    <div>
+                        <strong>例句：</strong>I can do it.<br>
+                        <span style="color:var(--text-sub)">→ I <strong>kən</strong> do it.</span>
+                    </div>
+                    <span style="font-size:1.2rem;">🔊</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 专家建议 -->
+    <div class="expert-box">
+        <h3>💡 专家的练习建议</h3>
+        <ul style="padding-left: 20px; margin: 0;">
+            <li><strong>不要用力！</strong> 练习这组词时，摸着你的喉咙。读 Schwa 的部分时，喉咙应该几乎没有震动，肌肉是松的。</li>
+            <li><strong>夸张对比法：</strong>
+                <br>先把 About 读成：AAAA-BOUT (夸张重音)。
+                <br>然后把前面的 A 缩短、变弱，直到变成一个小嗝声：uh-BOUT。
+            </li>
+        </ul>
+    </div>
+
+    <!-- 终极串联 -->
+    <div class="challenge-box">
+        <h3 style="margin-top:0; color:#d97706;">🔥 终极造句串联 🔥</h3>
+        <p style="margin-bottom:5px;">Today a police officer ate a banana.</p>
+        <p style="font-size:0.9rem; color:#666; margin-bottom:20px;">
+            / <strong>tə-DAY</strong> ə <strong>pə-LICE</strong> ə-fə-sər <strong>ATE</strong> ə <strong>bə-NA-nə</strong> /
+        </p>
+        <button class="play-btn" style="width:60px; height:60px; font-size:1.5rem; margin:0 auto;" onclick="playAudio('Today a police officer ate a banana')">🔊</button>
+        <p style="font-size:0.8rem; color:#999; margin-top:10px;">点击按钮播放整句</p>
+    </div>
+
+</div>
+
+<script>
+    function playAudio(text) {
+        // 使用有道词典语音API (Type=0 美音)
+        const audioUrl = `https://dict.youdao.com/dictvoice?type=0&audio=${encodeURIComponent(text)}`;
+        const audio = new Audio(audioUrl);
+        audio.play().catch(error => {
+            console.error("播放失败:", error);
+            alert("播放失败，请检查网络连接。");
+        });
+    }
+</script>
+
+</body>
+</html>
