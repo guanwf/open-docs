@@ -91,7 +91,7 @@ sudo visudo -c && echo "pos ALL=(ALL:ALL) ALL" | tee -a /etc/sudoers && echo "po
             { cmd: "dd if=/dev/zero of=/tmp/test_iops bs=4k count=10000 oflag=direct", desc: "#iops=总操作次数/总耗时; 普通机械硬盘 (HDD): 顺序写入通常在 100 MB/s - 200 MB/s;  SATA SSD: 通常在 450 MB/s - 550 MB/s;  NVMe SSD: 通常在 1500 MB/s - 7000 MB/s。" },
             { cmd: "fio -name=randwrite -ioengine=libaio -iodepth=1 -rw=randwrite -bs=4k -direct=1 -size=512M -numjobs=1 -runtime=60 -group_reporting", desc: "#iops 测试随机写入 IOPS (4k块大小)" },
 
-
+            { cmd: "ps -aux | grep clear2 | grep -v grep | awk '{print $2}' | xargs kill -9", desc: "批量kill进程" },
 
         ]
     },
