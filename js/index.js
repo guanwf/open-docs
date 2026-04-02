@@ -29,7 +29,7 @@ const database = [
         items: [
             { cmd: "cat /etc/os-release | grep '^ID=' | awk -F= '{print $2}'", desc: "查看系统类型" },
             { cmd: "cat /etc/os-release | grep 'VERSION_ID=' | awk -F= '{print $2}' | tr -d [:punct:]", desc: "查看系统版本" },
-            
+            { cmd: "cat /etc/redhat-release", desc: "查看Red Hat版本" },
             { cmd: "cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 64;echo", desc: "生成64位随机数" },
 
             { cmd: "uname -r", desc: "查看内核信息" ,tags: ["系统", "信息"] },
@@ -62,7 +62,6 @@ const database = [
             { cmd: "find / -size +500M", desc: "#size,查找大于500M文件" },
             { cmd: "du -h --max-depth=1 /XXX", desc: "#size,查看某个目录下每个文件的大小" },
             { cmd: `for dir in */; do echo -n "$dir: "; find "$dir" -type f | wc -l; done`, desc: "#size,查看哪些目录下文件数量最多（需要在(具体目录下)/vdb1分区内执行）" },
-
 
             { cmd: "find /vdb1/tmp -type f -mtime +30 -delete", desc: "#size,清理30天前的临时文件（请确认路径正确性）" },
             { cmd: `find /vdb1/var/log -name "*.log.*" -type f -delete`, desc: "#size,清理旧日志（谨慎操作，确保不影响系统运行）" },            
@@ -116,14 +115,25 @@ firewall-cmd --reload
 
             { cmd: "tracepath  192.168.0.1", desc: "追踪数据包从本机到目标主机所经过的网络路由路径, tracepath [域名]" },    
 
-            { cmd: "sar -n DEV 1", desc: "查看网卡是否打满." },
+            { cmd: "sar -n DEV 1", desc: "查看网卡是否打满.",doc:"https://xd20al46gl.feishu.cn/docx/RWH6dWc2Yobe1Exb1aGcXgvYnlc" },
+            { cmd: "sar [选项] -f <日志文件路径>", desc: "sar -f /var/log/sa/sa02，查看网指定要读取的历史数据文件，必须配合日志文件使用卡是否打满." ,doc:"https://xd20al46gl.feishu.cn/docx/RWH6dWc2Yobe1Exb1aGcXgvYnlc" },
+            { cmd: "sar -f /var/log/sa/sa02 -s 09:00:00 -e 12:00:00", desc: "查看指定时间段的网络数据." },
+            
+            { cmd: "tsar -n DEV 1", desc: "查看网卡是否打满.tsar -tcp -i 1 -d20260331" },
+
             { cmd: "ethtool -S ens192", desc: "查看网卡数据，其中ens192是网卡名称." },
             
             // { cmd: "tracert g.cn", desc: "查看网卡是否打满." },
             // nslookup g.cn 8.8.8.8
             
             { cmd: "docker run --dns 223.5.5.5", desc: "Google的DNS(8.8.8.8或8.8.4.4);阿里公共DNS主DNS：223.5.5.5；辅 DNS：223.6.6.6." },
+            { cmd: `>>192.168.0.1机器开启监听
+nc -l 9999
 
+>>发送测试
+nc -v 192.168.0.1 9999`, desc: "用nc临时测试2个主机的port是否通！" },
+
+            { cmd: "tcpdump -i any port 9999 -n -v", desc: "抓取物理网卡上9999端口的包." },
             
 
         ]
@@ -273,13 +283,13 @@ from gv$ob_servers;
              `, desc: "在sys租户下面查询，查看租户的内存及磁盘使用情况." },
 
         ]
-    },            
+    },
     {
         id: "nginx",
         title: { zh: "Nginx", en: "Nginx" },
         type: "nginx",
         items: [
-            { 
+            {
                 desc: "portal proxy",
                 cmd: `
 #portal
@@ -291,6 +301,8 @@ server {
         proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
         expires -1;
         proxy_pass http://192.168.0.1;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 }` 
             },
@@ -305,10 +317,12 @@ server {
                 proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
                 expires -1;
                 proxy_pass http://192.168.0.1;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                
     }
 }` 
             },
-            { 
+            {
                 desc: "xxl-job-admin proxy",
                 cmd: `
 #xxljob
@@ -319,10 +333,12 @@ server {
                 proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
                 expires -1;
                 proxy_pass http://192.168.0.1;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                
     }
 }` 
             },
-            { 
+            {
                 desc: "minio proxy",
                 cmd: `
 #minio
@@ -333,6 +349,8 @@ server {
                 proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
                 expires -1;
                 proxy_pass http://192.168.0.1;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                
     }
 }` 
             },
@@ -347,6 +365,8 @@ server {
                 proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
                 expires -1;
                 proxy_pass http://192.168.0.1;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                
     }
 }` 
             },
@@ -383,6 +403,10 @@ server {
             { cmd: "kubectl -n roc-uat delete pod roc-goods --grace-period=0 --force --wait=false", desc: "强制删除pod",doc:"" },            
             { cmd: "kubectl -n roc-uat describe pod roc-goods", desc: "查看pod明细",doc:"" },
             { cmd: "kubectl -n roc-uat describe node [nodeName]", desc: "查看node明细",doc:"" },
+
+            { cmd: "kubectl apply -f k8s-pod.yaml", desc: "重新Apply",doc:"" },
+            { cmd: "kubectl replace --force -f k8s-pod.yaml", desc: "强制替换 (Force Replace)",doc:"" },
+            
             { cmd: "kubectl -n roc-uat get pods |grep Evicted | awk '{print $1}' | xargs kubectl -n roc-uat delete pod", desc: "删除大量evicted的pod.",doc:"" },
             { cmd: "docker cp ab5593917446:/home/logs/error.log ./", desc: "ab5593917446=容器Id(通过docker ps可以查询到),从容器中复制文件到本地，反之则从本地复制到容器里面. >> docker cp [本地文件/目录路径] [容器名或容器ID]:[容器内目标路径]",doc:"" },
             { cmd: "kubectl cp <namespace>/<pod>:<root_dir>/<parent_dir>/<file_name> ./<file_name>", desc: "从pod复制文件到本地",doc:"" },
@@ -393,7 +417,7 @@ server {
 
             { cmd: `kubectl -n roc-uat exec -it roc-goods  -- timeout 10 bash -c "</dev/tcp/192.168.0.1/8080" 2>/dev/null && echo "通" || echo "不通"`, desc: "通过pod测试,192.168.0.1:8080是否能通.",doc:"" },
             
-            { cmd: `kubectl -n roc-uat get pods -o=jsonpath='{range .items[*]}{"kubectl rollout restart deploy -n roc-uat "}{.metadata.labels.app}{"\\n"}'`, desc: "批量生成需要重启的pod命令.",doc:"" },
+            { cmd: `kubectl -n roc-uat get pods -o=jsonpath='{range .items[*]}{"kubectl rollout restart deploy -n roc-uat "}{.metadata.labels.app}{"\\n"}' | sort -u`, desc: "批量生成需要重启的pod命令.",doc:"" },
 
             { cmd: "kubectl -n roc-uat top pod --sort-by=memory", desc: "根据内存排序",doc:"" },
             
@@ -412,7 +436,8 @@ server {
             { cmd: "kubectl -n roc-uat logs -f --since=1h roc-goods > /tmp/roc-goods.log", desc: "#log,取1小时内的日志",doc:"" },
 
             { cmd: "kubectl run -it --rm dns-test --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28 --restart=Never -- nslookup www.baidu.com", desc: "#测试pod访问外网是否正常.镜像2M,用完删除.",doc:"" },
-            
+                        
+            { cmd: "kubectl -n roc-uat debug -it dble-pos-7655bd6f46-z77bs --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/redis:7.2.0 --target=dble-pos -- bash", desc: "#debug,进入pod调试",doc:"" }
 
         ]
     },
@@ -438,7 +463,7 @@ server {
             { category: "🛠️Tools",text:"start-spring-io", url: "https://start.spring.io/", desc: "generate java projects"},            
             { category: "🛠️Tools",text:"properties2yaml-在线格式转换", url: "https://www.bejson.com/devtools/properties2yaml/", desc: ""},
             { category: "🛠️Tools",text:"icon-getemoji", url: "https://getemoji.com/", desc: "icon"},
-            
+                        
             { category:"📚Doc",text:"FastDeploy&FastLink", url: "https://xd20al46gl.feishu.cn/docx/Hkhvdh1CkoHkYGxhe4Hc3oWqn7Z", desc: ""},
             { category:"📚Doc",text:"Nginx升级方法", url: "https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh", desc: "4N11294&"},
             { category: "📚Doc",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
@@ -454,8 +479,7 @@ server {
             { category: "📚Doc",text:"Java所有版本下载", url: "https://adoptium.net/zh-CN/temurin/releases", desc: "Java所有版本下载-LTS"},
             { category: "📚Doc",text:"磁盘压测", url: "https://xd20al46gl.feishu.cn/docx/CxapdqUGxoF8Vtxi9nacifPonGd", desc: "IOPS压测."},
             
-            
-            
+                        
             { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
             { category: "❄️K8s",text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档"},
             { category: "❄️K8s",text:"Kubernetes|大规模集群的注意事项", url: "https://kubernetes.io/zh-cn/docs/setup/best-practices/cluster-large/", desc: ""},
@@ -479,6 +503,7 @@ server {
             { category: "⚽️NetWork",text:"WinMTR", url: "https://sourceforge.net/projects/winmtr/", desc: "network check"},
 
             { category: "⚽️NetWork",text:"Wireshark", url: "https://www.wireshark.org/docs/relnotes/", desc: "抓包分析"},
+            { category: "⚽️NetWork",text:"itdog", url: "https://www.itdog.cn/", desc: "itdog-网速检测"},
             // https://mp.weixin.qq.com/s/47AWj_IBKjoT71eL8dALug
             
         ]
