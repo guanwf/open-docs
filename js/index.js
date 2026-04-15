@@ -67,7 +67,9 @@ const database = [
             { cmd: `find /vdb1/var/log -name "*.log.*" -type f -delete`, desc: "#size,清理旧日志（谨慎操作，确保不影响系统运行）" },            
             
             { cmd: "docker system prune -a", desc: "#docker,清理无用的镜像和卷" },
-            { cmd: "docker image prune -a", desc: "#docker,清理无用的镜像和卷" },
+            { cmd: "docker image prune -a", desc: "#docker,清理无用的镜像和卷" },            
+            { cmd: "docker tag nginx registry.example.com/nginx:v2", desc: "#docker,打标签,docker tag 源镜像[:源标签] 目标镜像[:目标标签]" },
+            { cmd: "docker push zhangsan/myapp:v1.0", desc: "#docker,推送镜像" },
             { cmd: `docker ps -a --filter "status=exited"`, desc: "#docker,查询" },
             { cmd: "docker system prune -f --volumes", desc: "#docker,清理无用的镜像和卷" },
             { cmd: `docker images -f "dangling=true"`, desc: "#docker,查询挂起的" },
@@ -75,6 +77,8 @@ const database = [
             { cmd: "docker stats containerId", desc: "#docker,实时监控容器资源使用情况;docker stats 3. 监控所有运行中的容器" },
             { cmd: "docker run -m 512m --memory-swap 1g my_image", desc: "#docker,限制内存使用：可以在创建容器时设置内存限制" },
 
+            { cmd: "docker-compose ps -q | xargs docker inspect -f '{{.Name}}: {{.RestartCount}} 次重启'", desc: "#docker-compose,查看重启次数" },
+            
             { cmd: `建立pos用户,目录，分配权限，切换sudo权限
 mkdir -p /data/pos-work
 groupadd posgroup
@@ -89,9 +93,17 @@ sudo visudo -c && echo "pos ALL=(ALL:ALL) ALL" | tee -a /etc/sudoers && echo "po
 
             { cmd: "dd if=/dev/zero of=/tmp/test_iops bs=4k count=10000 oflag=direct", desc: "#iops=总操作次数/总耗时; 普通机械硬盘 (HDD): 顺序写入通常在 100 MB/s - 200 MB/s;  SATA SSD: 通常在 450 MB/s - 550 MB/s;  NVMe SSD: 通常在 1500 MB/s - 7000 MB/s。" },
             { cmd: "fio -name=randwrite -ioengine=libaio -iodepth=1 -rw=randwrite -bs=4k -direct=1 -size=512M -numjobs=1 -runtime=60 -group_reporting", desc: "#iops 测试随机写入 IOPS (4k块大小)" },
-
             { cmd: "ps -aux | grep clear2 | grep -v grep | awk '{print $2}' | xargs kill -9", desc: "批量kill进程" },
+            { cmd: `
+# 源机器
+docker save -o nginx.tar nginx:latest
+# 拷贝 nginx.tar 到目标机器
 
+# 目标机器
+docker load -i nginx.tar
+docker run -d -p 80:80 nginx:latest             
+                `, desc: "镜像迁移" },
+            
         ]
     },
     {
@@ -386,6 +398,40 @@ server {
         }
     }` 
             },
+            {
+                desc: "itor-portal proxy",
+                cmd: `
+#itor-portal
+server {
+    listen       9977;
+    server_name  localhost;
+    charset utf-8;
+    location ~ / {
+        proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+        expires -1;
+        proxy_pass http://192.168.0.1:30092;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}` 
+            },
+            {
+                desc: "isrm-portal proxy",
+                cmd: `
+#isrm-portal
+server {
+    listen       9966;
+    server_name  localhost;
+    charset utf-8;
+    location ~ / {
+        proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
+        expires -1;
+        proxy_pass http://192.168.0.1:30091;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}` 
+            },                        
         ]
     },            
     {
@@ -430,7 +476,8 @@ server {
             
             { cmd: "kubectl -n roc-uat get configmap common-config -o jsonpath='{.data.NACOS_SERVER}'", desc: "#cm,查询configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"" },
             { cmd: `kubectl -n roc-uat patch configmap common-config -p '{"data":{"NACOS_SERVER":"http://nacos.pbs:8848"}}'`, desc: "#cm,设置configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"" },
-         
+            { cmd: `kubectl -n roc-uat patch deployment roc-goods -p '{"spec":{"template":{"spec":{"containers":[{"name":"roc-goods","resources":{"limits":{"memory":"4Gi"}}}]}}}}'`, desc: "#deployment,设置deployment的资源限制",doc:"" },
+
             { cmd: "kubectl port-forward --address 0.0.0.0 svc/kube-prometheus-stack-alertmanager -n monitoring 9093:9093", desc: "根据service直接代理给k8s-master机器的端口访问，如：http://192.168.227.102:9093/#/alerts",doc:"" },
             
             { cmd: "kubectl -n roc-uat logs -f --since=1h roc-goods > /tmp/roc-goods.log", desc: "#log,取1小时内的日志",doc:"" },
@@ -438,7 +485,7 @@ server {
             { cmd: "kubectl run -it --rm dns-test --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28 --restart=Never -- nslookup www.baidu.com", desc: "#测试pod访问外网是否正常.镜像2M,用完删除.",doc:"" },
                         
             { cmd: "kubectl -n roc-uat debug -it dble-pos-7655bd6f46-z77bs --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/redis:7.2.0 --target=dble-pos -- bash", desc: "#debug,进入pod调试",doc:"" }
-
+            
         ]
     },
     {
@@ -490,9 +537,11 @@ server {
             { category: "❄️K8s",text:"Kubernetes|K8S 修改节点 pod 上限", url: "https://koomu.cn/k8s-modify-node-pods-limits/", desc: ""},
             
             { category: "❄️K8s",text:"K8S-配置存活、就绪和启动探针", url: "https://kubernetes.io/zh-cn/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/", desc: ""},
-            { category: "❄️K8s",text:"获取yaml文件创建pod", url: "http://39.103.177.212:30008/", desc: "需要vpn"},
-            { category: "❄️K8s",text:"通过kubectl连接集群-hw-cce", url: "https://support.huaweicloud.com/intl/zh-cn/usermanual-cce/cce_10_0107.html", desc: ""},
+            { category: "❄️K8s",text:"通过kubectl连接集群-hw-cce", url: "https://support.huaweicloud.com/intl/zh-cn/usermanual-cce/cce_10_0107.html", desc: ""},            
 
+            { category: "❄️K8s",text:"获取yaml文件创建pod", url: "http://39.103.177.212:30008/", desc: "需要vpn"},
+            { category: "❄️K8s",text:"K8s Pod YAML 生成器", url: "./k8s-pod-yaml-generator.html", desc: ""},
+            
             {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
             {category: "📊Monitor", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
 
