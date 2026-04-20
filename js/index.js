@@ -545,6 +545,10 @@ server {
             
             { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
             { category: "❄️K8s",text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档"},
+            
+            { category: "❄️K8s",text: "Kubernetes-Architecture", url: "https://kubernetes.io/zh-cn/docs/concepts/architecture/", desc: "k8s-架构" },
+            { category: "❄️K8s",text: "Kubernetes-版本记录", url: "https://kubernetes.io/zh-cn/releases/", desc: "发行版本" },
+            
             { category: "❄️K8s",text:"Kubernetes|大规模集群的注意事项", url: "https://kubernetes.io/zh-cn/docs/setup/best-practices/cluster-large/", desc: ""},
             { category: "❄️K8s",text:"測試 K8S Pod 數量超過 110 會發生甚麼事?", url: "https://hackmd.io/@QI-AN/What-happens-when-the-number-of-K8S-Pods-exceeds-110#15-%E6%9F%A5%E7%9C%8B%E7%8B%80%E6%85%8B%E7%82%BA-Running-%E7%9A%84-Pod-%E6%98%AF%E5%90%A6%E6%9C%89%E8%A2%AB%E5%BD%B1%E9%9F%BF", desc: ""},
             
@@ -559,6 +563,18 @@ server {
             { category: "❄️K8s",text:"K8s Pod YAML 生成器", url: "./k8s-pod-yaml-generator.html", desc: ""},
             { category: "❄️K8s",text:"k8s-kubeadm集群证书过期更换方法", url: "https://xd20al46gl.feishu.cn/docx/GaDrdYRvuoTnT4xaMvNczu9TnId", desc: ""},            
 
+            { category: "📚DB",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
+            { category: "📚DB",text:"ob-oms-调优", url: "https://xd20al46gl.feishu.cn/docx/HcURd9NSAoWvBPxUfyccuFNznTc", desc: ""},
+            { category: "📚DB",text:"oceanbase-版本选择说明", url: "https://xd20al46gl.feishu.cn/docx/WMMmd6iFUoIhtKxywwBclEsBnKc", desc: ""},
+            { category: "📚DB",text:"observer日常维护", url: "https://xd20al46gl.feishu.cn/docx/I3BcdNX6doYjrExlSNrcAF1inff", desc: ""},
+            { category: "📚DB",text:"mySQL-安装方法", url: "https://xd20al46gl.feishu.cn/docx/J05VdQykeotDM5xKE0icDV9Qn4g", desc: "333q31&2"},
+            { category: "📚DB",text:"mySQL日常操作", url: "https://xd20al46gl.feishu.cn/docx/HGmndOA03o3zgbxkos6cwBwinNd", desc: "7@e15734"},
+            { category: "📚DB",text:"ob-部署前配置", url: "https://www.oceanbase.com/docs/community-observer-cn-10000000000900490", desc: ""},
+            { category: "📚DB",text:"observer-文档概览", url: "https://www.oceanbase.com/docs/community-observer-cn-1000000000056379", desc: ""},
+            { category: "📚DB",text:"ob-数据库整体架构", url: "https://www.oceanbase.com/docs/community-observer-cn-10000000000900890", desc: ""},
+            { category: "📚DB",text:"ocp-文档概述", url: "https://www.oceanbase.com/docs/ocp", desc: ""},
+            { category: "📚DB",text:"ob-发布版本记录", url: "https://www.oceanbase.com/product/oceanbase-database-community-rn/releaseNote#V4.2.5", desc: ""},
+            
 
             {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
             {category: "📊Monitor", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
@@ -573,14 +589,6 @@ server {
             { category: "⚽️NetWork",text:"itdog", url: "https://www.itdog.cn/", desc: "itdog-网速检测"},
             // https://mp.weixin.qq.com/s/47AWj_IBKjoT71eL8dALug
             
-            { category: "📚DB",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
-            { category: "📚DB",text:"ob-oms-调优", url: "https://xd20al46gl.feishu.cn/docx/HcURd9NSAoWvBPxUfyccuFNznTc", desc: ""},
-            { category: "📚DB",text:"oceanbase-版本选择说明", url: "https://xd20al46gl.feishu.cn/docx/WMMmd6iFUoIhtKxywwBclEsBnKc", desc: ""},
-            { category: "📚DB",text:"observer日常维护", url: "https://xd20al46gl.feishu.cn/docx/I3BcdNX6doYjrExlSNrcAF1inff", desc: ""},
-            { category: "📚DB",text:"mySQL-安装方法", url: "https://xd20al46gl.feishu.cn/docx/J05VdQykeotDM5xKE0icDV9Qn4g", desc: "333q31&2"},
-            { category: "📚DB",text:"mySQL日常操作", url: "https://xd20al46gl.feishu.cn/docx/HGmndOA03o3zgbxkos6cwBwinNd", desc: "7@e15734"},
-
-
 
         ]
     }

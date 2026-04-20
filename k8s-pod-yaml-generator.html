@@ -13,7 +13,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) 8px minmax(300px, 1.1fr);
+  grid-template-columns: minmax(300px, 2fr) 8px minmax(300px, 3fr);
   align-items: start;
   position: relative;
 }
@@ -191,9 +191,9 @@ input:checked + .slider:before { transform: translateX(16px); }
 #statusMsg { flex: 1; overflow: hidden; text-overflow: ellipsis; }
 
 /* 模板弹窗 */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; }
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
 .modal-bg.open { display: flex; }
-.modal { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 1.4rem; width: 100%; max-width: 620px; }
+.modal { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 1.4rem; width: 70vw; height: 70vh; max-width: 80vw; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
 .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .modal-title { font-size: 15px; font-weight: 600; }
 .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #9ca3af; width: 30px; height: 30px; border-radius: 6px; }
@@ -201,7 +201,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 .modal-tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
 .tab { font-size: 12px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 10px; cursor: pointer; color: #6b7280; }
 .tab.active { background: #eef2ff; border-color: #a5b4fc; color: #4f46e5; font-weight: 500; }
-.modal textarea { width: 100%; min-height: 300px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: .8rem; font-family: 'Fira Code','Consolas',monospace; font-size: 12px; line-height: 1.7; color: #1e293b; resize: vertical; outline: none; }
+.modal textarea { width: 100%; flex: 1; min-height: 200px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: .8rem; font-family: 'Fira Code','Consolas',monospace; font-size: 12px; line-height: 1.7; color: #1e293b; resize: vertical; outline: none; margin-bottom: 8px; }
 .modal textarea:focus { border-color: #6366f1; }
 .modal-foot { display: flex; gap: 8px; margin-top: 12px; justify-content: space-between; align-items: center; }
 .tpl-name-input { font-size: 12px; height: 30px; border-radius: 6px; border: 1px solid #d1d5db; padding: 0 8px; width: 200px; outline: none; }
@@ -253,7 +253,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 <div class="page-title">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
   K8s Pod YAML 生成器
-  <span class="badge">kubectl apply -f</span>
+  <span class="badge">kubectl apply -f  文件名称.yaml</span>
 </div>
 
 <div class="layout">
@@ -401,6 +401,23 @@ input:checked + .slider:before { transform: translateX(16px); }
     </div>
 
     <div class="divider"></div>
+    <div class="sec-label">命令参数（选填）</div>
+    <div class="field-row">
+      <div class="field full">
+        <label>命令 (command)</label>
+        <input id="command" placeholder="覆盖容器入口点，如 /bin/sh">
+        <div class="hint">可执行文件路径，留空使用镜像默认 entrypoint</div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field full">
+        <label>参数 (args)</label>
+        <input id="args" placeholder="空格分隔的参数，如 -c 'echo hello'">
+        <div class="hint">命令行参数，留空使用镜像默认 cmd</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
     <div class="sec-label">环境变量（选填）</div>
     <div id="envVars"></div>
     <button class="add-btn" onclick="addEnv()">+ 添加环境变量</button>
@@ -473,7 +490,7 @@ input:checked + .slider:before { transform: translateX(16px); }
     <div class="ph-tip">
       <b>占位符：</b>
       {{name}} · {{namespace}} · {{imageTag}} · {{containerName}} · {{restartPolicy}}
-      · {{ports}} · {{env}} · {{labels}} · {{resources}} · {{probes}}
+      · {{command}} · {{args}} · {{ports}} · {{env}} · {{labels}} · {{resources}} · {{probes}}
       · {{volumeMounts}} · {{volumes}} · {{servicePorts}}
     </div>
     <div class="modal-foot">
@@ -506,6 +523,8 @@ spec:
   containers:
   - name: {{containerName}}
     image: {{imageTag}}
+{{command}}
+{{args}}
 {{ports}}
 {{env}}
 {{resources}}
@@ -528,6 +547,8 @@ spec:
   containers:
   - name: {{containerName}}
     image: {{imageTag}}
+{{command}}
+{{args}}
 {{ports}}
 {{env}}
 {{resources}}
@@ -561,6 +582,8 @@ spec:
   containers:
   - name: {{containerName}}
     image: {{imageTag}}
+{{command}}
+{{args}}
 {{ports}}
 {{env}}
 {{resources}}
@@ -583,6 +606,8 @@ spec:
   containers:
   - name: {{containerName}}
     image: {{imageTag}}
+{{command}}
+{{args}}
 {{ports}}
 {{env}}
 {{resources}}
@@ -604,6 +629,8 @@ spec:
   containers:
   - name: {{containerName}}
     image: {{imageTag}}
+{{command}}
+{{args}}
 {{ports}}
 {{env}}
 {{resources}}
@@ -816,6 +843,8 @@ spec:
   containers:
   - name: {{containerName}}
     image: {{imageTag}}
+{{command}}
+{{args}}
 {{ports}}
 {{env}}
 {{resources}}
@@ -1037,6 +1066,8 @@ function generate() {
   const useLive = document.getElementById('enableLiveness').checked;
   const useReady= document.getElementById('enableReadiness').checked;
   const useResources = document.getElementById('enableResources').checked;
+  const command = document.getElementById('command').value.trim();
+  const args = document.getElementById('args').value.trim();
 
   if (!img) { alert('请填写镜像版本'); return; }
 
@@ -1051,6 +1082,10 @@ function generate() {
   const envStr = envs.length
     ? '    env:\n' + envs.map(e => `    - name: ${e.k}\n      value: "${e.v}"`).join('\n')
     : '';
+
+  // 命令参数
+  const commandStr = command ? `    command: ["${command}"]` : '';
+  const argsStr = args ? `    args: ["${args.split(' ').filter(a => a).join('", "')}"]` : '';
 
   const extraLbls = lbls.length ? '\n' + lbls.map(l => `    ${l.k}: "${l.v}"`).join('\n') : '';
   const labelsStr = `  labels:\n    app: ${name}${extraLbls}`;
@@ -1074,6 +1109,8 @@ function generate() {
     .replace(/\{\{imageTag\}\}/g,      img)
     .replace(/\{\{containerName\}\}/g, cname)
     .replace(/\{\{restartPolicy\}\}/g, restart)
+    .replace(/\{\{command\}\}/g,      commandStr)
+    .replace(/\{\{args\}\}/g,         argsStr)
     .replace(/\{\{labels\}\}/g,        labelsStr)
     .replace(/\{\{ports\}\}/g,         portsStr)
     .replace(/\{\{env\}\}/g,           envStr)
