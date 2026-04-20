@@ -103,7 +103,23 @@ docker save -o nginx.tar nginx:latest
 docker load -i nginx.tar
 docker run -d -p 80:80 nginx:latest             
                 `, desc: "镜像迁移" },
-            
+            { cmd: `
+# 专门过滤慢查询关键字
+grep -i "slow query" observer.log
+grep -E "GLIBC|symbol lookup error|version|libraries" *.log
+
+                `, desc: "过滤关键字" },
+            { cmd: `
+dmesg -T
+dmesg -T | grep -i oom
+dmesg -T | grep -i "out of memory"
+dmesg -T | grep -i "oom\|killed"
+
+                `, desc: "dmesg是查看 Linux 内核日志的命令，专门用来查：系统级别的硬件、驱动、内存、进程被杀、网络、IO 等底层问题。" },
+
+                
+
+
         ]
     },
     {
@@ -146,7 +162,7 @@ nc -l 9999
 nc -v 192.168.0.1 9999`, desc: "用nc临时测试2个主机的port是否通！" },
 
             { cmd: "tcpdump -i any port 9999 -n -v", desc: "抓取物理网卡上9999端口的包." },
-            
+            { cmd: "iptables -A INPUT -p tcp --sport 3306 -j DROP", desc: "丢弃，阻止来自3306端口的入站TCP连接" }
 
         ]
     },
@@ -484,7 +500,9 @@ server {
 
             { cmd: "kubectl run -it --rm dns-test --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28 --restart=Never -- nslookup www.baidu.com", desc: "#测试pod访问外网是否正常.镜像2M,用完删除.",doc:"" },
                         
-            { cmd: "kubectl -n roc-uat debug -it dble-pos-7655bd6f46-z77bs --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/redis:7.2.0 --target=dble-pos -- bash", desc: "#debug,进入pod调试",doc:"" }
+            { cmd: "kubectl -n roc-uat debug -it dble-pos-7655bd6f46-z77bs --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/redis:7.2.0 --target=dble-pos -- bash", desc: "#debug,进入pod调试",doc:"" },            
+            { cmd: "kubectl -n roc-uat logs roc-goods-794ccfdd79-2zwtm -c roc-goods --previous", desc: "查看上一次被杀死的容器的日志(-c roc-goods表示指定容器),专门用来查：Pod 为什么崩溃、为什么重启、为什么被 kill",doc:"" }
+            
             
         ]
     },
@@ -510,23 +528,21 @@ server {
             { category: "🛠️Tools",text:"start-spring-io", url: "https://start.spring.io/", desc: "generate java projects"},            
             { category: "🛠️Tools",text:"properties2yaml-在线格式转换", url: "https://www.bejson.com/devtools/properties2yaml/", desc: ""},
             { category: "🛠️Tools",text:"icon-getemoji", url: "https://getemoji.com/", desc: "icon"},
-                        
+            { category: "🛠️Tools",text:"pdf转换", url: "https://tools.pdf24.org/zh/", desc: "pdf各种转换-免费"},
+
+            
             { category:"📚Doc",text:"FastDeploy&FastLink", url: "https://xd20al46gl.feishu.cn/docx/Hkhvdh1CkoHkYGxhe4Hc3oWqn7Z", desc: ""},
             { category:"📚Doc",text:"Nginx升级方法", url: "https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh", desc: "4N11294&"},
             { category: "📚Doc",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
             { category: "📚Doc",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
             { category: "📚Doc",text:"镜像版本列表", url: "./imagelist.html", desc: ""},
-            { category: "📚Doc",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
+            
             { category: "📚Doc",text:"rocky-os-下载", url: "https://rockylinux.org/zh-CN/download", desc: ""},
             
-            { category: "📚Doc",text:"pdf转换", url: "https://tools.pdf24.org/zh/", desc: "pdf各种转换-免费"},
-            { category: "📚Doc",text:"mySQL-安装方法", url: "https://xd20al46gl.feishu.cn/docx/J05VdQykeotDM5xKE0icDV9Qn4g", desc: "333q31&2"},
-            { category: "📚Doc",text:"mySQL日常操作", url: "https://xd20al46gl.feishu.cn/docx/HGmndOA03o3zgbxkos6cwBwinNd", desc: "7@e15734"},
-
             { category: "📚Doc",text:"Java所有版本下载", url: "https://adoptium.net/zh-CN/temurin/releases", desc: "Java所有版本下载-LTS"},
             { category: "📚Doc",text:"磁盘压测", url: "https://xd20al46gl.feishu.cn/docx/CxapdqUGxoF8Vtxi9nacifPonGd", desc: "IOPS压测."},
+            { category: "📚Doc",text:"多镜像仓库使用说明", url: "https://xd20al46gl.feishu.cn/docx/J17sdDzUVo4NfZxxupbcq6uSnoh", desc: ""},
             
-                        
             { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
             { category: "❄️K8s",text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档"},
             { category: "❄️K8s",text:"Kubernetes|大规模集群的注意事项", url: "https://kubernetes.io/zh-cn/docs/setup/best-practices/cluster-large/", desc: ""},
@@ -541,7 +557,9 @@ server {
 
             { category: "❄️K8s",text:"获取yaml文件创建pod", url: "http://39.103.177.212:30008/", desc: "需要vpn"},
             { category: "❄️K8s",text:"K8s Pod YAML 生成器", url: "./k8s-pod-yaml-generator.html", desc: ""},
-            
+            { category: "❄️K8s",text:"k8s-kubeadm集群证书过期更换方法", url: "https://xd20al46gl.feishu.cn/docx/GaDrdYRvuoTnT4xaMvNczu9TnId", desc: ""},            
+
+
             {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
             {category: "📊Monitor", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
 
@@ -555,6 +573,15 @@ server {
             { category: "⚽️NetWork",text:"itdog", url: "https://www.itdog.cn/", desc: "itdog-网速检测"},
             // https://mp.weixin.qq.com/s/47AWj_IBKjoT71eL8dALug
             
+            { category: "📚DB",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
+            { category: "📚DB",text:"ob-oms-调优", url: "https://xd20al46gl.feishu.cn/docx/HcURd9NSAoWvBPxUfyccuFNznTc", desc: ""},
+            { category: "📚DB",text:"oceanbase-版本选择说明", url: "https://xd20al46gl.feishu.cn/docx/WMMmd6iFUoIhtKxywwBclEsBnKc", desc: ""},
+            { category: "📚DB",text:"observer日常维护", url: "https://xd20al46gl.feishu.cn/docx/I3BcdNX6doYjrExlSNrcAF1inff", desc: ""},
+            { category: "📚DB",text:"mySQL-安装方法", url: "https://xd20al46gl.feishu.cn/docx/J05VdQykeotDM5xKE0icDV9Qn4g", desc: "333q31&2"},
+            { category: "📚DB",text:"mySQL日常操作", url: "https://xd20al46gl.feishu.cn/docx/HGmndOA03o3zgbxkos6cwBwinNd", desc: "7@e15734"},
+
+
+
         ]
     }
 ];
