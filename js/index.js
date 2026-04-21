@@ -532,6 +532,7 @@ server {
 
             
             { category:"📚Doc",text:"FastDeploy&FastLink", url: "https://xd20al46gl.feishu.cn/docx/Hkhvdh1CkoHkYGxhe4Hc3oWqn7Z", desc: ""},
+            { category:"📚Doc",text:"基础设施组件清单", url: "./infra-list.html", desc: ""},
             { category:"📚Doc",text:"Nginx升级方法", url: "https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh", desc: "4N11294&"},
             { category: "📚Doc",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
             { category: "📚Doc",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
@@ -565,15 +566,18 @@ server {
 
             { category: "📚DB",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
             { category: "📚DB",text:"ob-oms-调优", url: "https://xd20al46gl.feishu.cn/docx/HcURd9NSAoWvBPxUfyccuFNznTc", desc: ""},
-            { category: "📚DB",text:"oceanbase-版本选择说明", url: "https://xd20al46gl.feishu.cn/docx/WMMmd6iFUoIhtKxywwBclEsBnKc", desc: ""},
-            { category: "📚DB",text:"observer日常维护", url: "https://xd20al46gl.feishu.cn/docx/I3BcdNX6doYjrExlSNrcAF1inff", desc: ""},
+            { category: "📚DB",text:"OMS社区版文档", url: "https://www.oceanbase.com/docs/community-oms-cn-1000000005763933", desc: ""},
+            
+            { category: "📚DB",text:"OBServer-版本选择说明", url: "https://xd20al46gl.feishu.cn/docx/WMMmd6iFUoIhtKxywwBclEsBnKc", desc: ""},
+            { category: "📚DB",text:"OBServer-日常维护", url: "https://xd20al46gl.feishu.cn/docx/I3BcdNX6doYjrExlSNrcAF1inff", desc: ""},
             { category: "📚DB",text:"mySQL-安装方法", url: "https://xd20al46gl.feishu.cn/docx/J05VdQykeotDM5xKE0icDV9Qn4g", desc: "333q31&2"},
             { category: "📚DB",text:"mySQL日常操作", url: "https://xd20al46gl.feishu.cn/docx/HGmndOA03o3zgbxkos6cwBwinNd", desc: "7@e15734"},
-            { category: "📚DB",text:"ob-部署前配置", url: "https://www.oceanbase.com/docs/community-observer-cn-10000000000900490", desc: ""},
-            { category: "📚DB",text:"observer-文档概览", url: "https://www.oceanbase.com/docs/community-observer-cn-1000000000056379", desc: ""},
-            { category: "📚DB",text:"ob-数据库整体架构", url: "https://www.oceanbase.com/docs/community-observer-cn-10000000000900890", desc: ""},
-            { category: "📚DB",text:"ocp-文档概述", url: "https://www.oceanbase.com/docs/ocp", desc: ""},
-            { category: "📚DB",text:"ob-发布版本记录", url: "https://www.oceanbase.com/product/oceanbase-database-community-rn/releaseNote#V4.2.5", desc: ""},
+            { category: "📚DB",text:"OBServer-部署前配置", url: "https://www.oceanbase.com/docs/community-observer-cn-10000000000900490", desc: ""},
+            { category: "📚DB",text:"OBServer-文档概览", url: "https://www.oceanbase.com/docs/community-observer-cn-1000000000056379", desc: ""},
+            { category: "📚DB",text:"OBServer-数据库整体架构", url: "https://www.oceanbase.com/docs/community-observer-cn-10000000000900890", desc: ""},
+            { category: "📚DB",text:"OCP-文档概述", url: "https://www.oceanbase.com/docs/ocp", desc: ""},
+            { category: "📚DB",text:"ODP-数据库代理", url: "https://www.oceanbase.com/docs/odp-doc-cn", desc: ""},
+            { category: "📚DB",text:"OB-发布版本记录", url: "https://www.oceanbase.com/product/oceanbase-database-community-rn/releaseNote#V4.2.5", desc: ""},
             
 
             {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },

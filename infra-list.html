@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基础设施组件清单</title>
+<style>
+  :root {
+    --bg:        #f5f6f0;
+    --surface:   #ffffff;
+    --surface2:  #f0f1eb;
+    --border:    #ddddd5;
+    --border2:   #c8c9c0;
+    --text:      #2c2c28;
+    --muted:     #6b6b65;
+    --hint:      #9e9e97;
+    --accent:    #2d8c5e;
+    --accent-bg: #e6f4ed;
+    --warn:      #c97c10;
+    --warn-bg:   #fef4e0;
+    --danger:    #c23b3b;
+    --mono:      'JetBrains Mono', 'Cascadia Code', 'Fira Mono', 'Courier New', monospace;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+  body.dark {
+    --bg:        #1c1e1a;
+    --surface:   #242620;
+    --surface2:  #2c2e28;
+    --border:    #3a3d35;
+    --border2:   #4a4d44;
+    --text:      #e8e8e0;
+    --muted:     #a0a098;
+    --hint:      #686860;
+    --accent:    #4ab87a;
+    --accent-bg: #1a3326;
+    --warn:      #e8a030;
+    --warn-bg:   #332610;
+  }
+  body.eyecare {
+    --bg:        #f4f0e4;
+    --surface:   #faf7ee;
+    --surface2:  #ede9db;
+    --border:    #d5d0c0;
+    --border2:   #c0bb9f;
+    --text:      #3a3525;
+    --muted:     #7a7360;
+    --hint:      #a09880;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+  body { background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; transition: background .2s, color .2s; }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex; align-items: center; gap: 12px; height: 52px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .topbar-title { font-size: 15px; font-weight: 600; white-space: nowrap; color: var(--text); }
+  .topbar-title span { color: var(--accent); }
+  .topbar-spacer { flex: 1; }
+
+  /* Search */
+  .search-wrap { position: relative; display: flex; align-items: center; }
+  .search-wrap input {
+    height: 34px; padding: 0 32px 0 32px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface2);
+    color: var(--text); font-size: 13px;
+    width: 220px; outline: none;
+    transition: border-color .15s, width .2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); width: 280px; }
+  .search-wrap .ico-search {
+    position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+    color: var(--hint); font-size: 14px; pointer-events: none;
+  }
+  .search-wrap .btn-clear {
+    position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--hint); color: var(--surface);
+    border: none; cursor: pointer; font-size: 11px; line-height: 18px; text-align: center;
+    display: none; padding: 0;
+  }
+  .search-wrap input:not(:placeholder-shown) ~ .btn-clear { display: block; }
+
+  /* Theme toggles */
+  .theme-group { display: flex; gap: 4px; }
+  .theme-btn {
+    height: 30px; padding: 0 10px; font-size: 12px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface2); color: var(--muted);
+    cursor: pointer; white-space: nowrap; transition: all .15s;
+  }
+  .theme-btn:hover, .theme-btn.active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+  .add-btn {
+    height: 34px; padding: 0 14px; font-size: 13px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius);
+    cursor: pointer; white-space: nowrap; font-weight: 500;
+    transition: opacity .15s;
+  }
+  .add-btn:hover { opacity: .88; }
+
+  /* ── Filter bar ── */
+  .filterbar {
+    position: sticky; top: 52px; z-index: 40;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .filter-label { font-size: 11px; color: var(--hint); white-space: nowrap; }
+  .ftag {
+    font-size: 11px; padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--muted);
+    cursor: pointer; transition: all .12s; white-space: nowrap;
+  }
+  .ftag.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .ftag:hover:not(.active) { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+  /* ── Stats ── */
+  .stats-row {
+    display: flex; gap: 10px; padding: 14px 20px 0;
+    flex-wrap: wrap;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 18px;
+    display: flex; align-items: baseline; gap: 7px;
+  }
+  .stat-num { font-size: 22px; font-weight: 700; font-family: var(--mono); }
+  .stat-lbl { font-size: 11px; color: var(--muted); }
+
+  /* ── Table ── */
+  .tbl-wrap {
+    margin: 14px 20px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  table { width: 100%; border-collapse: collapse; table-layout: auto; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 10px 12px;
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-align: left; white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+    letter-spacing: .04em;
+  }
+  th .si { opacity: .3; margin-left: 3px; }
+  th.sorted .si { opacity: 1; color: var(--accent); }
+  th:hover { color: var(--text); }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);  /* ✅ 每行都有分割线 */
+    vertical-align: middle;
+    font-size: 13px;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  /* Seq num */
+  .seq { font-family: var(--mono); font-size: 11px; color: var(--hint); text-align: right; width: 36px; }
+
+  /* Component name */
+  .cname { font-weight: 600; font-size: 13px; color: var(--text); }
+
+  /* Category chips */
+  .cat-chip {
+    display: inline-block; font-size: 10px; font-weight: 500;
+    padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+  }
+  .c-container { background: #fde8e0; color: #8b3010; }
+  .c-storage   { background: #e0f2ea; color: #1a6640; }
+  .c-db        { background: #fce4f0; color: #8b2050; }
+  .c-message   { background: #fef3d8; color: #8b5500; }
+  .c-network   { background: #ddeeff; color: #1a4a88; }
+  .c-runtime   { background: #eeebff; color: #4030a0; }
+  .c-monitor   { background: #e8f4d8; color: #366010; }
+  body.dark .c-container { background: #4a1808; color: #f5b090; }
+  body.dark .c-storage   { background: #0c3a20; color: #7ddaa8; }
+  body.dark .c-db        { background: #3a0c24; color: #f0a0c0; }
+  body.dark .c-message   { background: #3a2200; color: #f0c060; }
+  body.dark .c-network   { background: #0c2a50; color: #80b8f8; }
+  body.dark .c-runtime   { background: #201448; color: #b0a0f8; }
+  body.dark .c-monitor   { background: #1a3008; color: #a0d060; }
+  body.eyecare .c-container { background: #f0d8cc; color: #6a2808; }
+  body.eyecare .c-storage   { background: #d0e8d8; color: #1a5030; }
+
+  /* Ports */
+  .ports-cell { display: flex; flex-wrap: wrap; gap: 4px; }
+  .port-tag {
+    display: inline-flex; align-items: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    background: var(--accent-bg); color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius: 4px; padding: 2px 7px;
+    cursor: pointer; transition: opacity .12s; white-space: nowrap;
+    user-select: none;
+  }
+  .port-tag:hover { opacity: .75; }
+  .port-tag.copied { background: var(--accent); color: #fff; }
+
+  /* Version */
+  .ver { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+  /* Date */
+  .date-cell { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  /* Status */
+  .status-wrap { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .d-ok   { background: var(--accent); box-shadow: 0 0 0 2px var(--accent-bg); }
+  .d-warn { background: var(--warn);   box-shadow: 0 0 0 2px var(--warn-bg); }
+  .d-off  { background: var(--hint); }
+  .status-lbl { font-size: 12px; color: var(--muted); }
+
+  /* Links */
+  .links-cell { display: flex; flex-direction: column; gap: 2px; }
+  .links-cell a {
+    font-size: 12px; color: #2563eb; text-decoration: none; white-space: nowrap;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .links-cell a:hover { text-decoration: underline; }
+  body.dark .links-cell a { color: #6aa8f8; }
+
+  /* Note */
+  .note-cell { font-size: 12px; color: var(--muted); max-width: 200px; word-break: break-all; }
+
+  /* Action btns */
+  .act-wrap { display: flex; gap: 5px; white-space: nowrap; }
+  .act-btn {
+    height: 26px; padding: 0 9px; font-size: 11px;
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    background: var(--surface2); color: var(--muted);
+    cursor: pointer; transition: all .12s;
+  }
+  .act-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface); }
+  .act-btn.del:hover { color: var(--danger); border-color: var(--danger); background: #fff0f0; }
+
+  .empty-row td { text-align: center; padding: 40px; color: var(--hint); font-size: 13px; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,.48);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 24px; width: 460px; max-width: 94vw;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%; height: 34px; padding: 0 10px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text); font-size: 13px;
+    outline: none; font-family: inherit; transition: border-color .15s;
+  }
+  .form-row textarea { height: 64px; padding: 8px 10px; resize: vertical; }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--accent); }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .btn-cancel {
+    height: 34px; padding: 0 14px; font-size: 13px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: var(--radius); cursor: pointer; color: var(--text);
+  }
+  .btn-save {
+    height: 34px; padding: 0 18px; font-size: 13px; font-weight: 500;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius); cursor: pointer;
+  }
+  .btn-save:hover { opacity: .9; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: #222; color: #fff;
+    padding: 8px 16px; border-radius: var(--radius);
+    font-size: 12px; opacity: 0;
+    transition: opacity .2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-title">🖥 基础设施 <span>组件清单</span></div>
+  <div class="topbar-spacer"></div>
+  <div class="search-wrap">
+    <span class="ico-search">🔍</span>
+    <input type="text" id="search" placeholder="搜索组件、端口、备注…" oninput="render()">
+    <button class="btn-clear" onclick="clearSearch()" title="清空">✕</button>
+  </div>
+  <div class="theme-group">
+    <button class="theme-btn active" id="t-light" onclick="setTheme('light')">☀ 日间</button>
+    <button class="theme-btn" id="t-eyecare" onclick="setTheme('eyecare')">🍃 护眼</button>
+    <button class="theme-btn" id="t-dark" onclick="setTheme('dark')">🌙 夜间</button>
+  </div>
+  <button class="add-btn" onclick="openModal()">＋ 新增组件</button>
+</div>
+
+<!-- Filter bar -->
+<div class="filterbar">
+  <span class="filter-label">分类：</span>
+  <div id="filterTags"></div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row" id="stats"></div>
+
+<!-- Table -->
+<div class="tbl-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th class="seq" title="序号">#</th>
+        <th onclick="sortBy('name')">组件名称 <span class="si" id="si-name">↕</span></th>
+        <th onclick="sortBy('category')">分类 <span class="si" id="si-category">↕</span></th>
+        <th onclick="sortBy('version')">版本 <span class="si" id="si-version">↕</span></th>
+        <th>端口</th>
+        <th onclick="sortBy('updated')">更新日期 <span class="si" id="si-updated">↕</span></th>
+        <th>状态</th>
+        <th>相关链接</th>
+        <th>备注</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modalTitle">新增组件</h3>
+    <div class="form-grid">
+      <div class="form-row full"><label>组件名称 *</label><input id="f-name" placeholder="如 Redis"></div>
+      <div class="form-row"><label>分类</label>
+        <select id="f-category">
+          <option value="storage">存储</option>
+          <option value="db">数据库</option>
+          <option value="message">消息队列</option>
+          <option value="network">网络/代理</option>
+          <option value="runtime">运行时</option>
+          <option value="monitor">监控</option>
+          <option value="container">容器编排</option>
+        </select>
+      </div>
+      <div class="form-row"><label>版本</label><input id="f-version" placeholder="如 7.2.4"></div>
+      <div class="form-row full"><label>端口（多个用逗号分隔）</label><input id="f-ports" placeholder="如 6379, 16379"></div>
+      <div class="form-row"><label>更新日期</label><input id="f-updated" type="date"></div>
+      <div class="form-row"><label>状态</label>
+        <select id="f-status">
+          <option value="ok">运行中</option>
+          <option value="warn">告警</option>
+          <option value="off">已停用</option>
+        </select>
+      </div>
+      <div class="form-row full">
+        <label>相关链接（格式：名称:URL，多个用逗号分隔）</label>
+        <input id="f-links" placeholder="如 文档:https://redis.io, 控制台:http://192.168.1.1:8001">
+      </div>
+      <div class="form-row full"><label>备注</label><textarea id="f-note" placeholder="简短描述..."></textarea></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-save" onclick="saveItem()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CATS = {
+  storage:   { label: '存储',     cls: 'c-storage' },
+  db:        { label: '数据库',   cls: 'c-db' },
+  message:   { label: '消息队列', cls: 'c-message' },
+  network:   { label: '网络/代理',cls: 'c-network' },
+  runtime:   { label: '运行时',   cls: 'c-runtime' },
+  monitor:   { label: '监控',     cls: 'c-monitor' },
+  container: { label: '容器编排', cls: 'c-container' },
+};
+
+const STATUS = {
+  ok:   { dot: 'd-ok',   lbl: '使用中' },
+  warn: { dot: 'd-warn', lbl: '告警' },
+  off:  { dot: 'd-off',  lbl: '已停用' },
+};
+
+let data = [
+  { id:1,  name:'Kubernetes', category:'container', version:'1.29.2', ports:'6443,10250,10255,30000-32767', updated:'2024-11-01', status:'ok',   links:'Dashboard:http://k8s.local', note:'生产集群，3 master 5 node' },
+  { id:2,  name:'Redis',      category:'storage',   version:'7.2.4',  ports:'6379,16379',                  updated:'2025-01-15', status:'ok',   links:'RedisInsight:http://192.168.1.10:8001,文档:https://redis.io', note:'主从集群，Sentinel 模式' },
+  { id:3,  name:'RocketMQ',   category:'message',   version:'5.1.4',  ports:'9876,10911,10912',            updated:'2024-12-10', status:'ok',   links:'控制台:http://mq.local:8080,文档:https://rocketmq.apache.org', note:'双 Broker 部署' },
+  { id:4,  name:'MinIO',      category:'storage',   version:'RELEASE.2024-10-02', ports:'9000,9001',       updated:'2024-10-10', status:'ok',   links:'控制台:http://minio.local:9001,文档:https://min.io/docs', note:'对象存储，纠删码 4+2' },
+  { id:5,  name:'OceanBase',  category:'db',        version:'4.3.1',  ports:'2881,2882',                   updated:'2025-02-20', status:'warn', links:'文档:https://www.oceanbase.com/docs', note:'3节点，注意内存压力告警' },
+  { id:6,  name:'Nginx',      category:'network',   version:'1.26.0', ports:'80,443,8080',                 updated:'2025-03-01', status:'ok',   links:'配置文档:http://wiki.local/nginx', note:'统一入口，upstream 动态配置' },
+  { id:7,  name:'SFTP',       category:'network',   version:'OpenSSH 9.6', ports:'22,2222',                updated:'2024-09-05', status:'ok',   links:'', note:'专用数据交换节点' },
+  { id:8,  name:'MongoDB',    category:'db',        version:'7.0.8',  ports:'27017,27018,27019',           updated:'2025-01-20', status:'ok',   links:'Compass:mongodb://192.168.1.30:27017,文档:https://www.mongodb.com/docs', note:'3节点 ReplicaSet' },
+  { id:9,  name:'MQTT(EMQX)', category:'message',   version:'5.6.0',  ports:'1883,8083,8084,18083',        updated:'2025-04-01', status:'ok',   links:'Dashboard:http://emqx.local:18083,文档:https://docs.emqx.com', note:'IoT 接入层，TLS 单向认证' },
+  { id:10, name:'Java (JDK)', category:'runtime',   version:'OpenJDK 21.0.3', ports:'',                   updated:'2025-03-15', status:'ok',   links:'发布说明:https://openjdk.org/projects/jdk/21', note:'统一基础镜像版本' },
+  { id:11, name:'Loki',       category:'monitor',   version:'3.0.0',  ports:'3100,9095',                   updated:'2025-04-10', status:'ok',   links:'Grafana:http://grafana.local:3000,文档:https://grafana.com/docs/loki', note:'与 Promtail + Grafana 联动' },
+];
+let nextId = 20;
+let sortKey = 'name', sortDir = 1;
+let activeFilter = 'all';
+let editId = null;
+
+/* ── Theme ── */
+function setTheme(t) {
+  document.body.classList.remove('dark', 'eyecare');
+  if (t === 'dark') document.body.classList.add('dark');
+  if (t === 'eyecare') document.body.classList.add('eyecare');
+  ['light','eyecare','dark'].forEach(k => {
+    document.getElementById('t-'+k).classList.toggle('active', k === t);
+  });
+  localStorage.setItem('theme', t);
+}
+(function() { const t = localStorage.getItem('theme'); if (t) setTheme(t); })();
+
+/* ── Search ── */
+function clearSearch() {
+  document.getElementById('search').value = '';
+  render();
+}
+
+/* ── Sort ── */
+function sortBy(k) {
+  if (sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = 1; }
+  document.querySelectorAll('.si').forEach(el => { el.textContent = '↕'; el.style.color = ''; });
+  const si = document.getElementById('si-' + k);
+  if (si) { si.textContent = sortDir === 1 ? '↑' : '↓'; }
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  render();
+}
+
+/* ── Filter ── */
+function setFilter(f) { activeFilter = f; render(); }
+
+function getRows() {
+  const q = (document.getElementById('search').value || '').toLowerCase().trim();
+  return data.filter(d => {
+    const catOk = activeFilter === 'all' || d.category === activeFilter;
+    const qOk = !q || [d.name, d.ports, d.version, d.note, d.category, d.links]
+      .some(v => (v||'').toLowerCase().includes(q));
+    return catOk && qOk;
+  }).sort((a, b) => {
+    const av = (a[sortKey] || '').toString().toLowerCase();
+    const bv = (b[sortKey] || '').toString().toLowerCase();
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+}
+
+/* ── Render stats ── */
+function renderStats() {
+  const ok = data.filter(d => d.status === 'ok').length;
+  const warn = data.filter(d => d.status === 'warn').length;
+  const cats = new Set(data.map(d => d.category)).size;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card"><span class="stat-num">${data.length}</span><span class="stat-lbl">组件总数</span></div>
+    <div class="stat-card"><span class="stat-num" style="color:var(--accent)">${ok}</span><span class="stat-lbl">运行中</span></div>
+    <div class="stat-card"><span class="stat-num" style="color:var(--warn)">${warn}</span><span class="stat-lbl">告警</span></div>
+    <div class="stat-card"><span class="stat-num">${cats}</span><span class="stat-lbl">分类数</span></div>
+  `;
+}
+
+/* ── Render filter tags ── */
+function renderFilters() {
+  const counts = {};
+  data.forEach(d => counts[d.category] = (counts[d.category] || 0) + 1);
+  let html = `<span class="ftag ${activeFilter==='all'?'active':''}" onclick="setFilter('all')">全部 (${data.length})</span>`;
+  Object.entries(CATS).forEach(([k, v]) => {
+    if (counts[k]) html += `<span class="ftag ${activeFilter===k?'active':''}" onclick="setFilter('${k}')">${v.label} (${counts[k]})</span>`;
+  });
+  document.getElementById('filterTags').innerHTML = html;
+}
+
+/* ── Render table ── */
+function renderTable(rows) {
+  if (!rows.length) {
+    document.getElementById('tbody').innerHTML = '<tr class="empty-row"><td colspan="10">没有匹配的组件</td></tr>';
+    return;
+  }
+  document.getElementById('tbody').innerHTML = rows.map((d, idx) => {
+    const cat = CATS[d.category] || { label: d.category, cls: '' };
+    const st  = STATUS[d.status] || STATUS.off;
+
+    // Ports — 空则显示 —
+    const portHtml = d.ports
+      ? d.ports.split(',').map(p => p.trim()).filter(Boolean)
+          .map(p => `<span class="port-tag" onclick="copyPort(this,'${p}')">${p}</span>`).join('')
+      : '<span style="color:var(--hint);font-size:11px">—</span>';
+
+    // Links parsing: support name:https://... (colon in URL)
+    function parseLinks(raw) {
+      if (!raw || !raw.trim()) return [];
+      return raw.split(',').map(item => {
+        item = item.trim();
+        const colonIdx = item.indexOf(':');
+        if (colonIdx === -1) return null;
+        const name = item.slice(0, colonIdx).trim();
+        const url  = item.slice(colonIdx + 1).trim();
+        // if url starts with http or https, it's valid
+        if (!url) return null;
+        const fullUrl = url.startsWith('http') ? url : 'http://' + url;
+        return { name: name || fullUrl, url: fullUrl };
+      }).filter(Boolean);
+    }
+    const links = parseLinks(d.links);
+    const linkHtml = links.length
+      ? links.map(l => `<a href="${l.url}" target="_blank">🔗 ${l.name}</a>`).join('')
+      : '<span style="color:var(--hint);font-size:11px">—</span>';
+
+    return `<tr>
+      <td class="seq">${idx + 1}</td>
+      <td><span class="cname">${d.name}</span></td>
+      <td><span class="cat-chip ${cat.cls}">${cat.label}</span></td>
+      <td><span class="ver">${d.version || '—'}</span></td>
+      <td><div class="ports-cell">${portHtml}</div></td>
+      <td class="date-cell">${d.updated || '—'}</td>
+      <td><div class="status-wrap"><span class="dot ${st.dot}"></span><span class="status-lbl">${st.lbl}</span></div></td>
+      <td class="links-cell">${linkHtml}</td>
+      <td class="note-cell">${d.note || ''}</td>
+      <td><div class="act-wrap">
+        <button class="act-btn" onclick="openModal(${d.id})">编辑</button>
+        <button class="act-btn del" onclick="delItem(${d.id})">删除</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function render() { renderStats(); renderFilters(); renderTable(getRows()); }
+
+/* ── Copy port ── */
+function copyPort(el, port) {
+  navigator.clipboard.writeText(port).then(() => {
+    el.classList.add('copied');
+    showToast('已复制端口：' + port);
+    setTimeout(() => el.classList.remove('copied'), 1200);
+  });
+}
+
+/* ── Toast ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ── Modal ── */
+function openModal(id) {
+  editId = id || null;
+  document.getElementById('modalTitle').textContent = id ? '编辑组件' : '新增组件';
+  const d = id ? (data.find(x => x.id === id) || {}) : {};
+  document.getElementById('f-name').value     = d.name     || '';
+  document.getElementById('f-category').value = d.category || 'storage';
+  document.getElementById('f-version').value  = d.version  || '';
+  document.getElementById('f-ports').value    = d.ports    || '';
+  document.getElementById('f-updated').value  = d.updated  || new Date().toISOString().slice(0,10);
+  document.getElementById('f-status').value   = d.status   || 'ok';
+  document.getElementById('f-links').value    = d.links    || '';
+  document.getElementById('f-note').value     = d.note     || '';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function saveItem() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { alert('组件名称不能为空'); return; }
+  const obj = {
+    name,
+    category: document.getElementById('f-category').value,
+    version:  document.getElementById('f-version').value.trim(),
+    ports:    document.getElementById('f-ports').value.trim(),
+    updated:  document.getElementById('f-updated').value,
+    status:   document.getElementById('f-status').value,
+    links:    document.getElementById('f-links').value.trim(),
+    note:     document.getElementById('f-note').value.trim(),
+  };
+  if (editId) {
+    const i = data.findIndex(x => x.id === editId);
+    if (i > -1) data[i] = { ...data[i], ...obj };
+  } else {
+    data.push({ id: nextId++, ...obj });
+  }
+  closeModal();
+  render();
+  showToast(editId ? '已更新：' + name : '已新增：' + name);
+}
+
+function delItem(id) {
+  const d = data.find(x => x.id === id);
+  if (!d) return;
+  if (!confirm('确认删除「' + d.name + '」？')) return;
+  data = data.filter(x => x.id !== id);
+  render();
+  showToast('已删除：' + d.name);
+}
+
+/* ── Init ── */
+render();
+</script>
+</body>
+</html>
