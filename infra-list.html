@@ -110,6 +110,15 @@
   }
   .add-btn:hover { opacity: .88; }
 
+  .export-btn {
+    height: 34px; padding: 0 14px; font-size: 13px;
+    background: var(--warn); color: #fff;
+    border: none; border-radius: var(--radius);
+    cursor: pointer; white-space: nowrap; font-weight: 500;
+    transition: opacity .15s;
+  }
+  .export-btn:hover { opacity: .88; }
+
   /* ── Filter bar ── */
   .filterbar {
     position: sticky; top: 52px; z-index: 40;
@@ -298,6 +307,100 @@
   }
   .btn-save:hover { opacity: .9; }
 
+  /* ── Export Modal - Dual List ── */
+  .export-lists-container {
+    display: flex; gap: 16px; margin-bottom: 24px;
+    height: 300px;
+  }
+  .export-list-container {
+    flex: 1;
+    display: flex; flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .export-list-header {
+    background: var(--surface2);
+    padding: 6px 12px;
+    font-size: 12px; font-weight: 600;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-buttons {
+    display: flex; gap: 4px;
+  }
+  .header-btn {
+    font-size: 10px; padding: 2px 6px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer; transition: all .15s;
+  }
+  .header-btn:hover {
+    background: var(--surface2);
+    border-color: var(--border);
+  }
+  .export-list {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--surface);
+  }
+  .export-list-item {
+    padding: 8px 12px;
+    font-size: 12px; color: var(--text);
+    cursor: pointer; user-select: none;
+    border-bottom: 1px solid var(--border);
+    transition: background-color .15s;
+    display: flex; align-items: center;
+    gap: 8px;
+  }
+  .export-list-item:last-child { border-bottom: none; }
+  .export-list-item:hover { background: var(--surface2); }
+  .export-list-item.selected {
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-left: 3px solid var(--accent);
+  }
+  .export-list-item input[type="checkbox"] {
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .export-list-item .col-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .export-list-item .col-key {
+    font-size: 10px; color: var(--hint);
+    flex-shrink: 0;
+  }
+  .export-list-buttons {
+    display: flex; flex-direction: column;
+    justify-content: center; gap: 8px;
+    width: 50px; align-items: center;
+  }
+  .export-move-btn {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .export-move-btn:hover {
+    background: var(--accent-bg);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .export-move-btn:disabled {
+    opacity: 0.4; cursor: not-allowed;
+  }
+
   /* ── Toast ── */
   .toast {
     position: fixed; bottom: 24px; right: 24px; z-index: 999;
@@ -309,6 +412,8 @@
   }
   .toast.show { opacity: 1; }
 </style>
+<!-- SheetJS for Excel export -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -326,6 +431,7 @@
     <button class="theme-btn" id="t-eyecare" onclick="setTheme('eyecare')">🍃 护眼</button>
     <button class="theme-btn" id="t-dark" onclick="setTheme('dark')">🌙 夜间</button>
   </div>
+  <button class="export-btn" onclick="openExportModal()">📤 导出</button>
   <button class="add-btn" onclick="openModal()">＋ 新增组件</button>
 </div>
 
@@ -399,6 +505,55 @@
   </div>
 </div>
 
+<!-- Export Modal -->
+<div class="modal-overlay" id="exportModalOverlay">
+  <div class="modal" onclick="event.stopPropagation()" style="width: 700px;">
+    <h3>导出选项</h3>
+    <div style="margin-bottom: 16px; font-size: 12px; color: var(--muted);">选择导出列并调整顺序（默认导出全部列）</div>
+
+    <div class="export-lists-container">
+      <div class="export-list-container">
+        <div class="export-list-header">
+          <span>可用列</span>
+          <div class="header-buttons">
+            <button class="header-btn" onclick="selectAllAvailable()" title="全选">全选</button>
+            <button class="header-btn" onclick="deselectAllAvailable()" title="全取消">全取消</button>
+          </div>
+        </div>
+        <div class="export-list" id="availableColumns">
+          <!-- Available columns will be populated here -->
+        </div>
+      </div>
+
+      <div class="export-list-buttons">
+        <button class="export-move-btn" onclick="moveToSelected()" title="添加到导出列">▶</button>
+        <button class="export-move-btn" onclick="moveToAvailable()" title="移除出导出列">◀</button>
+        <div style="height: 10px;"></div>
+        <button class="export-move-btn" onclick="moveUpSelected()" title="上移">↑</button>
+        <button class="export-move-btn" onclick="moveDownSelected()" title="下移">↓</button>
+      </div>
+
+      <div class="export-list-container">
+        <div class="export-list-header">
+          <span>导出列</span>
+          <div class="header-buttons">
+            <button class="header-btn" onclick="selectAllSelected()" title="全选">全选</button>
+            <button class="header-btn" onclick="deselectAllSelected()" title="全取消">全取消</button>
+          </div>
+        </div>
+        <div class="export-list" id="selectedColumns">
+          <!-- Selected columns will be populated here -->
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeExportModal()">取消</button>
+      <button class="btn-save" onclick="exportToExcel()">导出 Excel</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -435,6 +590,20 @@ let nextId = 20;
 let sortKey = 'name', sortDir = 1;
 let activeFilter = 'all';
 let editId = null;
+
+// Columns configuration for export
+const columnDefs = [
+  { key: 'seq', label: '序号', getter: (row, idx) => idx + 1 },
+  { key: 'name', label: '组件名称', getter: (row) => row.name },
+  { key: 'category', label: '分类', getter: (row) => (CATS[row.category] || { label: row.category }).label },
+  { key: 'version', label: '版本', getter: (row) => row.version || '' },
+  { key: 'ports', label: '端口', getter: (row) => row.ports || '' },
+  { key: 'updated', label: '更新日期', getter: (row) => row.updated || '' },
+  { key: 'status', label: '状态', getter: (row) => (STATUS[row.status] || STATUS.off).lbl },
+  { key: 'links', label: '相关链接', getter: (row) => row.links || '' },
+  { key: 'note', label: '备注', getter: (row) => row.note || '' },
+  // Note: '操作' column is not exported
+];
 
 /* ── Theme ── */
 function setTheme(t) {
@@ -597,6 +766,9 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+document.getElementById('exportModalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeExportModal();
+});
 
 function saveItem() {
   const name = document.getElementById('f-name').value.trim();
@@ -629,6 +801,263 @@ function delItem(id) {
   data = data.filter(x => x.id !== id);
   render();
   showToast('已删除：' + d.name);
+}
+
+/* ── Export Modal ── */
+function openExportModal() {
+  const availableList = document.getElementById('availableColumns');
+  const selectedList = document.getElementById('selectedColumns');
+
+  // Clear lists
+  availableList.innerHTML = '';
+  selectedList.innerHTML = '';
+
+  // By default, all columns are in available list (left side) with checkboxes
+  columnDefs.forEach(col => {
+    const item = createListItem(col, true); // Include checkbox for available list
+    availableList.appendChild(item);
+  });
+
+  document.getElementById('exportModalOverlay').classList.add('open');
+}
+
+function closeExportModal() {
+  document.getElementById('exportModalOverlay').classList.remove('open');
+}
+
+function createListItem(col, includeCheckbox = false) {
+  const div = document.createElement('div');
+  div.className = 'export-list-item';
+  div.dataset.key = col.key;
+
+  if (includeCheckbox) {
+    div.innerHTML = `
+      <input type="checkbox" class="export-checkbox">
+      <span class="col-label">${col.label}</span>
+      <span class="col-key">${col.key}</span>
+    `;
+  } else {
+    div.innerHTML = `
+      <span class="col-label">${col.label}</span>
+      <span class="col-key">${col.key}</span>
+    `;
+  }
+
+  div.addEventListener('click', function(e) {
+    // If clicking on checkbox, don't toggle selection
+    if (e.target.type === 'checkbox') return;
+    if (e.target.tagName === 'BUTTON') return;
+
+    // Toggle selection
+    const isSelected = this.classList.contains('selected');
+    document.querySelectorAll('.export-list-item.selected').forEach(el => {
+      el.classList.remove('selected');
+    });
+
+    if (!isSelected) {
+      this.classList.add('selected');
+    }
+  });
+
+  // Store the checkbox reference if present
+  if (includeCheckbox) {
+    div.checkbox = div.querySelector('input[type="checkbox"]');
+  }
+
+  return div;
+}
+
+// Get the currently selected list item (if any)
+function getSelectedItem() {
+  return document.querySelector('.export-list-item.selected');
+}
+
+// Move items from available to selected list
+function moveToSelected() {
+  const availableList = document.getElementById('availableColumns');
+  const selectedList = document.getElementById('selectedColumns');
+
+  // Get all checked checkboxes in available list
+  const checkedItems = Array.from(availableList.querySelectorAll('.export-list-item'))
+    .filter(item => {
+      const checkbox = item.querySelector('input[type="checkbox"]');
+      return checkbox && checkbox.checked;
+    });
+
+  if (checkedItems.length === 0) {
+    // If no checkboxes checked, try to move the highlighted item
+    const selectedItem = getSelectedItem();
+    if (!selectedItem || !availableList.contains(selectedItem)) {
+      alert('请先在左边列表中选择要导出的列（勾选复选框或点击选中）。');
+      return;
+    }
+    checkedItems.push(selectedItem);
+  }
+
+  // Move each checked item
+  checkedItems.forEach(item => {
+    const key = item.dataset.key;
+    const col = columnDefs.find(c => c.key === key);
+    if (!col) return;
+
+    // Create new item with checkbox for selected list
+    const newItem = createListItem(col, true);
+    selectedList.appendChild(newItem);
+
+    // Remove from available list
+    item.remove();
+  });
+}
+
+// Move items from selected to available list
+function moveToAvailable() {
+  const availableList = document.getElementById('availableColumns');
+  const selectedList = document.getElementById('selectedColumns');
+
+  // Get all checked checkboxes in selected list
+  const checkedItems = Array.from(selectedList.querySelectorAll('.export-list-item'))
+    .filter(item => {
+      const checkbox = item.querySelector('input[type="checkbox"]');
+      return checkbox && checkbox.checked;
+    });
+
+  if (checkedItems.length === 0) {
+    // If no checkboxes checked, try to move the highlighted item
+    const selectedItem = getSelectedItem();
+    if (!selectedItem || !selectedList.contains(selectedItem)) {
+      alert('请先在右边列表中选择要移除的列（勾选复选框或点击选中）。');
+      return;
+    }
+    checkedItems.push(selectedItem);
+  }
+
+  // Move each checked item
+  checkedItems.forEach(item => {
+    const key = item.dataset.key;
+    const col = columnDefs.find(c => c.key === key);
+    if (!col) return;
+
+    // Create new item with checkbox for available list
+    const newItem = createListItem(col, true);
+    availableList.appendChild(newItem);
+
+    // Remove from selected list
+    item.remove();
+  });
+}
+
+// Move selected item up in the selected list
+function moveUpSelected() {
+  const selectedItem = getSelectedItem();
+  if (!selectedItem) {
+    alert('请先在右边列表中选择要移动的列。');
+    return;
+  }
+
+  const selectedList = document.getElementById('selectedColumns');
+  if (!selectedList.contains(selectedItem)) {
+    alert('只能在导出列列表中调整顺序。');
+    return;
+  }
+
+  const prevSibling = selectedItem.previousElementSibling;
+  if (prevSibling) {
+    selectedList.insertBefore(selectedItem, prevSibling);
+  }
+}
+
+// Move selected item down in the selected list
+function moveDownSelected() {
+  const selectedItem = getSelectedItem();
+  if (!selectedItem) {
+    alert('请先在右边列表中选择要移动的列。');
+    return;
+  }
+
+  const selectedList = document.getElementById('selectedColumns');
+  if (!selectedList.contains(selectedItem)) {
+    alert('只能在导出列列表中调整顺序。');
+    return;
+  }
+
+  const nextSibling = selectedItem.nextElementSibling;
+  if (nextSibling) {
+    selectedList.insertBefore(nextSibling, selectedItem);
+  }
+}
+
+// Select all checkboxes in available list
+function selectAllAvailable() {
+  const availableList = document.getElementById('availableColumns');
+  const checkboxes = availableList.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = true);
+}
+
+// Deselect all checkboxes in available list
+function deselectAllAvailable() {
+  const availableList = document.getElementById('availableColumns');
+  const checkboxes = availableList.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = false);
+}
+
+// Select all checkboxes in selected list
+function selectAllSelected() {
+  const selectedList = document.getElementById('selectedColumns');
+  const checkboxes = selectedList.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = true);
+}
+
+// Deselect all checkboxes in selected list
+function deselectAllSelected() {
+  const selectedList = document.getElementById('selectedColumns');
+  const checkboxes = selectedList.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(cb => cb.checked = false);
+}
+
+function exportToExcel() {
+  // Get columns from selected list (right side)
+  const selectedList = document.getElementById('selectedColumns');
+  const selectedItems = Array.from(selectedList.querySelectorAll('.export-list-item'));
+
+  if (selectedItems.length === 0) {
+    alert('请至少选择一列进行导出。');
+    return;
+  }
+
+  // Get column definitions in the order they appear in the selected list
+  const selectedCols = selectedItems.map(item => {
+    const key = item.dataset.key;
+    return columnDefs.find(col => col.key === key);
+  }).filter(Boolean); // Filter out any undefined (should not happen)
+
+  // Get filtered rows (respecting search and filter)
+  const rows = getRows();
+
+  // Prepare data array
+  const dataArray = [];
+  // Header row
+  const headerRow = selectedCols.map(col => col.label);
+  dataArray.push(headerRow);
+
+  // Data rows
+  rows.forEach((row, idx) => {
+    const dataRow = selectedCols.map(col => col.getter(row, idx));
+    dataArray.push(dataRow);
+  });
+
+  // Create worksheet
+  const ws = XLSX.utils.aoa_to_sheet(dataArray);
+
+  // Create workbook
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '组件清单');
+
+  // Generate file and trigger download
+  XLSX.writeFile(wb, '基础设施组件清单.xlsx');
+
+  // Close modal
+  closeExportModal();
+  showToast('导出成功，文件已下载。');
 }
 
 /* ── Init ── */
