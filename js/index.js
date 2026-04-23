@@ -72,11 +72,11 @@ const database = [
             { cmd: "docker push zhangsan/myapp:v1.0", desc: "#docker,推送镜像" },
             { cmd: `docker ps -a --filter "status=exited"`, desc: "#docker,查询" },
             { cmd: "docker system prune -f --volumes", desc: "#docker,清理无用的镜像和卷" },
-            { cmd: `docker images -f "dangling=true"`, desc: "#docker,查询挂起的" },
+            { cmd: `docker images -f "dangling=true"`, desc: "#docker,查询挂起的镜像" },
             { cmd: "docker images | grep aeon | awk '{print $3}' | xargs docker rmi -f", desc: "#docker,清理无用的镜像和卷" },
             { cmd: "docker stats containerId", desc: "#docker,实时监控容器资源使用情况;docker stats 3. 监控所有运行中的容器" },
             { cmd: "docker run -m 512m --memory-swap 1g my_image", desc: "#docker,限制内存使用：可以在创建容器时设置内存限制" },
-
+            { cmd: "docker inspect rmqbroker --format='{{.State.OOMKilled}}'", desc: "#docker,检查容器是否因 OOM 被杀" },
             { cmd: "docker-compose ps -q | xargs docker inspect -f '{{.Name}}: {{.RestartCount}} 次重启'", desc: "#docker-compose,查看重启次数" },
             
             { cmd: `建立pos用户,目录，分配权限，切换sudo权限
@@ -454,6 +454,7 @@ server {
         id: "k8s",
         title: { zh: "K8s", en: "K8s" },
         type: "k8s",
+        layout: "grid", // 开启一行两个
         items: [
             { cmd: "kubectl -n roc-uat get pod|grep abc", desc: "get pod,abc 改成需要的.",doc:"" },
             { cmd: "kubectl rollout restart deploy -n roc-uat roc-goods", desc: "滚动重启" ,doc:"https://kubernetes.io/zh-cn/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/" },
@@ -662,7 +663,7 @@ const app = {
             let searchHtml = '';
 
             // 仅 cmd, k8s, nginx 类型显示搜索和标签
-            if (['cmd', 'k8s'].includes(section.type)) {
+            if (['cmd', 'k8s', 'list'].includes(section.type)) {
                 
                 // A. 搜索框
                 const ph = this.state.lang === 'zh' ? '搜索...' : 'Search...';
@@ -769,7 +770,8 @@ const app = {
                 for (const [cat, items] of Object.entries(groups)) {
                     const listItems = items.map(link => {
                         const descSpan = link.desc ? `<span class="link-desc">(${link.desc})</span>` : '';
-                        return `<li><a href="${link.url}" target="_blank">${link.text}</a>${descSpan}</li>`;
+                        const filterText = (link.text + ' ' + (link.desc || '') + ' ' + (link.category || '')).toLowerCase();
+                        return `<li data-filter="${app.escapeHtml(filterText)}"><a href="${link.url}" target="_blank">${link.text}</a>${descSpan}</li>`;
                     }).join('');
                     
                     contentHtml += `
@@ -861,12 +863,19 @@ const app = {
     },
     clearSearch(btn, sectionId) {
         const input = btn.previousElementSibling; input.value = ''; btn.style.display = 'none';
-        document.querySelectorAll(`#${sectionId} .cmd-box`).forEach(box => box.style.display = 'flex');
+        // 重置所有元素的显示状态
+        const boxes = document.querySelectorAll(`#${sectionId} .cmd-box`);
+        if (boxes.length > 0) {
+            boxes.forEach(box => box.style.display = 'flex');
+        } else {
+            // 链接区块：显示所有li和分类卡片
+            document.querySelectorAll(`#${sectionId} .link-ol li`).forEach(li => li.style.display = '');
+            document.querySelectorAll(`#${sectionId} .link-category-card`).forEach(card => card.style.display = '');
+        }
 
-        // input.focus();
-         // 触发筛选（此时会保留标签的选择状态，只清空了搜索词）
-         app.filterSection(sectionId);
-         input.focus();
+        // 触发筛选（此时会保留标签的选择状态，只清空了搜索词）
+        app.filterSection(sectionId);
+        input.focus();
     },
     toggleMenu() { document.getElementById('mobile-menu').classList.toggle('open'); },
     closeMenu() { document.getElementById('mobile-menu').classList.remove('open'); },
@@ -1063,23 +1072,54 @@ const app = {
 
         // 3. 遍历并筛选
         const boxes = section.querySelectorAll('.cmd-box');
-        boxes.forEach(box => {
-            const textMatch = box.getAttribute('data-filter').includes(term);
-            
-            // 标签匹配逻辑：如果选了标签，检查 data-tags 是否包含该标签
-            let tagMatch = true;
-            if (selectedTag) {
-                const boxTags = box.getAttribute('data-tags').split(',');
-                tagMatch = boxTags.includes(selectedTag);
-            }
+        if (boxes.length > 0) {
+            // 命令区块过滤逻辑
+            boxes.forEach(box => {
+                const textMatch = box.getAttribute('data-filter').includes(term);
 
-            // 同时满足才显示
-            if (textMatch && tagMatch) {
-                box.style.display = 'flex';
-            } else {
-                box.style.display = 'none';
-            }
-        });
+                // 标签匹配逻辑：如果选了标签，检查 data-tags 是否包含该标签
+                let tagMatch = true;
+                if (selectedTag) {
+                    const boxTags = box.getAttribute('data-tags').split(',');
+                    tagMatch = boxTags.includes(selectedTag);
+                }
+
+                // 同时满足才显示
+                if (textMatch && tagMatch) {
+                    box.style.display = 'flex';
+                } else {
+                    box.style.display = 'none';
+                }
+            });
+        } else {
+            // 链接区块过滤逻辑
+            const linkItems = section.querySelectorAll('.link-ol li');
+            linkItems.forEach(li => {
+                const textMatch = li.getAttribute('data-filter').includes(term);
+                if (textMatch) {
+                    li.style.display = '';
+                } else {
+                    li.style.display = 'none';
+                }
+            });
+
+            // 处理分类卡片：隐藏没有可见链接的卡片
+            const categoryCards = section.querySelectorAll('.link-category-card');
+            categoryCards.forEach(card => {
+                const links = card.querySelectorAll('.link-ol li');
+                let hasVisible = false;
+                links.forEach(li => {
+                    if (li.style.display !== 'none') {
+                        hasVisible = true;
+                    }
+                });
+                if (!hasVisible) {
+                    card.style.display = 'none';
+                } else {
+                    card.style.display = '';
+                }
+            });
+        }
     },
 
 };
