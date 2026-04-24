@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服务器配置清单</title>
+<style>
+  :root {
+    --bg:        #f5f6f0;
+    --surface:   #ffffff;
+    --surface2:  #f0f1eb;
+    --border:    #ddddd5;
+    --border2:   #c8c9c0;
+    --text:      #2c2c28;
+    --muted:     #6b6b65;
+    --hint:      #9e9e97;
+    --accent:    #2d8c5e;
+    --accent-bg: #e6f4ed;
+    --warn:      #c97c10;
+    --warn-bg:   #fef4e0;
+    --danger:    #c23b3b;
+    --danger-bg: #fff0f0;
+    --mono:      'JetBrains Mono','Cascadia Code','Fira Mono','Courier New',monospace;
+    --radius:    8px;
+    --radius-lg: 12px;
+  }
+  body.dark {
+    --bg:        #1c1e1a;
+    --surface:   #242620;
+    --surface2:  #2c2e28;
+    --border:    #3a3d35;
+    --border2:   #4a4d44;
+    --text:      #e8e8e0;
+    --muted:     #a0a098;
+    --hint:      #686860;
+    --accent:    #4ab87a;
+    --accent-bg: #1a3326;
+    --warn:      #e8a030;
+    --warn-bg:   #332610;
+    --danger:    #e06060;
+    --danger-bg: #3a1818;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; }
+  body { background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; transition: background .2s,color .2s; }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex; align-items: center; gap: 12px; height: 52px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .topbar-title { font-size: 15px; font-weight: 600; white-space: nowrap; color: var(--text); }
+  .topbar-title span { color: var(--accent); }
+  .topbar-spacer { flex: 1; }
+
+  .search-wrap { position: relative; display: flex; align-items: center; }
+  .search-wrap input {
+    height: 34px; padding: 0 32px 0 32px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface2);
+    color: var(--text); font-size: 13px;
+    width: 200px; outline: none;
+    transition: border-color .15s,width .2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); width: 260px; }
+  .search-wrap .ico-search {
+    position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+    color: var(--hint); font-size: 14px; pointer-events: none;
+  }
+  .search-wrap .btn-clear {
+    position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--hint); color: var(--surface);
+    border: none; cursor: pointer; font-size: 11px; line-height: 18px; text-align: center;
+    display: none; padding: 0;
+  }
+  .search-wrap input:not(:placeholder-shown) ~ .btn-clear { display: block; }
+
+  .theme-group { display: flex; gap: 4px; }
+  .theme-btn {
+    height: 30px; padding: 0 10px; font-size: 12px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface2); color: var(--muted);
+    cursor: pointer; white-space: nowrap; transition: all .15s;
+  }
+  .theme-btn:hover, .theme-btn.active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+  .action-btn {
+    height: 34px; padding: 0 14px; font-size: 13px;
+    border: none; border-radius: var(--radius);
+    cursor: pointer; white-space: nowrap; font-weight: 500;
+    transition: opacity .15s;
+  }
+  .action-btn:hover { opacity: .88; }
+  .btn-add { background: var(--accent); color: #fff; }
+  .btn-export { background: var(--warn); color: #fff; }
+  .btn-template { background: #5b6abf; color: #fff; }
+
+  /* ── Tab bar ── */
+  .tabbar {
+    position: sticky; top: 52px; z-index: 45;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex; align-items: center; gap: 0;
+  }
+  .tab {
+    padding: 10px 20px; font-size: 13px; font-weight: 500;
+    color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .15s; user-select: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-badge {
+    display: inline-block; font-size: 10px; padding: 1px 6px;
+    border-radius: 10px; background: var(--surface2); color: var(--hint);
+    margin-left: 5px; font-weight: 400;
+  }
+  .tab.active .tab-badge { background: var(--accent-bg); color: var(--accent); }
+
+  /* ── Template bar ── */
+  .templatebar {
+    position: sticky; top: 93px; z-index: 40;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .templatebar label { font-size: 11px; color: var(--hint); white-space: nowrap; }
+  .templatebar select {
+    height: 32px; padding: 0 10px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text); font-size: 13px;
+    outline: none; min-width: 140px;
+  }
+  .templatebar select:focus { border-color: var(--accent); }
+  .tbtn {
+    height: 32px; padding: 0 12px; font-size: 12px; font-weight: 500;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text);
+    cursor: pointer; transition: all .12s; white-space: nowrap;
+  }
+  .tbtn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+  .title-input {
+    font-size: 15px; font-weight: 600;
+    border: none; background: transparent;
+    color: var(--text); outline: none;
+    width: 280px; padding: 4px 8px;
+    border-radius: var(--radius);
+    transition: background .15s;
+  }
+  .title-input:hover { background: var(--surface2); }
+  .title-input:focus { background: var(--surface2); }
+  .tbar-spacer { flex: 1; }
+  .inline-stat { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .inline-stat strong { color: var(--text); font-family: var(--mono); font-weight: 600; }
+
+  /* ── Stats ── */
+  .stats-row {
+    display: flex; gap: 10px; padding: 14px 20px 0;
+    flex-wrap: wrap;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 18px;
+    display: flex; align-items: baseline; gap: 7px;
+  }
+  .stat-num { font-size: 22px; font-weight: 700; font-family: var(--mono); }
+  .stat-lbl { font-size: 11px; color: var(--muted); }
+
+  /* ── Table ── */
+  .tbl-wrap {
+    margin: 14px 20px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: auto;
+    background: var(--surface);
+  }
+  table { width: 100%; border-collapse: collapse; table-layout: auto; min-width: 1200px; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 9px 10px;
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-align: left; white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+    position: relative;
+    letter-spacing: .03em;
+  }
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    font-size: 13px;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .seq { font-family: var(--mono); font-size: 11px; color: var(--hint); text-align: center; width: 36px; }
+  .sname { font-weight: 600; font-size: 13px; color: var(--text); }
+  .ip-addr { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .cat-chip {
+    display: inline-block; font-size: 10px; font-weight: 500;
+    padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+  }
+  .c-os        { background: #e8f0f8; color: #1a5080; }
+  .c-db        { background: #fce4f0; color: #8b2050; }
+  .c-middleware{ background: #fde8e0; color: #8b3010; }
+  .c-k8s       { background: #e0f2ea; color: #1a6640; }
+  .c-monitor   { background: #e8f4d8; color: #366010; }
+  .c-log       { background: #fef3d8; color: #8b5500; }
+  .c-other     { background: #eeebff; color: #4030a0; }
+  body.dark .c-os         { background: #0c2a48; color: #80b0e8; }
+  body.dark .c-db         { background: #3a0c24; color: #f0a0c0; }
+  body.dark .c-middleware { background: #4a1808; color: #f5b090; }
+  body.dark .c-k8s        { background: #0c3a20; color: #7ddaa8; }
+  body.dark .c-monitor    { background: #1a3008; color: #a0d060; }
+  body.dark .c-log        { background: #3a2200; color: #f0c060; }
+  body.dark .c-other      { background: #201448; color: #b0a0f8; }
+  .func-tag { font-size: 11px; color: var(--muted); }
+  .os-tag { font-size: 11px; color: var(--muted); }
+  .num-cell { font-family: var(--mono); font-size: 12px; text-align: right; }
+  .note-cell { font-size: 12px; color: var(--muted); max-width: 160px; word-break: break-all; }
+  tr.total-row td { background: var(--accent-bg); border-top: 2px solid var(--accent); font-weight: 600; }
+  tr.total-row .num-cell { color: var(--accent); }
+
+  .act-wrap { display: flex; gap: 3px; white-space: nowrap; }
+  th[draggable="true"] { cursor: grab; user-select: none; }
+  th[draggable="true"]:active { cursor: grabbing; }
+  th.drag-src { opacity: 0.35; }
+  th.drag-over { background: var(--accent-bg) !important; }
+  th .resize-handle {
+    position: absolute; top: 0; right: 0;
+    width: 7px; height: 100%;
+    cursor: col-resize; user-select: none; z-index: 2;
+    background: transparent;
+  }
+  th .resize-handle:hover,
+  th .resize-handle.resizing { background: var(--accent); }
+  .act-btn {
+    height: 26px; padding: 0 7px; font-size: 11px;
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    background: var(--surface2); color: var(--muted);
+    cursor: pointer; transition: all .12s;
+  }
+  .act-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface); }
+  .act-btn.del:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-bg); }
+  .act-btn.up:hover, .act-btn.down:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+
+  .empty-row td { text-align: center; padding: 40px; color: var(--hint); font-size: 13px; }
+
+  /* ── Modal (通用) ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,.48);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 24px; width: 520px; max-width: 94vw;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  }
+  .modal.wide { width: 700px; }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .modal p.hint { font-size: 12px; color: var(--hint); margin-bottom: 16px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%; height: 34px; padding: 0 10px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text); font-size: 13px;
+    outline: none; font-family: inherit; transition: border-color .15s;
+  }
+  .form-row textarea { height: 60px; padding: 8px 10px; resize: vertical; }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--accent); }
+  .form-row input[type="number"] { text-align: right; font-family: var(--mono); }
+
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .btn-cancel {
+    height: 34px; padding: 0 14px; font-size: 13px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: var(--radius); cursor: pointer; color: var(--text);
+  }
+  .btn-save {
+    height: 34px; padding: 0 18px; font-size: 13px; font-weight: 500;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius); cursor: pointer;
+  }
+  .btn-save:hover { opacity: .9; }
+  .btn-danger {
+    height: 34px; padding: 0 18px; font-size: 13px; font-weight: 500;
+    background: var(--danger); color: #fff;
+    border: none; border-radius: var(--radius); cursor: pointer;
+  }
+  .btn-danger:hover { opacity: .9; }
+
+  /* ── Export Modal Dual List ── */
+  .export-lists-container {
+    display: flex; gap: 16px; margin-bottom: 20px;
+    height: 300px;
+  }
+  .export-list-container {
+    flex: 1;
+    display: flex; flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .export-list-header {
+    background: var(--surface2);
+    padding: 6px 12px;
+    font-size: 12px; font-weight: 600;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-buttons { display: flex; gap: 4px; }
+  .header-btn {
+    font-size: 10px; padding: 2px 6px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer; transition: all .15s;
+  }
+  .header-btn:hover { background: var(--surface2); border-color: var(--border); }
+  .export-list {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--surface);
+  }
+  .export-list-item {
+    padding: 8px 12px;
+    font-size: 12px; color: var(--text);
+    cursor: pointer; user-select: none;
+    border-bottom: 1px solid var(--border);
+    transition: background-color .15s;
+    display: flex; align-items: center;
+    gap: 8px;
+  }
+  .export-list-item:last-child { border-bottom: none; }
+  .export-list-item:hover { background: var(--surface2); }
+  .export-list-item.selected {
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-left: 3px solid var(--accent);
+  }
+  .export-list-item input[type="checkbox"] { margin: 0; flex-shrink: 0; }
+  .export-list-item .col-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .export-list-item .col-key { font-size: 10px; color: var(--hint); flex-shrink: 0; }
+  .export-list-buttons {
+    display: flex; flex-direction: column;
+    justify-content: center; gap: 8px;
+    width: 50px; align-items: center;
+  }
+  .export-move-btn {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .export-move-btn:hover { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+  .export-move-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Template Management ── */
+  .tmpl-list { margin-bottom: 16px; }
+  .tmpl-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    transition: background .12s;
+  }
+  .tmpl-item:hover { background: var(--surface2); }
+  .tmpl-icon {
+    width: 36px; height: 36px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .tmpl-icon.k8s { background: #e0f2ea; color: #1a6640; }
+  .tmpl-icon.normal { background: #e8f0f8; color: #1a5080; }
+  .tmpl-info { flex: 1; min-width: 0; }
+  .tmpl-name { font-weight: 600; font-size: 13px; }
+  .tmpl-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .tmpl-acts { display: flex; gap: 4px; flex-shrink: 0; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: #222; color: #fff;
+    padding: 8px 16px; border-radius: var(--radius);
+    font-size: 12px; opacity: 0;
+    transition: opacity .2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── K8s template extra form ── */
+  .k8s-section { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-top: 8px; }
+  .k8s-section h4 { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+  .form-row-sm label { font-size: 10px; color: var(--hint); margin-bottom: 2px; display: block; }
+  .form-row-sm input, .form-row-sm select {
+    width: 100%; height: 28px; padding: 0 8px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text); font-size: 12px;
+    outline: none; font-family: inherit;
+  }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+  .grid-5 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 6px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ Top bar ═══ -->
+<div class="topbar">
+  <div class="topbar-title">🖥 INFRA <span>服务器清单</span></div>
+  <input type="text" class="title-input" id="reportTitle" value="xxx客户的服务器配置清单">
+  <div class="search-wrap">
+    <span class="ico-search">🔍</span>
+    <input type="text" id="search" placeholder="搜索名称、IP、分类…" oninput="render()">
+    <button class="btn-clear" onclick="clearSearch()" title="清空">✕</button>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="theme-group">
+    <button class="theme-btn active" id="t-light" onclick="setTheme('light')">☀ 日间</button>
+    <button class="theme-btn" id="t-eyecare" onclick="setTheme('eyecare')">🍃 护眼</button>
+    <button class="theme-btn" id="t-dark" onclick="setTheme('dark')">🌙 夜间</button>
+  </div>
+  <button class="action-btn btn-export" onclick="openExportModal()">📤 导出</button>
+  <button class="action-btn btn-add" onclick="openModal()">＋ 新增</button>
+</div>
+
+<!-- ═══ Tab bar ═══ -->
+<div class="tabbar">
+  <div class="tab active" data-tab="test" onclick="switchTab('test')">测试环境 <span class="tab-badge" id="badge-test">0</span></div>
+  <div class="tab" data-tab="prod" onclick="switchTab('prod')">生产环境 <span class="tab-badge" id="badge-prod">0</span></div>
+</div>
+
+<!-- ═══ Template bar ═══ -->
+<div class="templatebar">
+  <label>选择模板：</label>
+  <select id="templateSelect"></select>
+  <button class="tbtn" onclick="applyTemplate()">📥 应用模板</button>
+  <button class="tbtn" onclick="openTemplateMgr()">⚙ 管理模板</button>
+  <div class="tbar-spacer"></div>
+  <span class="inline-stat">机器：<strong id="st-count">0</strong></span>
+  <span class="inline-stat" style="margin-left:12px;">CPU：<strong id="st-cpu">0</strong></span>
+  <span class="inline-stat" style="margin-left:12px;">内存：<strong id="st-mem">0</strong> GB</span>
+  <span class="inline-stat" style="margin-left:12px;">数据盘：<strong id="st-disk">0</strong> GB</span>
+</div>
+
+<!-- ═══ Table ═══ -->
+<div class="tbl-wrap">
+  <table>
+    <thead id="thead"></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<!-- ═══ Modal: Add/Edit Server ═══ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modalTitle">新增服务器</h3>
+    <div class="form-grid">
+      <div class="form-row full"><label>服务器名称 *</label><input id="f-name" placeholder="如 app-server-01"></div>
+      <div class="form-row"><label>IP地址</label><input id="f-ip" placeholder="如 192.168.1.10"></div>
+      <div class="form-row"><label>分类</label>
+        <select id="f-category">
+          <option value="操作系统类">操作系统类</option>
+          <option value="数据库类">数据库类</option>
+          <option value="中间件类">中间件类</option>
+          <option value="K8s类">K8s类</option>
+          <option value="监控类">监控类</option>
+          <option value="日志类">日志类</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+      <div class="form-row"><label>职能</label>
+        <select id="f-function">
+          <option value="应用服务">应用服务</option>
+          <option value="数据处理">数据处理</option>
+          <option value="消息队列">消息队列</option>
+          <option value="调度管理">调度管理</option>
+          <option value="存储备份">存储备份</option>
+          <option value="监控告警">监控告警</option>
+          <option value="日志收集">日志收集</option>
+        </select>
+      </div>
+      <div class="form-row"><label>操作系统</label>
+        <select id="f-os">
+          <option value="Linux">Linux</option>
+          <option value="CentOS">CentOS</option>
+          <option value="Ubuntu">Ubuntu</option>
+          <option value="Rocky Linux">Rocky Linux</option>
+          <option value="Windows Server">Windows Server</option>
+        </select>
+      </div>
+      <div class="form-row"><label>服务器数量</label><input id="f-count" type="number" min="1" value="1"></div>
+      <div class="form-row"><label>CPU (核)</label><input id="f-cpu" type="number" min="1" value="8"></div>
+      <div class="form-row"><label>内存 (GB)</label><input id="f-memory" type="number" min="1" value="16"></div>
+      <div class="form-row"><label>系统盘 (GB)</label><input id="f-sysDisk" type="number" min="1" value="100"></div>
+      <div class="form-row"><label>数据盘 (GB)</label><input id="f-dataDisk" type="number" min="0" value="200"></div>
+      <div class="form-row full"><label>备注</label><textarea id="f-note" placeholder="简要描述…"></textarea></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-save" onclick="saveItem()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Export ═══ -->
+<div class="modal-overlay" id="exportModalOverlay">
+  <div class="modal wide" onclick="event.stopPropagation()">
+    <h3>导出 Excel</h3>
+    <p class="hint">选择导出列并调整顺序（默认全部列），将同时导出测试环境和生产环境至同一文件的不同 Sheet。</p>
+    <div class="export-lists-container">
+      <div class="export-list-container">
+        <div class="export-list-header">
+          <span>可用列</span>
+          <div class="header-buttons">
+            <button class="header-btn" onclick="selectAll('available',true)" title="全选">全选</button>
+            <button class="header-btn" onclick="selectAll('available',false)" title="全取消">全取消</button>
+          </div>
+        </div>
+        <div class="export-list" id="availableColumns"></div>
+      </div>
+      <div class="export-list-buttons">
+        <button class="export-move-btn" onclick="moveColumns('toSelected')" title="添加到导出列">▶</button>
+        <button class="export-move-btn" onclick="moveColumns('toAvailable')" title="移除出导出列">◀</button>
+        <div style="height:10px"></div>
+        <button class="export-move-btn" onclick="moveColumn('up')" title="上移">↑</button>
+        <button class="export-move-btn" onclick="moveColumn('down')" title="下移">↓</button>
+      </div>
+      <div class="export-list-container">
+        <div class="export-list-header">
+          <span>导出列</span>
+          <div class="header-buttons">
+            <button class="header-btn" onclick="selectAll('selected',true)" title="全选">全选</button>
+            <button class="header-btn" onclick="selectAll('selected',false)" title="全取消">全取消</button>
+          </div>
+        </div>
+        <div class="export-list" id="selectedColumns"></div>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeExportModal()">取消</button>
+      <button class="btn-save" onclick="exportToExcel()">导出 Excel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Template Management ═══ -->
+<div class="modal-overlay" id="tmplMgrOverlay">
+  <div class="modal wide" onclick="event.stopPropagation()">
+    <h3>模板管理</h3>
+    <div class="tmpl-list" id="tmplList"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeTemplateMgr()">关闭</button>
+      <button class="action-btn btn-add" onclick="openTemplateEdit()" style="height:34px;padding:0 14px;font-size:13px;border:none;border-radius:8px;cursor:pointer;font-weight:500;">＋ 新增模板</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Template Add/Edit ═══ -->
+<div class="modal-overlay" id="tmplEditOverlay">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="tmplEditTitle">新增模板</h3>
+    <div class="form-grid">
+      <div class="form-row full"><label>模板名称 *</label><input id="tf-name" placeholder="如 MySQL数据库"></div>
+      <div class="form-row"><label>分类</label>
+        <select id="tf-category">
+          <option value="操作系统类">操作系统类</option>
+          <option value="数据库类">数据库类</option>
+          <option value="中间件类">中间件类</option>
+          <option value="K8s类">K8s类</option>
+          <option value="监控类">监控类</option>
+          <option value="日志类">日志类</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+      <div class="form-row"><label>职能</label>
+        <select id="tf-function">
+          <option value="应用服务">应用服务</option>
+          <option value="数据处理">数据处理</option>
+          <option value="消息队列">消息队列</option>
+          <option value="调度管理">调度管理</option>
+          <option value="存储备份">存储备份</option>
+          <option value="监控告警">监控告警</option>
+          <option value="日志收集">日志收集</option>
+        </select>
+      </div>
+      <div class="form-row full"><label>模板类型</label>
+        <select id="tf-type" onchange="toggleTmplType()">
+          <option value="normal">普通服务器</option>
+          <option value="k8s">K8s集群</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Normal template fields -->
+    <div id="tf-normal">
+      <div class="grid-5" style="margin-top:8px;">
+        <div class="form-row-sm"><label>CPU (核)</label><input id="tf-cpu" type="number" min="1" value="8"></div>
+        <div class="form-row-sm"><label>内存 (GB)</label><input id="tf-memory" type="number" min="1" value="16"></div>
+        <div class="form-row-sm"><label>系统盘 (GB)</label><input id="tf-sysDisk" type="number" min="1" value="100"></div>
+        <div class="form-row-sm"><label>数据盘 (GB)</label><input id="tf-dataDisk" type="number" min="0" value="200"></div>
+        <div class="form-row-sm"><label>机器数量</label><input id="tf-count" type="number" min="1" value="1"></div>
+      </div>
+    </div>
+
+    <!-- K8s template fields -->
+    <div id="tf-k8s" style="display:none;">
+      <div class="k8s-section">
+        <h4>Master 节点配置</h4>
+        <div class="grid-5">
+          <div class="form-row-sm"><label>CPU (核)</label><input id="tf-mCpu" type="number" min="1" value="8"></div>
+          <div class="form-row-sm"><label>内存 (GB)</label><input id="tf-mMemory" type="number" min="1" value="16"></div>
+          <div class="form-row-sm"><label>系统盘 (GB)</label><input id="tf-mSysDisk" type="number" min="1" value="200"></div>
+          <div class="form-row-sm"><label>数据盘 (GB)</label><input id="tf-mDataDisk" type="number" min="0" value="0"></div>
+          <div class="form-row-sm"><label>机器数量</label><input id="tf-mCount" type="number" min="1" value="3"></div>
+        </div>
+      </div>
+      <div class="k8s-section" style="margin-top:8px;">
+        <h4>Node 节点配置</h4>
+        <div class="grid-5">
+          <div class="form-row-sm"><label>CPU (核)</label><input id="tf-nCpu" type="number" min="1" value="16"></div>
+          <div class="form-row-sm"><label>内存 (GB)</label><input id="tf-nMemory" type="number" min="1" value="64"></div>
+          <div class="form-row-sm"><label>系统盘 (GB)</label><input id="tf-nSysDisk" type="number" min="1" value="200"></div>
+          <div class="form-row-sm"><label>数据盘 (GB)</label><input id="tf-nDataDisk" type="number" min="0" value="500"></div>
+          <div class="form-row-sm"><label>机器数量</label><input id="tf-nCount" type="number" min="1" value="5"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row full" style="margin-top:8px;"><label>备注</label><textarea id="tf-note" placeholder="模板描述…"></textarea></div>
+
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeTemplateEdit()">取消</button>
+      <button class="btn-save" onclick="saveTemplate()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══ ExcelJS ═══ -->
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  DATA — JSON-friendly configuration
+// ═══════════════════════════════════════════════════
+
+const categoryMap = {
+  '操作系统类': 'c-os', '数据库类': 'c-db', '中间件类': 'c-middleware',
+  'K8s类': 'c-k8s', '监控类': 'c-monitor', '日志类': 'c-log', '其他': 'c-other'
+};
+
+// ── Default Templates ──
+let templates = [
+  { id:'ob',  name:'OB数据库',   category:'数据库类', function:'数据处理',  type:'normal', cpu:16, memory:64,  sysDisk:500,  dataDisk:1000, count:3, note:'OceanBase分布式数据库' },
+  { id:'mysql', name:'MySQL数据库', category:'数据库类', function:'数据处理', type:'normal', cpu:8,  memory:32,  sysDisk:200,  dataDisk:500,  count:2, note:'MySQL主从部署' },
+  { id:'mw',  name:'中间件',     category:'中间件类', function:'应用服务',  type:'normal', cpu:8,  memory:16,  sysDisk:100,  dataDisk:200,  count:2, note:'Tomcat / Nginx 等中间件' },
+  { id:'k8s', name:'K8s集群',   category:'K8s类',    function:'调度管理',  type:'k8s',
+    masterCpu:8, masterMemory:16, masterSysDisk:200, masterDataDisk:0,   masterCount:3,
+    nodeCpu:16,  nodeMemory:64,  nodeSysDisk:200,   nodeDataDisk:500,    nodeCount:5,
+    note:'Kubernetes 生产集群' },
+  { id:'mon', name:'监控',       category:'监控类',   function:'监控告警',  type:'normal', cpu:8,  memory:32,  sysDisk:200,  dataDisk:500,  count:2, note:'Prometheus + Grafana' },
+  { id:'alert', name:'告警',     category:'监控类',   function:'监控告警',  type:'normal', cpu:4,  memory:8,   sysDisk:100,  dataDisk:200,  count:1, note:'告警中心' },
+  { id:'log', name:'日志',       category:'日志类',   function:'日志收集',  type:'normal', cpu:16, memory:64,  sysDisk:500,  dataDisk:2000, count:3, note:'ELK / Loki 日志集群' },
+];
+let tmplNextId = 100;
+
+// ── Environment Data ──
+let testData = [
+  { id:1, name:'app-server-01', ip:'', category:'中间件类', function:'应用服务', os:'Linux', count:2, cpu:8, memory:16, sysDisk:100, dataDisk:200, note:'应用服务器集群' },
+  { id:2, name:'mysql-test-01', ip:'', category:'数据库类', function:'数据处理', os:'Linux', count:1, cpu:8, memory:32, sysDisk:200, dataDisk:500, note:'MySQL测试库' },
+  { id:3, name:'redis-test-01', ip:'', category:'数据库类', function:'数据处理', os:'Linux', count:1, cpu:4, memory:8,  sysDisk:100, dataDisk:200, note:'Redis缓存' },
+];
+let prodData = [];
+let nextId = 100;
+
+let currentTab = 'test';
+let editId = null;
+let tmplEditId = null;
+
+// ── Column Definitions (for export) ──
+const columnDefs = [
+  { key:'seq',      label:'序号' },
+  { key:'name',     label:'服务器名称' },
+  { key:'ip',       label:'IP地址' },
+  { key:'category', label:'分类' },
+  { key:'function', label:'职能' },
+  { key:'os',       label:'操作系统' },
+  { key:'count',    label:'服务器数量' },
+  { key:'cpu',      label:'CPU' },
+  { key:'memory',   label:'内存(G)' },
+  { key:'sysDisk',  label:'系统盘(G)' },
+  { key:'dataDisk', label:'数据盘(G)' },
+  { key:'note',     label:'备注' },
+];
+const sumKeys = ['count','cpu','memory','sysDisk','dataDisk'];
+
+// ── Grid column order (drag-reorderable) ──
+let columnOrder = ['seq','name','ip','category','function','os','count','cpu','memory','sysDisk','dataDisk','note','actions'];
+let columnWidths = {};
+
+const headerHtml = {
+  seq:'<th class="seq" draggable="true" data-col="seq">#</th>',
+  name:'<th draggable="true" data-col="name">服务器名称</th>',
+  ip:'<th draggable="true" data-col="ip">IP地址</th>',
+  category:'<th draggable="true" data-col="category">分类</th>',
+  function:'<th draggable="true" data-col="function">职能</th>',
+  os:'<th draggable="true" data-col="os">操作系统</th>',
+  count:'<th draggable="true" data-col="count" style="text-align:right">服务器数量</th>',
+  cpu:'<th draggable="true" data-col="cpu" style="text-align:right">CPU</th>',
+  memory:'<th draggable="true" data-col="memory" style="text-align:right">内存(G)</th>',
+  sysDisk:'<th draggable="true" data-col="sysDisk" style="text-align:right">系统盘(G)</th>',
+  dataDisk:'<th draggable="true" data-col="dataDisk" style="text-align:right">数据盘(G)</th>',
+  note:'<th draggable="true" data-col="note">备注</th>',
+  actions:'<th draggable="true" data-col="actions" style="width:130px">操作</th>',
+};
+
+const cellHtml = {
+  seq:     (d,idx) => `<td class="seq">${idx+1}</td>`,
+  name:    (d) => `<td><span class="sname">${escHtml(d.name)}</span></td>`,
+  ip:      (d) => `<td><span class="ip-addr">${d.ip||'—'}</span></td>`,
+  category:(d) => `<td><span class="cat-chip ${categoryMap[d.category]||'c-other'}">${d.category}</span></td>`,
+  function:(d) => `<td><span class="func-tag">${d.function||'—'}</span></td>`,
+  os:      (d) => `<td><span class="os-tag">${d.os||'—'}</span></td>`,
+  count:   (d) => `<td class="num-cell">${d.count}</td>`,
+  cpu:     (d) => `<td class="num-cell">${(d.cpu||0)*(d.count||1)}</td>`,
+  memory:  (d) => `<td class="num-cell">${(d.memory||0)*(d.count||1)}</td>`,
+  sysDisk: (d) => `<td class="num-cell">${(d.sysDisk||0)*(d.count||1)}</td>`,
+  dataDisk:(d) => `<td class="num-cell">${(d.dataDisk||0)*(d.count||1)}</td>`,
+  note:    (d) => `<td class="note-cell">${escHtml(d.note||'')}</td>`,
+  actions: (d) => `<td><div class="act-wrap"><button class="act-btn up" onclick="moveRow(${d.id},-1)" title="上移">↑</button><button class="act-btn down" onclick="moveRow(${d.id},1)" title="下移">↓</button><button class="act-btn" onclick="openModal(${d.id})">编辑</button><button class="act-btn del" onclick="delItem(${d.id})">删除</button></div></td>`,
+};
+
+// ═══════════════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════════════
+
+function setTheme(t) {
+  document.body.classList.remove('dark','eyecare');
+  if (t==='dark') document.body.classList.add('dark');
+  if (t==='eyecare') document.body.classList.add('eyecare');
+  ['light','eyecare','dark'].forEach(k => document.getElementById('t-'+k).classList.toggle('active',k===t));
+  localStorage.setItem('theme',t);
+}
+(function(){ const t=localStorage.getItem('theme'); if(t) setTheme(t); })();
+
+// ═══════════════════════════════════════════════════
+//  UTILITY
+// ═══════════════════════════════════════════════════
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+function clearSearch() {
+  document.getElementById('search').value='';
+  render();
+}
+
+function getCurrentData() {
+  return currentTab==='test' ? testData : prodData;
+}
+
+function getDataRef() {
+  return currentTab==='test' ? 'testData' : 'prodData';
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════
+
+function switchTab(tab) {
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));
+  render();
+}
+
+function render() {
+  const data=getCurrentData();
+  const q=(document.getElementById('search').value||'').toLowerCase().trim();
+  const filtered=data.filter(d=>{
+    if(!q) return true;
+    return [d.name,d.ip,d.category,d.function,d.os,d.note].some(v=>(v||'').toLowerCase().includes(q));
+  });
+
+  // Badges
+  document.getElementById('badge-test').textContent=testData.length;
+  document.getElementById('badge-prod').textContent=prodData.length;
+
+  // Inline stats
+  let tCount=0,tCpu=0,tMem=0,tDisk=0;
+  filtered.forEach(d=>{ tCount+=d.count; tCpu+=d.cpu*d.count; tMem+=d.memory*d.count; tDisk+=d.dataDisk*d.count; });
+  document.getElementById('st-count').textContent=tCount;
+  document.getElementById('st-cpu').textContent=tCpu;
+  document.getElementById('st-mem').textContent=tMem;
+  document.getElementById('st-disk').textContent=tDisk;
+
+  // Template dropdown
+  renderTemplateSelect();
+
+  // Thead
+  document.getElementById('thead').innerHTML='<tr>'+columnOrder.map(k=>headerHtml[k]).join('')+'</tr>';
+
+  // Resize handles + apply stored widths
+  document.querySelectorAll('thead th').forEach(function(th){
+    var col=th.dataset.col;
+    var h=document.createElement('span');
+    h.className='resize-handle';
+    th.appendChild(h);
+    if(columnWidths[col]) th.style.width=columnWidths[col]+'px';
+  });
+
+  // Compute totals (multiplied by count)
+  const tot={count:0,cpu:0,memory:0,sysDisk:0,dataDisk:0};
+  filtered.forEach(d=>{
+    tot.count+=d.count;
+    tot.cpu+=d.cpu*d.count;
+    tot.memory+=d.memory*d.count;
+    tot.sysDisk+=d.sysDisk*d.count;
+    tot.dataDisk+=d.dataDisk*d.count;
+  });
+
+  // Table body
+  const tbody=document.getElementById('tbody');
+  const colSpan=columnOrder.length;
+  if(!filtered.length){
+    tbody.innerHTML='<tr class="empty-row"><td colspan="'+colSpan+'">没有匹配的服务器</td></tr>';
+    return;
+  }
+  const rowsHtml=filtered.map((d,idx)=>{
+    return '<tr>'+columnOrder.map(k=>{
+      if(k==='seq') return cellHtml.seq(d,idx);
+      return cellHtml[k](d);
+    }).join('')+'</tr>';
+  }).join('')+
+  '<tr class="total-row">'+columnOrder.map(k=>{
+    if(k==='seq') return '<td class="seq">合计</td>';
+    if(k==='count') return '<td class="num-cell">'+tot.count+'</td>';
+    if(k==='cpu') return '<td class="num-cell">'+tot.cpu+'</td>';
+    if(k==='memory') return '<td class="num-cell">'+tot.memory+'</td>';
+    if(k==='sysDisk') return '<td class="num-cell">'+tot.sysDisk+'</td>';
+    if(k==='dataDisk') return '<td class="num-cell">'+tot.dataDisk+'</td>';
+    return '<td></td>';
+  }).join('')+'</tr>';
+
+  tbody.innerHTML=rowsHtml;
+
+  // Measure column widths for Excel export
+  setTimeout(function(){
+    var w={};
+    document.querySelectorAll('thead th').forEach(function(th,i){
+      if(i<columnOrder.length) w[columnOrder[i]]=Math.max(5,Math.round(th.offsetWidth/8));
+    });
+    window._colWidths=w;
+  },0);
+}
+
+function escHtml(s){ return String(s).replace(/[&<>"]/g,function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]; }); }
+
+// ═══════════════════════════════════════════════════
+//  CRUD
+// ═══════════════════════════════════════════════════
+
+function openModal(id) {
+  editId=id||null;
+  document.getElementById('modalTitle').textContent=id?'编辑服务器':'新增服务器';
+  const data=getCurrentData();
+  const d=id?(data.find(x=>x.id===id)||{}):{};
+  document.getElementById('f-name').value=d.name||'';
+  document.getElementById('f-ip').value=d.ip||'';
+  document.getElementById('f-category').value=d.category||'中间件类';
+  document.getElementById('f-function').value=d.function||'应用服务';
+  document.getElementById('f-os').value=d.os||'Linux';
+  document.getElementById('f-count').value=d.count||1;
+  document.getElementById('f-cpu').value=d.cpu||8;
+  document.getElementById('f-memory').value=d.memory||16;
+  document.getElementById('f-sysDisk').value=d.sysDisk||100;
+  document.getElementById('f-dataDisk').value=d.dataDisk||200;
+  document.getElementById('f-note').value=d.note||'';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+document.getElementById('modalOverlay').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+
+function saveItem() {
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){ alert('服务器名称不能为空'); return; }
+  const obj={
+    name,
+    ip:document.getElementById('f-ip').value.trim(),
+    category:document.getElementById('f-category').value,
+    function:document.getElementById('f-function').value,
+    os:document.getElementById('f-os').value,
+    count:parseInt(document.getElementById('f-count').value)||1,
+    cpu:parseInt(document.getElementById('f-cpu').value)||8,
+    memory:parseInt(document.getElementById('f-memory').value)||16,
+    sysDisk:parseInt(document.getElementById('f-sysDisk').value)||100,
+    dataDisk:parseInt(document.getElementById('f-dataDisk').value)||0,
+    note:document.getElementById('f-note').value.trim(),
+  };
+  const data=getCurrentData();
+  if(editId){
+    const i=data.findIndex(x=>x.id===editId);
+    if(i>-1) data[i]={...data[i],...obj};
+  }else{
+    data.push({id:nextId++,...obj});
+  }
+  closeModal(); render();
+  showToast(editId?'已更新：'+name:'已新增：'+name);
+}
+
+function delItem(id) {
+  const data=getCurrentData();
+  const d=data.find(x=>x.id===id);
+  if(!d) return;
+  if(!confirm('确认删除「'+d.name+'」？')) return;
+  const idx=data.findIndex(x=>x.id===id);
+  if(idx>-1) data.splice(idx,1);
+  render();
+  showToast('已删除：'+d.name);
+}
+
+function moveRow(id,dir) {
+  const data=getCurrentData();
+  const idx=data.findIndex(x=>x.id===id);
+  if(idx===-1) return;
+  const target=idx+dir;
+  if(target<0||target>=data.length) return;
+  [data[idx],data[target]]=[data[target],data[idx]];
+  render();
+}
+
+// ═══════════════════════════════════════════════════
+//  TEMPLATES
+// ═══════════════════════════════════════════════════
+
+function renderTemplateSelect() {
+  const sel=document.getElementById('templateSelect');
+  sel.innerHTML=templates.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+}
+
+function applyTemplate() {
+  const sel=document.getElementById('templateSelect');
+  const tmpl=templates.find(t=>t.id===sel.value);
+  if(!tmpl) return;
+  const data=getCurrentData();
+
+  if(tmpl.type==='k8s'){
+    // Generate master rows
+    for(let i=1;i<=tmpl.masterCount;i++){
+      data.push({
+        id:nextId++, name:tmpl.name+'-master-'+String(i).padStart(2,'0'), ip:'',
+        category:tmpl.category, function:tmpl.function, os:'Linux',
+        count:1, cpu:tmpl.masterCpu, memory:tmpl.masterMemory,
+        sysDisk:tmpl.masterSysDisk, dataDisk:tmpl.masterDataDisk, note:tmpl.note||''
+      });
+    }
+    // Generate node rows
+    for(let i=1;i<=tmpl.nodeCount;i++){
+      data.push({
+        id:nextId++, name:tmpl.name+'-node-'+String(i).padStart(2,'0'), ip:'',
+        category:tmpl.category, function:tmpl.function, os:'Linux',
+        count:1, cpu:tmpl.nodeCpu, memory:tmpl.nodeMemory,
+        sysDisk:tmpl.nodeSysDisk, dataDisk:tmpl.nodeDataDisk, note:tmpl.note||''
+      });
+    }
+    showToast(`已应用模板「${tmpl.name}」：${tmpl.masterCount} master + ${tmpl.nodeCount} node`);
+  }else{
+    for(let i=1;i<=tmpl.count;i++){
+      data.push({
+        id:nextId++, name:tmpl.name+'-'+String(i).padStart(2,'0'), ip:'',
+        category:tmpl.category, function:tmpl.function, os:'Linux',
+        count:1, cpu:tmpl.cpu, memory:tmpl.memory,
+        sysDisk:tmpl.sysDisk, dataDisk:tmpl.dataDisk, note:tmpl.note||''
+      });
+    }
+    showToast(`已应用模板「${tmpl.name}」：${tmpl.count} 台`);
+  }
+  render();
+}
+
+// ── Template Management ──
+
+function openTemplateMgr() {
+  renderTemplateList();
+  document.getElementById('tmplMgrOverlay').classList.add('open');
+}
+function closeTemplateMgr() { document.getElementById('tmplMgrOverlay').classList.remove('open'); }
+document.getElementById('tmplMgrOverlay').addEventListener('click',function(e){ if(e.target===this) closeTemplateMgr(); });
+
+function renderTemplateList() {
+  const container=document.getElementById('tmplList');
+  container.innerHTML=templates.map(t=>{
+    let spec='';
+    if(t.type==='k8s'){
+      spec=`Master: ${t.masterCpu}核 ${t.masterMemory}G ×${t.masterCount} | Node: ${t.nodeCpu}核 ${t.nodeMemory}G ×${t.nodeCount}`;
+    }else{
+      spec=`${t.cpu}核 ${t.memory}G 系统${t.sysDisk}G 数据${t.dataDisk}G ×${t.count}台`;
+    }
+    return `<div class="tmpl-item">
+      <div class="tmpl-icon ${t.type}">${t.type==='k8s'?'☸':'🖥'}</div>
+      <div class="tmpl-info">
+        <div class="tmpl-name">${escHtml(t.name)}</div>
+        <div class="tmpl-desc">${escHtml(spec)}${t.note?' — '+escHtml(t.note):''}</div>
+      </div>
+      <div class="tmpl-acts">
+        <button class="act-btn" onclick="openTemplateEdit('${t.id}')">编辑</button>
+        <button class="act-btn del" onclick="deleteTemplate('${t.id}')">删除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openTemplateEdit(id) {
+  tmplEditId=id||null;
+  document.getElementById('tmplEditTitle').textContent=id?'编辑模板':'新增模板';
+  const t=id?templates.find(x=>x.id===id):null;
+
+  document.getElementById('tf-name').value=t?t.name:'';
+  document.getElementById('tf-category').value=t?t.category:'中间件类';
+  document.getElementById('tf-function').value=t?t.function:'应用服务';
+  document.getElementById('tf-type').value=t?t.type:'normal';
+  document.getElementById('tf-note').value=t?t.note||'':'';
+
+  // Normal fields
+  document.getElementById('tf-cpu').value=t&&t.type==='normal'?t.cpu:8;
+  document.getElementById('tf-memory').value=t&&t.type==='normal'?t.memory:16;
+  document.getElementById('tf-sysDisk').value=t&&t.type==='normal'?t.sysDisk:100;
+  document.getElementById('tf-dataDisk').value=t&&t.type==='normal'?t.dataDisk:200;
+  document.getElementById('tf-count').value=t&&t.type==='normal'?t.count:1;
+
+  // K8s fields
+  document.getElementById('tf-mCpu').value=t&&t.type==='k8s'?t.masterCpu:8;
+  document.getElementById('tf-mMemory').value=t&&t.type==='k8s'?t.masterMemory:16;
+  document.getElementById('tf-mSysDisk').value=t&&t.type==='k8s'?t.masterSysDisk:200;
+  document.getElementById('tf-mDataDisk').value=t&&t.type==='k8s'?t.masterDataDisk:0;
+  document.getElementById('tf-mCount').value=t&&t.type==='k8s'?t.masterCount:3;
+  document.getElementById('tf-nCpu').value=t&&t.type==='k8s'?t.nodeCpu:16;
+  document.getElementById('tf-nMemory').value=t&&t.type==='k8s'?t.nodeMemory:64;
+  document.getElementById('tf-nSysDisk').value=t&&t.type==='k8s'?t.nodeSysDisk:200;
+  document.getElementById('tf-nDataDisk').value=t&&t.type==='k8s'?t.nodeDataDisk:500;
+  document.getElementById('tf-nCount').value=t&&t.type==='k8s'?t.nodeCount:5;
+
+  toggleTmplType();
+  document.getElementById('tmplEditOverlay').classList.add('open');
+  document.getElementById('tmplMgrOverlay').classList.remove('open');
+}
+
+function closeTemplateEdit() { document.getElementById('tmplEditOverlay').classList.remove('open'); }
+document.getElementById('tmplEditOverlay').addEventListener('click',function(e){ if(e.target===this) closeTemplateEdit(); });
+
+function toggleTmplType() {
+  const type=document.getElementById('tf-type').value;
+  document.getElementById('tf-normal').style.display=type==='normal'?'block':'none';
+  document.getElementById('tf-k8s').style.display=type==='k8s'?'block':'none';
+}
+
+function saveTemplate() {
+  const name=document.getElementById('tf-name').value.trim();
+  if(!name){ alert('模板名称不能为空'); return; }
+
+  const type=document.getElementById('tf-type').value;
+  const base={
+    name, category:document.getElementById('tf-category').value,
+    function:document.getElementById('tf-function').value,
+    type, note:document.getElementById('tf-note').value.trim(),
+  };
+
+  if(type==='k8s'){
+    Object.assign(base,{
+      masterCpu:parseInt(document.getElementById('tf-mCpu').value)||8,
+      masterMemory:parseInt(document.getElementById('tf-mMemory').value)||16,
+      masterSysDisk:parseInt(document.getElementById('tf-mSysDisk').value)||200,
+      masterDataDisk:parseInt(document.getElementById('tf-mDataDisk').value)||0,
+      masterCount:parseInt(document.getElementById('tf-mCount').value)||3,
+      nodeCpu:parseInt(document.getElementById('tf-nCpu').value)||16,
+      nodeMemory:parseInt(document.getElementById('tf-nMemory').value)||64,
+      nodeSysDisk:parseInt(document.getElementById('tf-nSysDisk').value)||200,
+      nodeDataDisk:parseInt(document.getElementById('tf-nDataDisk').value)||500,
+      nodeCount:parseInt(document.getElementById('tf-nCount').value)||5,
+    });
+  }else{
+    Object.assign(base,{
+      cpu:parseInt(document.getElementById('tf-cpu').value)||8,
+      memory:parseInt(document.getElementById('tf-memory').value)||16,
+      sysDisk:parseInt(document.getElementById('tf-sysDisk').value)||100,
+      dataDisk:parseInt(document.getElementById('tf-dataDisk').value)||200,
+      count:parseInt(document.getElementById('tf-count').value)||1,
+    });
+  }
+
+  if(tmplEditId){
+    const i=templates.findIndex(x=>x.id===tmplEditId);
+    if(i>-1) templates[i]={...templates[i],...base};
+    showToast('已更新模板：'+name);
+  }else{
+    base.id='t'+ (tmplNextId++);
+    templates.push(base);
+    showToast('已新增模板：'+name);
+  }
+  closeTemplateEdit();
+  openTemplateMgr(); // refresh list
+  renderTemplateSelect();
+}
+
+function deleteTemplate(id) {
+  const t=templates.find(x=>x.id===id);
+  if(!t) return;
+  if(!confirm('确认删除模板「'+t.name+'」？')) return;
+  templates=templates.filter(x=>x.id!==id);
+  renderTemplateList();
+  renderTemplateSelect();
+  showToast('已删除模板：'+t.name);
+}
+
+// ═══════════════════════════════════════════════════
+//  EXPORT — Column Selection
+// ═══════════════════════════════════════════════════
+
+function createExportListItem(col,includeCheckbox){
+  const div=document.createElement('div');
+  div.className='export-list-item';
+  div.dataset.key=col.key;
+  if(includeCheckbox){
+    div.innerHTML=`<input type="checkbox" class="export-checkbox"><span class="col-label">${col.label}</span><span class="col-key">${col.key}</span>`;
+  }else{
+    div.innerHTML=`<span class="col-label">${col.label}</span><span class="col-key">${col.key}</span>`;
+  }
+  div.addEventListener('click',function(e){
+    if(e.target.type==='checkbox'||e.target.tagName==='BUTTON') return;
+    document.querySelectorAll('.export-list-item.selected').forEach(el=>el.classList.remove('selected'));
+    this.classList.toggle('selected');
+  });
+  return div;
+}
+
+function openExportModal(){
+  const avail=document.getElementById('availableColumns');
+  const sel=document.getElementById('selectedColumns');
+  avail.innerHTML=''; sel.innerHTML='';
+  columnDefs.forEach(col=>avail.appendChild(createExportListItem(col,true)));
+  document.getElementById('exportModalOverlay').classList.add('open');
+}
+function closeExportModal(){ document.getElementById('exportModalOverlay').classList.remove('open'); }
+document.getElementById('exportModalOverlay').addEventListener('click',function(e){ if(e.target===this) closeExportModal(); });
+
+function selectAll(list,checked){
+  const container=document.getElementById(list==='available'?'availableColumns':'selectedColumns');
+  container.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=checked);
+}
+
+function moveColumns(dir){
+  const fromList=document.getElementById(dir==='toSelected'?'availableColumns':'selectedColumns');
+  const toList=document.getElementById(dir==='toSelected'?'selectedColumns':'availableColumns');
+  const items=Array.from(fromList.querySelectorAll('.export-list-item')).filter(item=>{
+    const cb=item.querySelector('input[type="checkbox"]');
+    return cb&&cb.checked;
+  });
+  if(!items.length){
+    const sel=document.querySelector('.export-list-item.selected');
+    if(!sel||!fromList.contains(sel)){ alert('请先勾选要移动的列'); return; }
+    items.push(sel);
+  }
+  items.forEach(item=>{
+    const col=columnDefs.find(c=>c.key===item.dataset.key);
+    if(!col) return;
+    const newItem=createExportListItem(col,true);
+    toList.appendChild(newItem);
+    item.remove();
+  });
+}
+
+function moveColumn(dir){
+  const list=document.getElementById('selectedColumns');
+  const sel=list.querySelector('.export-list-item.selected');
+  if(!sel){ alert('请在导出列列表中选择要移动的列'); return; }
+  const sib=dir==='up'?sel.previousElementSibling:sel.nextElementSibling;
+  if(sib) list.insertBefore(dir==='up'?sel:sib, dir==='up'?sib:sel);
+}
+
+// ═══════════════════════════════════════════════════
+//  EXPORT — Excel
+// ═══════════════════════════════════════════════════
+
+// Convert 1-based column index to Excel column letter (A, B, ..., Z, AA, AB, ...)
+function colLetter(n){
+  let s='';
+  while(n>0){ n--; s=String.fromCharCode(65+(n%26))+s; n=Math.floor(n/26); }
+  return s;
+}
+
+async function exportToExcel(){
+  const selList=document.getElementById('selectedColumns');
+  const items=Array.from(selList.querySelectorAll('.export-list-item'));
+  if(!items.length){ alert('请至少选择一列进行导出'); return; }
+
+  const cols=items.map(item=>columnDefs.find(c=>c.key===item.dataset.key)).filter(Boolean);
+  const title=document.getElementById('reportTitle').value.trim()||'服务器配置清单';
+
+  const wb=new ExcelJS.Workbook();
+  await createSheet(wb,'测试环境',testData,cols,title);
+  await createSheet(wb,'生产环境',prodData,cols,title);
+
+  const buffer=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=(title.replace(/[/\\*?:"<>|]/g,'_')||'服务器配置清单')+'.xlsx';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  closeExportModal();
+  showToast('导出成功！文件已下载（含测试/生产两个 Sheet，底部有合计行）。');
+}
+
+async function createSheet(wb,sheetName,data,cols,title){
+  const ws=wb.addWorksheet(sheetName,{properties:{tabColor:{argb:'FF2D8C5E'}}});
+
+  var wm=window._colWidths||{};
+  var widthMap={
+    seq:wm.seq||5, name:wm.name||22, ip:wm.ip||18, category:wm.category||10,
+    function:wm.function||10, os:wm.os||14, count:wm.count||10, cpu:wm.cpu||8,
+    memory:wm.memory||9, sysDisk:wm.sysDisk||10, dataDisk:wm.dataDisk||10, note:wm.note||20
+  };
+  // Define columns (creates header row at row 1 automatically)
+  ws.columns=cols.map(c=>({header:c.label, key:c.key, width:(widthMap[c.key]||14)}));
+
+  // ── Insert title row at position 1 (shifts header to row 2) ──
+  ws.spliceRows(1,0,[]);
+  ws.mergeCells(1,1,1,cols.length);
+  const tCell=ws.getCell(1,1);
+  tCell.value=title;
+  tCell.font={bold:true,size:14,name:'Segoe UI',color:{argb:'FF2D5C4E'}};
+  tCell.alignment={vertical:'middle',horizontal:'center'};
+  tCell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF5F6F0'}};
+  tCell.border={bottom:{style:'thin',color:{argb:'FFDDDDD5'}},left:{style:'thin',color:{argb:'FFDDDDD5'}},right:{style:'thin',color:{argb:'FFDDDDD5'}}};
+  ws.getRow(1).height=30;
+
+  // ── Style header (row 2) ──
+  const hdr=ws.getRow(2);
+  hdr.height=22;
+  hdr.eachCell((cell)=>{
+    cell.font={bold:true,color:{argb:'FFFFFFFF'},name:'Segoe UI',size:11};
+    cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF2D5C4E'}};
+    cell.alignment={vertical:'middle',horizontal:'center'};
+    cell.border={top:{style:'thin',color:{argb:'FF1A7A3E'}},bottom:{style:'thin',color:{argb:'FF1A7A3E'}},left:{style:'thin',color:{argb:'FF1A7A3E'}},right:{style:'thin',color:{argb:'FF1A7A3E'}}};
+  });
+
+  // ── Data rows (values multiplied by count) ──
+  data.forEach((row,idx)=>{
+    const mult=v=>(v||0)*(row.count||1);
+    const values=cols.map(c=>{
+      if(c.key==='seq') return idx+1;
+      if(['cpu','memory','sysDisk','dataDisk'].includes(c.key)){
+        return mult(row[c.key]);
+      }
+      const v=row[c.key];
+      return v!==undefined&&v!==null?v:'';
+    });
+    const rowObj=ws.addRow(values);
+    rowObj.eachCell((cell,cellIdx)=>{
+      cell.font={name:'Segoe UI',size:11,color:{argb:'FF2C2C28'}};
+      cell.border={bottom:{style:'thin',color:{argb:'FFDDDDD5'}},left:{style:'thin',color:{argb:'FFDDDDD5'}},right:{style:'thin',color:{argb:'FFDDDDD5'}}};
+      cell.alignment={vertical:'middle'};
+      const colDef=cols[cellIdx-1];
+      if(colDef&&sumKeys.includes(colDef.key)){
+        cell.alignment={vertical:'middle',horizontal:'right'};
+        cell.numFmt='#,##0';
+      }
+      cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:idx%2===0?'FFFFFFFF':'FFF5F6F0'}};
+    });
+  });
+
+  // ── Total row ──
+  const lastDataRow=2+data.length;
+  const totalRow=ws.addRow([]);
+  totalRow.height=22;
+  cols.forEach((col,idx)=>{
+    const cell=totalRow.getCell(idx+1);
+    if(col.key==='seq'){
+      cell.value='合计';
+      cell.font={bold:true,size:11,name:'Segoe UI',color:{argb:'FF2D5C4E'}};
+      cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE6F4ED'}};
+      cell.alignment={vertical:'middle',horizontal:'left'};
+    }else if(sumKeys.includes(col.key)){
+      const letter=colLetter(idx+1);
+      cell.value={formula:`SUM(${letter}3:${letter}${lastDataRow})`};
+      cell.numFmt='#,##0';
+      cell.font={bold:true,size:11,name:'Segoe UI',color:{argb:'FFC97C10'}};
+      cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFEF4E0'}};
+      cell.alignment={vertical:'middle',horizontal:'right'};
+    }else{
+      cell.value='';
+    }
+    cell.border={top:{style:'medium',color:{argb:'FF2D8C5E'}},bottom:{style:'double',color:{argb:'FF2D8C5E'}},left:{style:'thin',color:{argb:'FF2D8C5E'}},right:{style:'thin',color:{argb:'FF2D8C5E'}}};
+  });
+
+  return ws;
+}
+
+// ═══════════════════════════════════════════════════
+//  DRAG & DROP — Column reorder
+// ═══════════════════════════════════════════════════
+
+function initDragDrop(){
+  var thead=document.querySelector('thead');
+  if(!thead) return;
+  var dragKey=null;
+  thead.addEventListener('dragstart',function(e){
+    if(e.target.closest('.resize-handle')) return;
+    var th=e.target.closest('th');
+    if(!th) return;
+    dragKey=th.dataset.col;
+    e.dataTransfer.effectAllowed='move';
+    setTimeout(function(){th.classList.add('drag-src');},0);
+  });
+  thead.addEventListener('dragend',function(){
+    document.querySelectorAll('.drag-src,.drag-over').forEach(function(el){el.classList.remove('drag-src','drag-over');});
+    dragKey=null;
+  });
+  thead.addEventListener('dragover',function(e){
+    e.preventDefault();
+    var th=e.target.closest('th');
+    if(!th||th.dataset.col===dragKey) return;
+    document.querySelectorAll('.drag-over').forEach(function(el){el.classList.remove('drag-over');});
+    th.classList.add('drag-over');
+  });
+  thead.addEventListener('dragleave',function(e){
+    var th=e.target.closest('th');
+    if(th) th.classList.remove('drag-over');
+  });
+  thead.addEventListener('drop',function(e){
+    e.preventDefault();
+    var th=e.target.closest('th');
+    if(!th||!dragKey||th.dataset.col===dragKey) return;
+    var rect=th.getBoundingClientRect();
+    var before=e.clientX<rect.left+rect.width/2;
+    var fromIdx=columnOrder.indexOf(dragKey);
+    var toIdx=columnOrder.indexOf(th.dataset.col);
+    if(toIdx<0) return;
+    if(!before&&toIdx<fromIdx) toIdx++;
+    else if(before&&toIdx>fromIdx) toIdx--;
+    if(fromIdx>=0&&toIdx>=0&&toIdx<columnOrder.length){
+      var item=columnOrder.splice(fromIdx,1)[0];
+      columnOrder.splice(toIdx,0,item);
+      render();
+    }
+    document.querySelectorAll('.drag-src,.drag-over').forEach(function(el){el.classList.remove('drag-src','drag-over');});
+    dragKey=null;
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  COLUMN RESIZE (mouse drag)
+// ═══════════════════════════════════════════════════
+
+function initColumnResize(){
+  var st=null;
+  document.addEventListener('mousedown',function(e){
+    var h=e.target.closest('.resize-handle');
+    if(!h) return;
+    var th=h.closest('th');
+    if(!th) return;
+    e.preventDefault();
+    st={col:th.dataset.col,startX:e.clientX,startWidth:th.offsetWidth};
+    h.classList.add('resizing');
+  });
+  document.addEventListener('mousemove',function(e){
+    if(!st) return;
+    e.preventDefault();
+    var diff=e.clientX-st.startX;
+    var w=Math.max(30,st.startWidth+diff);
+    columnWidths[st.col]=w;
+    document.querySelectorAll('th[data-col="'+st.col+'"]').forEach(function(th){
+      th.style.width=w+'px';
+    });
+    // Update export column width measurement
+    if(!window._colWidths) window._colWidths={};
+    window._colWidths[st.col]=Math.round(w/8);
+  });
+  document.addEventListener('mouseup',function(){
+    if(!st) return;
+    document.querySelectorAll('.resize-handle.resizing').forEach(function(el){el.classList.remove('resizing');});
+    st=null;
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+
+initDragDrop();
+initColumnResize();
+render();
+</script>
+</body>
+</html>

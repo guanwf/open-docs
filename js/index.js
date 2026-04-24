@@ -329,8 +329,10 @@ server {
         proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
         expires -1;
         proxy_pass http://192.168.0.1;
+        proxy_set_header Host $http_host; 
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }` 
             },
@@ -345,8 +347,10 @@ server {
                 proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
                 expires -1;
                 proxy_pass http://192.168.0.1;
+                proxy_set_header Host $http_host; 
                 proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
     }
 }` 
             },
@@ -361,8 +365,10 @@ server {
                 proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
                 expires -1;
                 proxy_pass http://192.168.0.1;
+                proxy_set_header Host $http_host; 
                 proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
     }
 }` 
             },
@@ -377,8 +383,10 @@ server {
                 proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
                 expires -1;
                 proxy_pass http://192.168.0.1;
+                proxy_set_header Host $http_host; 
                 proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;         
     }
 }` 
             },
@@ -393,8 +401,10 @@ server {
                 proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
                 expires -1;
                 proxy_pass http://192.168.0.1;
+                proxy_set_header Host $http_host; 
                 proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;                
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
     }
 }` 
             },
@@ -426,8 +436,10 @@ server {
         proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
         expires -1;
         proxy_pass http://192.168.0.1:30092;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }` 
             },
@@ -443,8 +455,10 @@ server {
         proxy_next_upstream http_503 http_500 http_502 http_404 error timeout invalid_header;
         expires -1;
         proxy_pass http://192.168.0.1:30091;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }` 
             },                        
@@ -533,7 +547,8 @@ server {
 
             
             { category:"📚Doc",text:"FastDeploy&FastLink", url: "https://xd20al46gl.feishu.cn/docx/Hkhvdh1CkoHkYGxhe4Hc3oWqn7Z", desc: ""},
-            { category:"📚Doc",text:"基础设施组件清单", url: "./infra-list.html", desc: ""},
+            { category:"📚Doc",text:"基础设施组件清单", url: "./infra/infra-list.html", desc: ""},
+            { category:"📚Doc",text:"服务器配置清单", url: "./infra/infra-servers.html", desc: ""},
             { category:"📚Doc",text:"Nginx升级方法", url: "https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh", desc: "4N11294&"},
             { category: "📚Doc",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
             { category: "📚Doc",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
@@ -562,7 +577,8 @@ server {
             { category: "❄️K8s",text:"通过kubectl连接集群-hw-cce", url: "https://support.huaweicloud.com/intl/zh-cn/usermanual-cce/cce_10_0107.html", desc: ""},            
 
             { category: "❄️K8s",text:"获取yaml文件创建pod", url: "http://39.103.177.212:30008/", desc: "需要vpn"},
-            { category: "❄️K8s",text:"K8s Pod YAML 生成器", url: "./k8s-pod-yaml-generator.html", desc: ""},
+            { category: "❄️K8s",text:"K8s Pod YAML 生成器", url: "./infra/k8s-pod-yaml-generator.html", desc: ""},
+            
             { category: "❄️K8s",text:"k8s-kubeadm集群证书过期更换方法", url: "https://xd20al46gl.feishu.cn/docx/GaDrdYRvuoTnT4xaMvNczu9TnId", desc: ""},            
 
             { category: "📚DB",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
@@ -579,7 +595,8 @@ server {
             { category: "📚DB",text:"OCP-文档概述", url: "https://www.oceanbase.com/docs/ocp", desc: ""},
             { category: "📚DB",text:"ODP-数据库代理", url: "https://www.oceanbase.com/docs/odp-doc-cn", desc: ""},
             { category: "📚DB",text:"OB-发布版本记录", url: "https://www.oceanbase.com/product/oceanbase-database-community-rn/releaseNote#V4.2.5", desc: ""},
-            
+            { category: "📚DB",text:"SQL-生成器", url: "./infra/mysql-sql-generator.html", desc: ""},
+
 
             {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
             {category: "📊Monitor", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},

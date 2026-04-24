@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL生成器</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; padding: 1.25rem; display: flex; flex-direction: column; }
+
+.page-title { font-size: 17px; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.badge { font-size: 11px; font-weight: 500; background: #e8f0fe; color: #1a56db; padding: 2px 8px; border-radius: 5px; }
+
+.layout {
+  flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(300px, 2fr) 8px minmax(300px, 3fr);
+  align-items: stretch;
+  position: relative;
+}
+
+.resizer {
+  cursor: col-resize;
+  background: #e5e7eb;
+  border-radius: 4px;
+  margin: 0 3px;
+  position: relative;
+  transition: background 0.2s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.resizer:hover { background: #6366f1; }
+.resizer::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px; height: 24px;
+  background: #9ca3af;
+  border-radius: 1px;
+}
+.resizer:hover::before { background: #6366f1; }
+.resizer.dragging { background: #6366f1; }
+.resizer.dragging::before { background: #fff; }
+
+.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem; overflow-y: auto; min-height: 0; }
+.card-title { font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .05em; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.dot-green { background: #16a34a; } .dot-amber { background: #d97706; }
+
+.sec-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
+.field { display: flex; flex-direction: column; gap: 3px; }
+.field.full { grid-column: 1 / -1; }
+label { font-size: 12px; color: #4b5563; font-weight: 500; }
+input, select, textarea { font-size: 12px; height: 30px; border-radius: 7px; border: 1px solid #d1d5db; background: #fff; color: #1a1a1a; padding: 0 8px; width: 100%; outline: none; }
+input:focus, select:focus, textarea:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.1); }
+.hint { font-size: 10px; color: #9ca3af; margin-top: 1px; }
+
+.tpl-row { display: flex; gap: 6px; align-items: center; margin-bottom: 7px; }
+.tpl-row select { flex: 1; }
+.tpl-btn { font-size: 11px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 0 10px; height: 30px; cursor: pointer; color: #4b5563; white-space: nowrap; flex-shrink: 0; }
+.tpl-btn:hover { background: #f9fafb; }
+
+/* Dynamic list */
+.dl-col-header {
+  display: grid;
+  grid-template-columns: 1fr 90px 55px 65px 65px 80px 1fr 26px;
+  gap: 4px;
+  margin-bottom: 3px;
+  padding-right: 2px;
+}
+.dl-col-header span { font-size: 10px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.dl-col-header span:first-child { text-align: left; }
+
+.col-row {
+  display: grid;
+  grid-template-columns: 1fr 90px 55px 65px 65px 80px 1fr 26px;
+  gap: 4px;
+  margin-bottom: 4px;
+  align-items: center;
+}
+.col-row input[type="text"], .col-row select {
+  font-size: 11px; height: 26px; border-radius: 5px;
+  border: 1px solid #d1d5db; background: #fff;
+  color: #1a1a1a; padding: 0 6px; width: 100%; outline: none;
+}
+.col-row input[type="text"]:focus, .col-row select:focus {
+  border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.1);
+}
+.col-row .chk-wrap {
+  display: flex; align-items: center; justify-content: center;
+}
+.col-row .chk-wrap input[type="checkbox"] {
+  width: 14px; height: 14px; cursor: pointer; margin: 0;
+}
+.rm { background: #fff; border: 1px solid #e5e7eb; border-radius: 5px; color: #9ca3af; cursor: pointer; width: 26px; height: 26px; font-size: 13px; flex-shrink: 0; }
+.rm:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+.add-btn { font-size: 11px; color: #6366f1; background: #fff; border: 1px dashed #a5b4fc; border-radius: 6px; padding: 0 8px; cursor: pointer; width: 100%; height: 26px; }
+.add-btn:hover { background: #eef2ff; }
+.divider { border: none; border-top: 1px solid #f3f4f6; margin: 9px 0; }
+.gen-btn { width: 100%; height: 34px; font-size: 13px; font-weight: 600; background: #4f46e5; border: none; border-radius: 8px; cursor: pointer; color: #fff; }
+.gen-btn:hover { background: #4338ca; } .gen-btn:active { transform: scale(.98); }
+
+/* 右侧编辑器 */
+.editor-wrap {
+  border: 1px solid #3a3a52;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  background: #1e1e2e;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  background: #2a2a3e;
+  border-bottom: 1px solid #3a3a52;
+  flex-shrink: 0;
+}
+.tb-label {
+  font-size: 11px; color: #aaa; font-family: sans-serif;
+  flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tb-btn {
+  font-size: 11px; background: #3a3a52; border: 1px solid #4a4a66;
+  border-radius: 5px; padding: 3px 9px; cursor: pointer; color: #ccc;
+  font-family: sans-serif; white-space: nowrap; flex-shrink: 0;
+}
+.tb-btn:hover { background: #4a4a66; color: #fff; }
+.tb-btn.green { border-color: #4ade80; color: #4ade80; }
+.tb-btn.green:hover { background: rgba(74,222,128,.15); }
+.tb-btn.blue  { border-color: #60a5fa; color: #60a5fa; }
+.tb-btn.blue:hover  { background: rgba(96,165,250,.15); }
+
+/* 标尺 */
+.ruler-row {
+  display: flex; background: #252538;
+  border-bottom: 1px solid #3a3a52; flex-shrink: 0; user-select: none; overflow: hidden;
+}
+.ruler-gutter {
+  background: #252538; border-right: 1px solid #3a3a52;
+  flex-shrink: 0; min-width: 38px;
+}
+.ruler-scale {
+  flex: 1; overflow: hidden; white-space: pre;
+  font-size: 10px; color: #4a4a66; padding: 2px 0 2px 10px;
+  letter-spacing: 0; line-height: 1.4;
+}
+
+/* Editor body with highlight overlay */
+.editor-body {
+  display: flex; flex: 1; overflow: hidden; position: relative;
+  min-height: 200px;
+}
+.line-nums {
+  background: #252538; color: #555; text-align: right;
+  padding: 8px 8px 8px 6px; border-right: 1px solid #3a3a52;
+  user-select: none; flex-shrink: 0; min-width: 38px;
+  line-height: 1.6; font-size: 12.5px;
+  overflow: hidden;
+  white-space: pre; z-index: 2;
+}
+.editor-highlight-wrap {
+  flex: 1; position: relative; overflow: hidden;
+}
+.highlight-layer {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  margin: 0; padding: 8px 10px;
+  background: transparent; border: none;
+  font-family: inherit; font-size: inherit; line-height: inherit;
+  white-space: pre; overflow: auto;
+  pointer-events: none; z-index: 0;
+  color: #cdd6f4;
+}
+.highlight-layer code {
+  background: transparent !important; padding: 0 !important;
+}
+.highlight-layer code .hljs { background: transparent !important; }
+.editor-ta {
+  position: relative; z-index: 1;
+  color: transparent; caret-color: #f5c2e7;
+  background: transparent; border: none; outline: none; resize: none;
+  padding: 8px 10px;
+  font-family: inherit; font-size: inherit; line-height: inherit;
+  tab-size: 2; white-space: pre; overflow-wrap: normal;
+  overflow: auto; width: 100%; height: 100%;
+}
+.editor-ta::selection { background: #3a3a5c; }
+
+.status-bar {
+  display: flex; align-items: center; gap: 14px;
+  padding: 4px 10px; background: #252538;
+  border-top: 1px solid #3a3a52; flex-shrink: 0; font-family: sans-serif;
+}
+.status-bar span { font-size: 10px; color: #666; white-space: nowrap; }
+.status-bar .ok   { color: #4ade80; }
+.status-bar .err  { color: #f38ba8; }
+.status-bar .warn { color: #f9e2af; }
+#statusMsg { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+
+/* 模板弹窗 */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+.modal-bg.open { display: flex; }
+.modal { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 1.4rem; width: 70vw; height: 70vh; max-width: 80vw; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.modal-title { font-size: 15px; font-weight: 600; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #9ca3af; width: 30px; height: 30px; border-radius: 6px; }
+.modal-close:hover { background: #f3f4f6; }
+.modal-tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.tab { font-size: 12px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 10px; cursor: pointer; color: #6b7280; }
+.tab.active { background: #eef2ff; border-color: #a5b4fc; color: #4f46e5; font-weight: 500; }
+.modal textarea { width: 100%; flex: 1; min-height: 200px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: .8rem; font-family: 'Fira Code','Consolas',monospace; font-size: 12px; line-height: 1.7; color: #1e293b; resize: vertical; outline: none; margin-bottom: 8px; }
+.modal textarea:focus { border-color: #6366f1; }
+.modal-foot { display: flex; gap: 8px; margin-top: 12px; justify-content: space-between; align-items: center; }
+.tpl-name-input { font-size: 12px; height: 30px; border-radius: 6px; border: 1px solid #d1d5db; padding: 0 8px; width: 200px; outline: none; }
+.tpl-name-input:focus { border-color: #6366f1; }
+.btn-save { font-size: 12px; background: #4f46e5; border: none; border-radius: 7px; padding: 6px 14px; cursor: pointer; color: #fff; font-weight: 500; }
+.btn-save:hover { background: #4338ca; }
+.btn-del  { font-size: 12px; background: #fff; border: 1px solid #fca5a5; border-radius: 7px; padding: 6px 12px; cursor: pointer; color: #dc2626; }
+.btn-del:hover { background: #fee2e2; }
+.btn-new  { font-size: 12px; background: #fff; border: 1px solid #d1d5db; border-radius: 7px; padding: 6px 12px; cursor: pointer; color: #4b5563; }
+.btn-new:hover { background: #f9fafb; }
+.ph-tip { font-size: 10px; color: #9ca3af; margin-top: 8px; line-height: 1.8; }
+.ph-tip b { font-weight: 600; color: #6b7280; }
+.ph-tip .dl-var { color: #6366f1; font-weight: 600; }
+
+.footer-status {
+  flex-shrink: 0;
+  text-align: center; padding: 10px 16px; margin-top: 16px;
+  font-size: 11px; color: #6b7280; background: #f8fafc;
+  border-radius: 8px; border: 1px solid #e5e7eb; line-height: 1.6;
+  white-space: normal; word-wrap: break-word;
+}
+.footer-status span { display: inline-block; margin: 0 4px; }
+
+@media (max-width: 700px) {
+  .layout { grid-template-columns: 1fr; gap: 14px; }
+  .resizer { display: none; }
+  .field-row { grid-template-columns: 1fr; }
+  .dl-col-header, .col-row { grid-template-columns: 1fr 1fr; }
+  .col-row .rm { grid-column: 1 / -1; justify-self: end; }
+  .footer-status { font-size: 11px; padding: 6px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  MySQL SQL 生成器
+  <span class="badge">快速生成 DDL / DML 语句</span>
+</div>
+
+<div class="layout">
+
+  <!-- ══ LEFT: 参数配置 ══ -->
+  <div class="card">
+    <div class="card-title"><span class="dot dot-amber"></span>参数配置</div>
+
+    <div class="sec-label">选择模板</div>
+    <div class="tpl-row">
+      <select id="tplSelect" onchange="onTemplateChange()"></select>
+      <button class="tpl-btn" onclick="openModal()">预览 / 编辑</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="sec-label">变量输入</div>
+    <div id="varInputs"></div>
+
+    <div class="divider"></div>
+    <div id="dynListSection" style="display:none">
+      <div class="sec-label" id="dynListLabel">列定义</div>
+      <div id="dynListHeaders" class="dl-col-header"></div>
+      <div id="dynListRows"></div>
+      <button class="add-btn" id="dynAddBtn" onclick="addDLRow()">+ 添加列</button>
+      <div class="divider"></div>
+    </div>
+
+    <button class="gen-btn" onclick="generate()">生成 SQL</button>
+  </div>
+
+  <div class="resizer" id="resizer"></div>
+
+  <!-- ══ RIGHT: SQL 编辑器 ══ -->
+  <div class="editor-wrap">
+    <div class="editor-toolbar">
+      <span class="tb-label" id="editorLabel">生成结果（可直接编辑）</span>
+      <button class="tb-btn blue" onclick="formatSQL()">格式化</button>
+      <button class="tb-btn" onclick="copySQL()">复制</button>
+      <button class="tb-btn green" onclick="exportSQL()">导出文件</button>
+    </div>
+
+    <div class="ruler-row">
+      <div class="ruler-gutter" id="rulerGutter"></div>
+      <div class="ruler-scale"  id="rulerScale"></div>
+    </div>
+
+    <div class="editor-body">
+      <div class="line-nums" id="lineNums">1</div>
+      <div class="editor-highlight-wrap">
+        <pre class="highlight-layer"><code id="highlightCode"></code></pre>
+        <textarea class="editor-ta" id="sqlTa"
+          spellcheck="false"
+          oninput="onEditorInput()"
+          onscroll="syncScroll(this)"
+          onkeydown="handleTab(event)"
+          onclick="updateCursor()"
+          onkeyup="updateCursor()"
+          placeholder="选择模板并点击「生成 SQL」…"></textarea>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span id="statusMsg">—</span>
+      <span id="cursorPos">行 1, 列 1</span>
+      <span>Tab = 2空格</span>
+      <span>UTF-8</span>
+    </div>
+  </div>
+
+</div><!-- end .layout -->
+
+<div class="footer-status">
+  <span id="datetime"></span>
+</div>
+
+<!-- ══ 模板弹窗 ══ -->
+<div class="modal-bg" id="modalBg" onclick="bgClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">模板管理</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-tabs" id="modalTabs"></div>
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:9px;">
+      <span style="font-size:12px; color:#4b5563; font-weight:500;">名称：</span>
+      <input class="tpl-name-input" id="tplNameInput">
+    </div>
+    <textarea id="modalTa" spellcheck="false" placeholder="在此编辑 SQL 模板，使用 {{变量名}} 作为占位符&#10;动态列表使用 {{动态列表占位符}} 并在左侧面板中配置行数据"></textarea>
+    <div class="ph-tip" id="placeholderHints"></div>
+    <div class="modal-foot">
+      <div style="display:flex; gap:6px;">
+        <button class="btn-new" onclick="newTemplate()">+ 新建模板</button>
+        <button class="btn-del" id="btnDel" onclick="deleteTemplate()">删除此模板</button>
+      </div>
+      <button class="btn-save" onclick="saveTemplate()">保存并关闭</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sql-formatter@15/dist/sql-formatter.min.js"></script>
+
+<script>
+
+// ═════════════════════════════════════════════════
+// 内建模板（JSON 格式）
+// ═════════════════════════════════════════════════
+const TEMPLATES_DATA = [
+  {
+    name: '创建数据库',
+    sql: [
+      'CREATE DATABASE IF NOT EXISTS `{{数据库名1}}` CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;',
+      'CREATE DATABASE IF NOT EXISTS `{{数据库名2}}` CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;',
+      'CREATE DATABASE IF NOT EXISTS `{{数据库名2}}` CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;'      
+    ],
+    variables: [
+      { name: '数据库名1', label: '数据库名1', placeholder: 'glsdb' },
+      { name: '数据库名2', label: '数据库名2', placeholder: 'mdmbasedb' }
+    ],
+    dynamicLists: []
+  },
+  {
+    name: '创建用户',
+    sql: [
+      "CREATE USER '{{用户名}}' IDENTIFIED BY '{{密码}}';",
+      "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER, CREATE VIEW, SHOW VIEW ON `{{授权库名}}`.* TO '{{用户名}}';"
+    ],
+    variables: [
+      { name: '用户名', label: '用户名', placeholder: 'app_user' },
+      { name: '密码', label: '密码', type: 'password', placeholder: '输入密码' },
+      { name: '授权库名', label: '授权库名', placeholder: 'ureport' }
+    ],
+    dynamicLists: []
+  },
+  {
+    name: '分配权限',
+    sql: [
+      "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER, CREATE VIEW, SHOW VIEW ON `{{库名}}`.* TO '{{用户名}}';",
+      "FLUSH PRIVILEGES;"
+    ],
+    variables: [
+      { name: '库名', label: '库名', placeholder: 'glsdb' },
+      { name: '用户名', label: '用户名', placeholder: 'app_user' }
+    ],
+    dynamicLists: []
+  },
+  {
+    name: '创建表',
+    sql: [
+      'CREATE TABLE IF NOT EXISTS `{{表名}}` (',
+      '  {{列定义}}',
+      ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='{{注释}}';"
+    ],
+    variables: [
+      { name: '表名', label: '表名', placeholder: 'users' },
+      { name: '注释', label: '注释', placeholder: '用户表' }
+    ],
+    dynamicLists: [
+      {
+        placeholder: '列定义',
+        fields: [
+          { name: 'columnName', label: '列名', type: 'text' },
+          { name: 'type', label: '类型', type: 'select',
+            options: ['BIGINT','INT','VARCHAR','TEXT','DATETIME','DATE','DECIMAL','BOOLEAN','JSON','CHAR'] },
+          { name: 'length', label: '长度', type: 'text' },
+          { name: 'notNull', label: 'NOT NULL', type: 'checkbox' },
+          { name: 'autoIncrement', label: 'AUTO_INC', type: 'checkbox' },
+          { name: 'defaultValue', label: '默认值', type: 'text' },
+          { name: 'comment', label: '注释', type: 'text' }
+        ]
+      }
+    ]
+  },
+  {
+    name: '创建视图',
+    sql: [
+      'CREATE OR REPLACE VIEW `{{视图名}}` AS',
+      '{{SELECT语句}};'
+    ],
+    variables: [
+      { name: '视图名', label: '视图名', placeholder: 'v_user_orders' },
+      { name: 'SELECT语句', label: 'SELECT 语句', type: 'textarea', placeholder: 'SELECT u.*, o.order_no\nFROM users u\nJOIN orders o ON u.id = o.user_id',
+        hint: '输入完整的 SELECT 查询语句（不含末尾分号）' }
+    ],
+    dynamicLists: []
+  }
+];
+
+// ═════════════════════════════════════════════════
+// 状态
+// ═════════════════════════════════════════════════
+let templates = TEMPLATES_DATA.map(t => ({
+  ...t,
+  sql: Array.isArray(t.sql) ? t.sql.join('\n') : t.sql,
+  variables: t.variables ? t.variables.map(v => ({ ...v })) : [],
+  dynamicLists: t.dynamicLists ? t.dynamicLists.map(d => ({ ...d, fields: d.fields.map(f => ({ ...f })) })) : []
+}));
+let modalIdx = 0;
+
+// ═════════════════════════════════════════════════
+// 变量检测
+// ═════════════════════════════════════════════════
+function detectVariables(sql, dynamicLists) {
+  const re = /\{\{([^}]+)\}\}/g;
+  const vars = [];
+  const seen = {};
+  const dlPlaceholders = (dynamicLists || []).map(d => d.placeholder);
+  let m;
+  while ((m = re.exec(sql)) !== null) {
+    const name = m[1];
+    if (!seen[name] && !dlPlaceholders.includes(name)) {
+      seen[name] = true;
+      vars.push(name);
+    }
+  }
+  return vars;
+}
+
+// ═════════════════════════════════════════════════
+// 表单渲染
+// ═════════════════════════════════════════════════
+function onTemplateChange() {
+  renderForm();
+  // 如果当前模板有动态列表，添加一行默认
+  const idx = parseInt(document.getElementById('tplSelect').value) || 0;
+  const tpl = templates[idx];
+  if (tpl.dynamicLists && tpl.dynamicLists.length > 0) {
+    addDLRow();
+  }
+  const ta = document.getElementById('sqlTa');
+  ta.value = '';
+  document.getElementById('highlightCode').innerHTML = '';
+  updateLineNums();
+  setStatus('已切换模板', 'warn');
+  document.getElementById('editorLabel').textContent = '生成结果（可直接编辑）';
+}
+
+function renderForm() {
+  const idx = parseInt(document.getElementById('tplSelect').value) || 0;
+  const tpl = templates[idx];
+  const container = document.getElementById('varInputs');
+  container.innerHTML = '';
+
+  // 检测简单变量
+  const detected = detectVariables(tpl.sql, tpl.dynamicLists);
+
+  detected.forEach(varName => {
+    const meta = tpl.variables.find(v => v.name === varName) || {};
+    const label = meta.label || varName;
+    const type = meta.type || 'text';
+    const placeholder = meta.placeholder || '';
+    const hint = meta.hint || '';
+    const defaultValue = meta.defaultValue || '';
+
+    const row = document.createElement('div');
+    row.className = 'field-row';
+
+    if (type === 'textarea') {
+      row.innerHTML = `
+        <div class="field full">
+          <label>${label}</label>
+          <textarea id="var_${varName}"
+            placeholder="${placeholder}"
+            style="height:60px;font-family:monospace;font-size:12px;padding:6px 8px;border-radius:7px;border:1px solid #d1d5db;width:100%;resize:vertical;outline:none"
+          >${defaultValue}</textarea>
+          ${hint ? `<div class="hint">${hint}</div>` : ''}
+        </div>`;
+    } else if (type === 'password') {
+      row.innerHTML = `
+        <div class="field full">
+          <label>${label}</label>
+          <input id="var_${varName}" type="password" placeholder="${placeholder}" value="${defaultValue}" autocomplete="off">
+          ${hint ? `<div class="hint">${hint}</div>` : ''}
+        </div>`;
+    } else {
+      row.innerHTML = `
+        <div class="field full">
+          <label>${label}</label>
+          <input id="var_${varName}" type="text" placeholder="${placeholder}" value="${defaultValue}">
+          ${hint ? `<div class="hint">${hint}</div>` : ''}
+        </div>`;
+    }
+    container.appendChild(row);
+  });
+
+  // 动态列表
+  const dlSection = document.getElementById('dynListSection');
+  const dlRows = document.getElementById('dynListRows');
+  const dlHeaders = document.getElementById('dynListHeaders');
+  const dlAddBtn = document.getElementById('dynAddBtn');
+
+  if (tpl.dynamicLists && tpl.dynamicLists.length > 0) {
+    const dl = tpl.dynamicLists[0];
+    dlSection.style.display = 'block';
+    document.getElementById('dynListLabel').textContent = dl.label || dl.placeholder;
+
+    // Build headers
+    let headerHtml = '';
+    dl.fields.forEach(f => {
+      headerHtml += `<span>${f.label}</span>`;
+    });
+    headerHtml += '<span></span>';
+    dlHeaders.innerHTML = headerHtml;
+
+    // Add button text
+    dlAddBtn.textContent = '+ 添加' + (dl.label || '行');
+
+    dlRows.innerHTML = '';
+    dlSection.style.display = 'block';
+  } else {
+    dlSection.style.display = 'none';
+    dlRows.innerHTML = '';
+  }
+}
+
+// ═════════════════════════════════════════════════
+// 动态列表行管理
+// ═════════════════════════════════════════════════
+function addDLRow(prefill) {
+  const idx = parseInt(document.getElementById('tplSelect').value) || 0;
+  const tpl = templates[idx];
+  if (!tpl.dynamicLists || !tpl.dynamicLists.length) return;
+  const dl = tpl.dynamicLists[0];
+  const container = document.getElementById('dynListRows');
+
+  const row = document.createElement('div');
+  row.className = 'col-row';
+
+  let html = '';
+  dl.fields.forEach(f => {
+    const val = prefill && prefill[f.name] !== undefined ? prefill[f.name] : '';
+    html += '<div>';
+    if (f.type === 'select') {
+      html += `<select data-field="${f.name}">`;
+      (f.options || []).forEach(opt => {
+        html += `<option value="${opt}"${val === opt ? ' selected' : ''}>${opt}</option>`;
+      });
+      html += '</select>';
+    } else if (f.type === 'checkbox') {
+      const checked = prefill && prefill[f.name] ? ' checked' : '';
+      html += `<div class="chk-wrap"><input type="checkbox" data-field="${f.name}"${checked}></div>`;
+    } else {
+      html += `<input type="text" data-field="${f.name}" placeholder="${f.label}" value="${val}">`;
+    }
+    html += '</div>';
+  });
+  html += `<button class="rm" onclick="this.parentElement.remove()">×</button>`;
+
+  row.innerHTML = html;
+  container.appendChild(row);
+}
+
+function getColumnDefs() {
+  const idx = parseInt(document.getElementById('tplSelect').value) || 0;
+  const tpl = templates[idx];
+  if (!tpl.dynamicLists || !tpl.dynamicLists.length) return {};
+
+  const result = {};
+  tpl.dynamicLists.forEach((dl, dlIdx) => {
+    const rows = document.querySelectorAll('#dynListRows .col-row');
+    const defs = [];
+    rows.forEach(row => {
+      const colName = row.querySelector('[data-field="columnName"]');
+      if (!colName || !colName.value.trim()) return;
+
+      const name = colName.value.trim();
+      const typeEl = row.querySelector('[data-field="type"]');
+      const lengthEl = row.querySelector('[data-field="length"]');
+      const notNullEl = row.querySelector('[data-field="notNull"]');
+      const autoIncEl = row.querySelector('[data-field="autoIncrement"]');
+      const defaultEl = row.querySelector('[data-field="defaultValue"]');
+      const commentEl = row.querySelector('[data-field="comment"]');
+
+      const type = typeEl ? typeEl.value : 'VARCHAR';
+      const length = lengthEl ? lengthEl.value.trim() : '';
+      const notNull = notNullEl ? notNullEl.checked : false;
+      const autoInc = autoIncEl ? autoIncEl.checked : false;
+      const defaultVal = defaultEl ? defaultEl.value.trim() : '';
+      const comment = commentEl ? commentEl.value.trim() : '';
+
+      let def = '`' + name + '` ' + type;
+      if (length) def += '(' + length + ')';
+      if (autoInc) def += ' NOT NULL AUTO_INCREMENT';
+      else if (notNull) def += ' NOT NULL';
+      if (defaultVal) {
+        if (defaultVal === 'CURRENT_TIMESTAMP') def += ' DEFAULT ' + defaultVal;
+        else def += " DEFAULT '" + defaultVal + "'";
+      }
+      if (comment) def += " COMMENT '" + comment + "'";
+      defs.push(def);
+    });
+    result[dl.placeholder] = defs.join(',\n  ');
+  });
+  return result;
+}
+
+// ═════════════════════════════════════════════════
+// SQL 生成
+// ═════════════════════════════════════════════════
+function generate() {
+  const idx = parseInt(document.getElementById('tplSelect').value) || 0;
+  if (idx >= templates.length) { alert('请选择模板'); return; }
+  const tpl = templates[idx];
+
+  let sql = tpl.sql;
+
+  // 替换简单变量
+  const simpleVars = detectVariables(tpl.sql, tpl.dynamicLists);
+  simpleVars.forEach(varName => {
+    const input = document.getElementById('var_' + varName);
+    if (!input) return;
+    const val = input.value.trim();
+    const re = new RegExp('\\{\\{' + escapeRegex(varName) + '\\}\\}', 'g');
+    sql = sql.replace(re, val);
+  });
+
+  // 替换动态列表
+  if (tpl.dynamicLists && tpl.dynamicLists.length > 0) {
+    const defs = getColumnDefs();
+    for (const [placeholder, defText] of Object.entries(defs)) {
+      if (!defText) {
+        setStatus('✗ 请添加至少一个列定义', 'err');
+        return;
+      }
+      const re = new RegExp('\\{\\{' + escapeRegex(placeholder) + '\\}\\}', 'g');
+      sql = sql.replace(re, defText);
+    }
+  }
+
+  // 清理多余空行
+  sql = sql.split('\n').filter((line, i, arr) => {
+    return !(line.trim() === '' && i > 0 && arr[i - 1].trim() === '');
+  }).join('\n').trimEnd();
+
+  const ta = document.getElementById('sqlTa');
+  ta.value = sql;
+  highlightSQL();
+  updateLineNums();
+  setStatus('✓ SQL 生成完成', 'ok');
+  document.getElementById('editorLabel').textContent = tpl.name + ' — 生成结果';
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// ═════════════════════════════════════════════════
+// 编辑器：标尺 / 行号 / 高亮 / 光标
+// ═════════════════════════════════════════════════
+function buildRuler() {
+  const cols = 100;
+  let scale = '';
+  for (let i = 1; i <= cols; i++) {
+    if      (i % 10 === 0) scale += String(i % 100 || 100).slice(-2)[1];
+    else if (i % 5  === 0) scale += '┼';
+    else if (i % 2  === 0) scale += '·';
+    else                   scale += ' ';
+  }
+  document.getElementById('rulerScale').textContent = scale;
+  syncRulerGutter();
+}
+
+function syncRulerGutter() {
+  const ln = document.getElementById('lineNums');
+  const rg = document.getElementById('rulerGutter');
+  rg.style.width = ln.offsetWidth + 'px';
+  rg.style.minWidth = ln.offsetWidth + 'px';
+}
+
+function updateLineNums() {
+  const ta = document.getElementById('sqlTa');
+  const count = ta.value === '' ? 1 : ta.value.split('\n').length;
+  const ln = document.getElementById('lineNums');
+  let html = '';
+  for (let i = 1; i <= count; i++) html += i + '\n';
+  ln.textContent = html;
+  ln.style.minWidth = (String(count).length * 8 + 16) + 'px';
+  syncRulerGutter();
+}
+
+function syncScroll(ta) {
+  const pre = document.querySelector('.highlight-layer');
+  pre.scrollTop = ta.scrollTop;
+  pre.scrollLeft = ta.scrollLeft;
+  document.getElementById('lineNums').scrollTop = ta.scrollTop;
+}
+
+function onEditorInput() {
+  highlightSQL();
+  updateLineNums();
+  updateCursor();
+  setStatus('已编辑', 'warn');
+}
+
+function updateCursor() {
+  const ta = document.getElementById('sqlTa');
+  const pos = ta.selectionStart;
+  const txt = ta.value.substring(0, pos);
+  const row = txt.split('\n').length;
+  const col = txt.split('\n').pop().length + 1;
+  document.getElementById('cursorPos').textContent = '行 ' + row + ', 列 ' + col;
+}
+
+function handleTab(e) {
+  if (e.key !== 'Tab') return;
+  e.preventDefault();
+  const ta = document.getElementById('sqlTa');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  if (start !== end) {
+    const before = ta.value.substring(0, start);
+    const sel = ta.value.substring(start, end);
+    const after = ta.value.substring(end);
+    const indented = e.shiftKey ? sel.replace(/^  /gm, '') : sel.replace(/^/gm, '  ');
+    ta.value = before + indented + after;
+    ta.selectionStart = start;
+    ta.selectionEnd = start + indented.length;
+  } else {
+    ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(end);
+    ta.selectionStart = ta.selectionEnd = start + 2;
+  }
+  onEditorInput();
+}
+
+function setStatus(msg, cls) {
+  const s = document.getElementById('statusMsg');
+  s.textContent = msg;
+  s.className = cls || '';
+}
+
+// ═════════════════════════════════════════════════
+// SQL 语法高亮（highlight.js）
+// ═════════════════════════════════════════════════
+function highlightSQL() {
+  const ta = document.getElementById('sqlTa');
+  const code = document.getElementById('highlightCode');
+  const text = ta.value;
+  if (!text.trim()) { code.innerHTML = ''; return; }
+  try {
+    const result = hljs.highlight(text, { language: 'sql', ignoreIllegals: true });
+    code.innerHTML = result.value;
+  } catch (e) {
+    code.innerHTML = escapeHtml(text);
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ═════════════════════════════════════════════════
+// SQL 格式化
+// ═════════════════════════════════════════════════
+function formatSQL() {
+  const ta = document.getElementById('sqlTa');
+  const text = ta.value.trim();
+  if (!text) { setStatus('内容为空', 'warn'); return; }
+  try {
+    if (typeof sqlFormatter !== 'undefined' && sqlFormatter.format) {
+      const formatted = sqlFormatter.format(text, {
+        language: 'mysql',
+        uppercase: true,
+        linesBetweenQueries: 2
+      });
+      ta.value = formatted;
+    } else {
+      // Fallback: simple uppercase for keywords
+      const keywords = /\b(select|from|where|and|or|not|in|is|null|as|on|join|left|right|inner|outer|cross|full|group|by|having|order|asc|desc|limit|offset|union|all|insert|into|values|update|set|delete|create|table|index|view|database|alter|drop|add|column|constraint|primary|key|foreign|references|default|check|unique|if|exists|not|grant|revoke|flush|privileges|show|use|describe|explain|procedure|function|trigger|event|schema|character|collate|engine|auto_increment|current_timestamp|null)\b/gi;
+      ta.value = text.replace(keywords, function(m) { return m.toUpperCase(); });
+    }
+    highlightSQL();
+    updateLineNums();
+    setStatus('✓ 格式化完成', 'ok');
+  } catch (e) {
+    setStatus('✗ 格式化失败: ' + e.message, 'err');
+  }
+}
+
+// ═════════════════════════════════════════════════
+// 复制 / 导出
+// ═════════════════════════════════════════════════
+function copySQL() {
+  const text = document.getElementById('sqlTa').value;
+  if (!text.trim()) { setStatus('内容为空', 'warn'); return; }
+  navigator.clipboard.writeText(text).then(function() {
+    const prev = document.getElementById('statusMsg').textContent;
+    const cls = document.getElementById('statusMsg').className;
+    setStatus('✓ 已复制到剪贴板', 'ok');
+    setTimeout(function() { setStatus(prev, cls); }, 1500);
+  });
+}
+
+function exportSQL() {
+  const text = document.getElementById('sqlTa').value.trim();
+  if (!text) { alert('内容为空，请先生成 SQL'); return; }
+  const idx = parseInt(document.getElementById('tplSelect').value) || 0;
+  const tplName = templates[idx] ? templates[idx].name : 'mysql';
+  const filename = tplName + '.sql';
+  const blob = new Blob([text], { type: 'text/sql;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  setStatus('✓ 已导出 ' + filename, 'ok');
+}
+
+// ═════════════════════════════════════════════════
+// 模板下拉
+// ═════════════════════════════════════════════════
+function renderTplSelect() {
+  const sel = document.getElementById('tplSelect');
+  const cur = sel.value;
+  sel.innerHTML = templates.map(function(t, i) {
+    return '<option value="' + i + '">' + t.name + '</option>';
+  }).join('');
+  if (cur && cur < templates.length) sel.value = cur;
+}
+
+// ═════════════════════════════════════════════════
+// 模板弹窗
+// ═════════════════════════════════════════════════
+function openModal() {
+  modalIdx = parseInt(document.getElementById('tplSelect').value) || 0;
+  renderModalTabs(); loadModalTab(modalIdx);
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
+function bgClick(e) { if (e.target === document.getElementById('modalBg')) closeModal(); }
+
+function renderModalTabs() {
+  document.getElementById('modalTabs').innerHTML = templates
+    .map(function(t, i) {
+      return '<button class="tab' + (i === modalIdx ? ' active' : '') + '" onclick="switchTab(' + i + ')">' + t.name + '</button>';
+    }).join('');
+}
+
+function switchTab(i) { saveCurrent(); modalIdx = i; renderModalTabs(); loadModalTab(i); }
+
+function loadModalTab(i) {
+  const tpl = templates[i];
+  document.getElementById('tplNameInput').value = tpl.name;
+  document.getElementById('modalTa').value = tpl.sql;
+  document.getElementById('btnDel').style.display = templates.length > 1 ? 'inline-block' : 'none';
+
+  // 生成占位符提示
+  const allVars = detectVariables(tpl.sql, []);
+  const dlPlaceholders = (tpl.dynamicLists || []).map(function(d) { return d.placeholder; });
+  let hintHtml = '<b>占位符：</b>';
+  hintHtml += allVars.map(function(v) {
+    return dlPlaceholders.includes(v)
+      ? '<span class="dl-var">{{' + v + '}}</span>'
+      : '{{' + v + '}}';
+  }).join(' · ');
+  if (dlPlaceholders.length) {
+    hintHtml += '<br><span style="color:#6366f1;font-size:10px;">紫色 = 动态列表（在左侧面板中配置）</span>';
+  }
+  document.getElementById('placeholderHints').innerHTML = hintHtml;
+}
+
+function saveCurrent() {
+  const name = document.getElementById('tplNameInput').value.trim();
+  const sql = document.getElementById('modalTa').value;
+  if (name) templates[modalIdx].name = name;
+  templates[modalIdx].sql = sql;
+  renderTplSelect();
+}
+
+function saveTemplate() { saveCurrent(); renderTplSelect(); closeModal(); renderForm(); }
+
+function newTemplate() {
+  saveCurrent();
+  templates.push({
+    name: '新模板 ' + (templates.length + 1),
+    sql: '-- 在此编写SQL模板，使用 {{变量名}} 作为占位符\nSELECT * FROM {{表名}} WHERE {{条件}};',
+    variables: [],
+    dynamicLists: []
+  });
+  modalIdx = templates.length - 1;
+  renderModalTabs(); loadModalTab(modalIdx); renderTplSelect();
+}
+
+function deleteTemplate() {
+  if (templates.length <= 1) { alert('至少保留一个模板'); return; }
+  if (!confirm('确定删除「' + templates[modalIdx].name + '」？')) return;
+  templates.splice(modalIdx, 1);
+  modalIdx = Math.max(0, modalIdx - 1);
+  renderModalTabs(); loadModalTab(modalIdx); renderTplSelect();
+}
+
+// ═════════════════════════════════════════════════
+// 可拖拽分割条
+// ═════════════════════════════════════════════════
+(function initResizer() {
+  const resizer = document.getElementById('resizer');
+  const layout = document.querySelector('.layout');
+  let isResizing = false;
+  let startX = 0, startLeftW = 0, startRightW = 0;
+
+  function getWidths() {
+    const cols = getComputedStyle(layout).gridTemplateColumns.split(' ');
+    return { left: cols[0], right: cols[2] };
+  }
+  function parseW(v) {
+    return v.includes('fr') ? parseFloat(v) : parseFloat(v) || 0;
+  }
+  function startResize(e) {
+    e.preventDefault(); isResizing = true;
+    resizer.classList.add('dragging');
+    startX = e.clientX;
+    const w = getWidths();
+    startLeftW = parseW(w.left);
+    startRightW = parseW(w.right);
+    document.addEventListener('mousemove', resize);
+    document.addEventListener('mouseup', stopResize);
+  }
+  function resize(e) {
+    if (!isResizing) return;
+    const dx = e.clientX - startX;
+    const layoutW = layout.clientWidth;
+    const totalFr = startLeftW + startRightW;
+    const leftPx = (startLeftW / totalFr) * (layoutW - 8) + dx;
+    const rightPx = (layoutW - 8) - leftPx;
+    if (leftPx < 300 || rightPx < 300) return;
+    layout.style.gridTemplateColumns = ((leftPx / (layoutW - 8)) * totalFr) + 'fr 8px ' + ((rightPx / (layoutW - 8)) * totalFr) + 'fr';
+  }
+  function stopResize() {
+    isResizing = false;
+    resizer.classList.remove('dragging');
+    document.removeEventListener('mousemove', resize);
+    document.removeEventListener('mouseup', stopResize);
+  }
+  resizer.addEventListener('mousedown', startResize);
+  resizer.addEventListener('touchstart', function(e) {
+    startResize(e.touches[0]);
+  });
+  document.addEventListener('touchmove', function(e) {
+    if (isResizing) resize(e.touches[0]);
+  });
+  document.addEventListener('touchend', stopResize);
+})();
+
+// ═════════════════════════════════════════════════
+// 日期时间状态栏
+// ═════════════════════════════════════════════════
+function updateDateTime() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', {
+    year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'
+  });
+  const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const offset = -now.getTimezoneOffset() / 60;
+  const offsetStr = offset >= 0 ? 'UTC+' + offset : 'UTC' + offset;
+  const browserLang = navigator.language || '未知';
+  const browserRegion = navigator.languages ? navigator.languages.join(', ') : browserLang;
+  const browserPlatform = navigator.platform || '未知';
+  document.getElementById('datetime').innerHTML =
+    '<span>' + dateStr + ' ' + timeStr + ' ' + timezone + ' (' + offsetStr + ')</span> | <span>语言: ' + browserRegion + ' | 平台: ' + browserPlatform + '</span>';
+}
+
+// ═════════════════════════════════════════════════
+// 初始化
+// ═════════════════════════════════════════════════
+renderTplSelect();
+renderForm();
+buildRuler();
+updateLineNums();
+updateDateTime();
+setInterval(updateDateTime, 1000);
+
+// 如果当前模板有动态列表，添加一行默认列
+const initTpl = templates[parseInt(document.getElementById('tplSelect').value) || 0];
+if (initTpl.dynamicLists && initTpl.dynamicLists.length > 0) {
+  addDLRow();
+}
+
+</script>
+</body>
+</html>
