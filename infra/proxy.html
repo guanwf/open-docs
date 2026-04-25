@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>Mail Proxy</title></head>
+<body>
+<script>
+(function() {
+  // Only accept messages from file:// pages (origin = "null")
+  var ALLOWED_ORIGINS = { 'null': true };
+
+  window.addEventListener('message', async function(event) {
+    if (!ALLOWED_ORIGINS[event.origin]) return;
+
+    var msg = event.data || {};
+    if (msg.action !== 'sendmail') return;
+
+    try {
+      var resp = await fetch('/api/sendmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        body: JSON.stringify(msg.data)
+      });
+      var result = await resp.json();
+      event.source.postMessage({
+        requestId: msg.requestId,
+        ok: true,
+        result: result
+      }, '*');
+    } catch (e) {
+      event.source.postMessage({
+        requestId: msg.requestId,
+        ok: false,
+        error: e.message
+      }, '*');
+    }
+  });
+
+  // Signal readiness to parent
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ action: 'proxyReady' }, '*');
+  }
+})();
+</script>
+</body>
+</html>

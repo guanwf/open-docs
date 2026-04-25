@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜像版本列表</title>
+    <style>
+        :root {
+            --primary-color: #0064C8;
+            --bg-color: #f5f7fa;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border-color: #e8e8e8;
+            --hover-bg: #f9fcff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+        }
+
+        /* --- 搜索框 --- */
+        .search-container {
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 15px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* --- 白名单 --- */
+        .whitelist-card {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 4px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .whitelist-title {
+            font-weight: bold;
+            color: #0050b3;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .domain-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .domain-tag {
+            background: #fff;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: monospace;
+            border: 1px solid #bae7ff;
+            color: #0050b3;
+        }
+
+        /* --- 表格核心样式 --- */
+        .table-wrapper {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            table-layout: fixed; /* 关键：固定列宽，防止内容挤压 */
+        }
+
+        /* 定义列宽 */
+        th:nth-child(1) { width: 20%; }  /* 版本 */
+        th:nth-child(2) { width: 70%; }  /* 地址 */
+        th:nth-child(3) { width: 10%; min-width: 70px; } /* 操作 */
+
+        th, td {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #fafafa;
+            font-weight: 600;
+            color: var(--text-sub);
+            border-bottom: 2px solid #ddd;
+        }
+
+        /* 分类标题行 */
+        .category-row {
+            background-color: #f0f5ff;
+            border-top: 2px solid #fff;
+        }
+        
+        .category-row td {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 15px;
+            padding: 10px 15px;
+        }
+
+        .category-desc {
+            font-weight: normal;
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 10px;
+        }
+
+        /* 数据行 */
+        .data-row:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .version-main {
+            font-weight: 600;
+            color: #333;
+            display: block;
+        }
+
+        .version-desc {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* 镜像地址列表 */
+        .url-cell-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* 多个地址之间的间距 */
+        }
+
+        .url-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: Consolas, Monaco, "Andale Mono", monospace;
+            color: #444;
+            font-size: 13px;
+        }
+
+        .url-text {
+            word-break: break-all;
+            padding-right: 10px;
+        }
+
+        /* 复制按钮 */
+        .copy-btn {
+            background: white;
+            border: 1px solid #ccc;
+            color: #666;
+            border-radius: 3px;
+            padding: 4px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            height: 26px;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: #f0f7ff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            display: none;
+        }
+
+        /* Toast */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: rgba(0,0,0,0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 12px;
+            position: fixed;
+            z-index: 999;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            bottom: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>镜像版本列表</h1>
+        </header>
+
+        <!-- 搜索 -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="输入关键字搜索 (例如: java, nginx)...">
+        </div>
+
+        <div id="empty-state" class="empty-state">未找到匹配内容</div>
+
+        <!-- 白名单 -->
+        <div id="whitelist-container"></div>
+
+        <!-- 表格容器 -->
+        <div class="table-wrapper">
+            <table id="image-table">
+                <thead>
+                    <tr>
+                        <th>版本 / 说明</th>
+                        <th>镜像地址 (Image URL)</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <!-- 内容将通过 JS 直接追加到这里，不再使用嵌套的 tbody -->
+            </table>
+        </div>
+    </div>
+
+    <div id="toast">已复制</div>
+
+    <script>
+        // ==========================================
+        // 1. 数据配置
+        // ==========================================
+        const configData = {
+            "whitelist": [
+                "aliregistry-cn-guangzhou.oss-cn-guangzhou.aliyuncs.com",
+                "dockerauth-cn-guangzhou.aliyuncs.com",
+                "registry.cn-guangzhou.aliyuncs.com"
+            ],
+            "categories": [
+                {
+                    "title": "Java Base Images",
+                    "subtitle": "JDK/JRE 环境",
+                    "items": [
+                        {
+                            "version": "Java 1.8",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:1.8.273"]
+                        },
+                        {
+                            "version": "Java 11",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:2.11.30"]
+                        },
+                        {
+                            "version": "Java 17",
+                            "desc": "openjdk-17+35_linux-x64_bin.tar.gz",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:17.0.0.1"]
+                        },
+                        {
+                            "version": "Java 21",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:21.0.3.1"]
+                        },
+                        {
+                            "version": "Java 25",
+                            "desc": "Eclipse Temurin (Early Access)",
+                            "urls": [
+                                "registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:eclipse-temurin_25.0.1_8-jdk-jammy",
+                                "registry.cn-zhangjiakou.aliyuncs.com/abtv/java-base:eclipse-temurin_25.0.1_8-jdk-ubi10-minimal"
+                            ]
+                        }                        
+                    ]
+                },
+                {
+                    "title": "Nacos",
+                    "subtitle": "注册配置中心",
+                    "items": [
+                        {
+                            "version": "2.4.3.1",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.1"]
+                        },
+                        {
+                            "version": "2.4.3.9",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nacos:2.4.3.9"]
+                        }
+                    ]
+                },
+                {
+                    "title": "Nginx",
+                    "subtitle": "Web Server",
+                    "items": [
+                        {
+                            "version": "1.24.0",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.24.0"]
+                        },
+                        {
+                            "version": "1.28.0",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/nginx:1.28.0"]
+                        }
+                    ]
+                },
+                {
+                    "title": "Busybox",
+                    "subtitle": "基础工具箱",
+                    "items": [
+                        {
+                            "version": "1.28.0",
+                            "urls": ["registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28"]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // ==========================================
+        // 2. 渲染逻辑
+        // ==========================================
+        
+        // 渲染白名单
+        function renderWhitelist() {
+            const container = document.getElementById('whitelist-container');
+            if (!configData.whitelist || configData.whitelist.length === 0) return;
+
+            const html = `
+                <div class="whitelist-card" id="whitelist-card">
+                    <div class="whitelist-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        白名单域名 (Whitelist)
+                    </div>
+                    <ul class="domain-list">
+                        ${configData.whitelist.map(domain => `<li class="domain-tag">${domain}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        // 渲染表格 (修正了挂载逻辑)
+        function renderTable() {
+            const table = document.getElementById('image-table');
+            
+            // 清理旧数据（保留thead）
+            const oldTbodies = table.querySelectorAll('tbody');
+            oldTbodies.forEach(tb => tb.remove());
+
+            configData.categories.forEach((cat) => {
+                // 创建一个新的 tbody 来容纳该分类
+                const tbody = document.createElement('tbody');
+                tbody.className = 'category-group';
+                tbody.dataset.categoryTitle = cat.title.toLowerCase();
+
+                // 1. 分类标题行 (colspan=3 跨越所有列)
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'category-row';
+                headerRow.innerHTML = `
+                    <td colspan="3">
+                        ${cat.title} 
+                        <span class="category-desc">${cat.subtitle || ''}</span>
+                    </td>
+                `;
+                tbody.appendChild(headerRow);
+
+                // 2. 数据行
+                cat.items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'data-row';
+
+                    // 构建左侧：版本信息
+                    const versionHtml = `
+                        <span class="version-main">${item.version}</span>
+                        ${item.desc ? `<span class="version-desc">${item.desc}</span>` : ''}
+                    `;
+
+                    // 构建中间：URL列表
+                    // 构建右侧：操作按钮列表
+                    // 它们是一一对应的
+                    let urlsHtml = '';
+                    let actionsHtml = '';
+
+                    item.urls.forEach(url => {
+                        urlsHtml += `
+                            <div class="url-item">
+                                <span class="url-text">${url}</span>
+                            </div>
+                        `;
+                        actionsHtml += `
+                            <div class="url-item" style="justify-content: flex-end;">
+                                <button class="copy-btn" data-url="${url}" onclick="copyText(this)">复制</button>
+                            </div>
+                        `;
+                    });
+
+                    row.innerHTML = `
+                        <td style="vertical-align: top;">${versionHtml}</td>
+                        <td style="vertical-align: top;"><div class="url-cell-content">${urlsHtml}</div></td>
+                        <td style="vertical-align: top;"><div class="url-cell-content">${actionsHtml}</div></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // 将构建好的 tbody 直接追加到 table 中
+                table.appendChild(tbody);
+            });
+        }
+
+        // 搜索逻辑
+        function filterContent() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase().trim();
+            let totalMatches = 0;
+
+            // 1. 白名单过滤
+            const whitelistCard = document.getElementById('whitelist-card');
+            if (whitelistCard) {
+                const tags = whitelistCard.querySelectorAll('.domain-tag');
+                let wlMatch = false;
+                tags.forEach(tag => {
+                    if (tag.textContent.toLowerCase().includes(filter)) {
+                        tag.style.display = "";
+                        wlMatch = true;
+                    } else {
+                        tag.style.display = "none";
+                    }
+                });
+                if (filter === "" || wlMatch) {
+                    whitelistCard.style.display = "";
+                    if(wlMatch) totalMatches++;
+                } else {
+                    whitelistCard.style.display = "none";
+                }
+            }
+
+            // 2. 表格过滤 (以 tbody 为单位)
+            const groups = document.querySelectorAll('.category-group');
+            const tableWrapper = document.querySelector('.table-wrapper');
+
+            groups.forEach(group => {
+                const title = group.dataset.categoryTitle;
+                const rows = group.querySelectorAll('.data-row');
+                let groupHasMatch = false;
+                
+                // 如果标题匹配，则显示该组所有行
+                const titleMatched = title.includes(filter);
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (filter === "" || titleMatched || text.includes(filter)) {
+                        row.style.display = "";
+                        groupHasMatch = true;
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+
+                if (groupHasMatch) {
+                    group.style.display = "";
+                    totalMatches++;
+                } else {
+                    group.style.display = "none";
+                }
+            });
+
+            // 空状态控制
+            const emptyState = document.getElementById('empty-state');
+            if (totalMatches === 0 && filter !== "") {
+                emptyState.style.display = "block";
+                tableWrapper.style.display = "none";
+            } else {
+                emptyState.style.display = "none";
+                tableWrapper.style.display = "block";
+            }
+        }
+
+        // 复制功能
+        function copyText(btn) {
+            const text = btn.getAttribute('data-url');
+            if (!text) return;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast();
+                const originalText = btn.innerText;
+                btn.innerText = "已复制";
+                btn.style.borderColor = "#52c41a";
+                btn.style.color = "#52c41a";
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.borderColor = "";
+                    btn.style.color = "";
+                }, 2000);
+            }).catch(() => {
+                // 简单的回退机制
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const t = document.getElementById("toast");
+            t.className = "show";
+            setTimeout(() => { t.className = t.className.replace("show", ""); }, 2000);
+        }
+
+        window.onload = function() {
+            renderWhitelist();
+            renderTable();
+            document.getElementById('searchInput').addEventListener('input', filterContent);
+        };
+    </script>
+</body>
+</html>
