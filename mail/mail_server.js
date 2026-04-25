@@ -136,7 +136,7 @@ function serveStatic(req, res) {
     let urlPath = req.url.split('?')[0];
     if (urlPath === '/') urlPath = '/infra-servers.html';
 
-    const filePath = path.join(__dirname, urlPath);
+    const filePath = path.join(__dirname, '..', 'infra', urlPath);
     const ext = path.extname(filePath).toLowerCase();
 
     if (!fs.existsSync(filePath)) {
