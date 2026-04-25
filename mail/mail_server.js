@@ -102,6 +102,12 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // On Render, only expose the API; hide static pages
+    if (process.env.RENDER) {
+      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('Mail API service — use POST /api/sendmail');
+      return;
+    }
     serveStatic(req, res);
 });
 
