@@ -196,3 +196,4 @@ async function sendMail(toList, subject, bodyText, attachmentBase64, attachmentN
     try { reader.cancel(); } catch(e) { /* ignore */ }
   }
 }
+
