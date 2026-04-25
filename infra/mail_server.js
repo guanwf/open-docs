@@ -152,7 +152,7 @@ function serveStatic(req, res) {
 }
 
 // ─── 启动 ───
-const PORT = parseInt(process.argv[2]) || 8080;
+const PORT = parseInt(process.env.PORT) || parseInt(process.argv[2]) || 8080;
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log('═'.repeat(50));
