@@ -428,6 +428,64 @@
   }
   .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
   .grid-5 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 6px; }
+
+  /* ── Basic Info Panel ── */
+  .basic-info-panel {
+    display: none;
+    margin: 14px 20px 20px;
+  }
+  .basic-info-panel.open { display: block; }
+  .basic-info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+  }
+  .basic-info-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .basic-info-card .hint {
+    font-size: 12px; color: var(--muted);
+    margin-bottom: 16px; line-height: 1.6;
+  }
+  .basic-info-card .hint code {
+    background: var(--surface2); padding: 1px 5px;
+    border-radius: 3px; font-family: var(--mono); font-size: 11px;
+  }
+  .basic-info-card textarea {
+    width: 100%; min-height: 360px; padding: 14px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text); font-size: 13px;
+    font-family: inherit; line-height: 1.7; resize: vertical;
+    outline: none; transition: border-color .15s;
+  }
+  .basic-info-card textarea:focus { border-color: var(--accent); }
+  .basic-info-card .char-count {
+    text-align: right; font-size: 11px; color: var(--hint);
+    margin-top: 6px;
+  }
+
+  /* ── Email Bar (in topbar) ── */
+  .email-input {
+    height: 34px; padding: 0 10px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text); font-size: 12px;
+    outline: none; width: 220px;
+    transition: border-color .15s;
+  }
+  .email-input:focus { border-color: var(--accent); }
+  .email-input::placeholder { color: var(--hint); font-size: 11px; }
+  .btn-send-email {
+    height: 34px; padding: 0 12px; font-size: 12px;
+    border: none; border-radius: var(--radius);
+    background: #5b6abf; color: #fff;
+    cursor: pointer; font-weight: 500; white-space: nowrap;
+    transition: opacity .15s;
+  }
+  .btn-send-email:hover { opacity: .88; }
+  .btn-send-email:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Server Panel (show/hide wrapper) ── */
+  .server-panel { display: block; }
+  .server-panel.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -442,6 +500,8 @@
     <button class="btn-clear" onclick="clearSearch()" title="清空">✕</button>
   </div>
   <div class="topbar-spacer"></div>
+  <input type="text" class="email-input" id="emailTo" placeholder="收件人邮箱，多个用逗号或分号分隔" title="多个收件人请用逗号或分号分隔">
+  <button class="btn-send-email" id="sendEmailBtn" onclick="sendEmail()">📧 发送邮件</button>
   <div class="theme-group">
     <button class="theme-btn active" id="t-light" onclick="setTheme('light')">☀ 日间</button>
     <button class="theme-btn" id="t-eyecare" onclick="setTheme('eyecare')">🍃 护眼</button>
@@ -453,9 +513,13 @@
 
 <!-- ═══ Tab bar ═══ -->
 <div class="tabbar">
+  <div class="tab" data-tab="basic" onclick="switchTab('basic')">📋 基本信息</div>
   <div class="tab active" data-tab="test" onclick="switchTab('test')">测试环境 <span class="tab-badge" id="badge-test">0</span></div>
   <div class="tab" data-tab="prod" onclick="switchTab('prod')">生产环境 <span class="tab-badge" id="badge-prod">0</span></div>
 </div>
+
+<!-- ═══ Server Panel (shown for test/prod tabs) ═══ -->
+<div class="server-panel" id="serverPanel">
 
 <!-- ═══ Template bar ═══ -->
 <div class="templatebar">
@@ -476,6 +540,28 @@
     <thead id="thead"></thead>
     <tbody id="tbody"></tbody>
   </table>
+</div>
+
+</div>
+
+<!-- ═══ Basic Info Panel (shown for basic tab) ═══ -->
+<div class="basic-info-panel" id="basicInfoPanel">
+  <div class="basic-info-card">
+    <h3>📋 基本信息</h3>
+    <div class="hint">
+      请记录以下基本信息（每行一条记录）：<br>
+      门店数、年销售额、SKU 数、数据量、其他重要指标…
+    </div>
+    <textarea id="basicInfoText" placeholder="示例：
+门店数：150 家
+年销售额：2.5 亿元
+SKU 数：8,000 个
+数据量：12 TB
+月度活跃用户：50 万
+日均订单量：3,000 单
+..." oninput="onBasicInfoChange()"></textarea>
+    <div class="char-count">已输入 <span id="basicInfoCount">0</span> 字符</div>
+  </div>
 </div>
 
 <!-- ═══ Modal: Add/Edit Server ═══ -->
@@ -706,6 +792,9 @@ let currentTab = 'test';
 let editId = null;
 let tmplEditId = null;
 
+// ── Basic Info (for "基本信息" tab) ──
+let basicInfo = localStorage.getItem('infraBasicInfo') || '';
+
 // ── Column Definitions (for export) ──
 const columnDefs = [
   { key:'seq',      label:'序号' },
@@ -791,6 +880,14 @@ function getCurrentData() {
   return currentTab==='test' ? testData : prodData;
 }
 
+// ── Basic Info ──
+function onBasicInfoChange() {
+  const ta=document.getElementById('basicInfoText');
+  basicInfo=ta.value;
+  localStorage.setItem('infraBasicInfo',basicInfo);
+  document.getElementById('basicInfoCount').textContent=basicInfo.length;
+}
+
 function getDataRef() {
   return currentTab==='test' ? 'testData' : 'prodData';
 }
@@ -802,10 +899,30 @@ function getDataRef() {
 function switchTab(tab) {
   currentTab=tab;
   document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));
+
+  const serverPanel=document.getElementById('serverPanel');
+  const basicPanel=document.getElementById('basicInfoPanel');
+  if(tab==='basic'){
+    serverPanel.classList.add('hidden');
+    basicPanel.classList.add('open');
+    // Restore textarea content
+    document.getElementById('basicInfoText').value=basicInfo;
+    document.getElementById('basicInfoCount').textContent=basicInfo.length;
+  }else{
+    serverPanel.classList.remove('hidden');
+    basicPanel.classList.remove('open');
+  }
+
   render();
 }
 
 function render() {
+  // Skip table rendering for basic tab
+  if(currentTab==='basic'){
+    document.getElementById('badge-test').textContent=testData.length;
+    document.getElementById('badge-prod').textContent=prodData.length;
+    return;
+  }
   const data=getCurrentData();
   const q=(document.getElementById('search').value||'').toLowerCase().trim();
   const filtered=data.filter(d=>{
@@ -1229,6 +1346,8 @@ async function exportToExcel(){
   const title=document.getElementById('reportTitle').value.trim()||'服务器配置清单';
 
   const wb=new ExcelJS.Workbook();
+  // Create "基本信息" sheet first
+  await createBasicInfoSheet(wb, basicInfo);
   await createSheet(wb,'测试环境',testData,cols,title);
   await createSheet(wb,'生产环境',prodData,cols,title);
 
@@ -1327,6 +1446,200 @@ async function createSheet(wb,sheetName,data,cols,title){
   });
 
   return ws;
+}
+
+// ── Create "基本信息" Sheet ──
+async function createBasicInfoSheet(wb, content){
+  const ws=wb.addWorksheet('基本信息',{properties:{tabColor:{argb:'FF5B6ABF'}}});
+  ws.columns=[{header:'项目',key:'item',width:20},{header:'内容',key:'content',width:80}];
+
+  // Title row
+  ws.spliceRows(1,0,[]);
+  ws.mergeCells(1,1,1,2);
+  const tCell=ws.getCell(1,1);
+  tCell.value='基本信息';
+  tCell.font={bold:true,size:14,name:'Segoe UI',color:{argb:'FF5B6ABF'}};
+  tCell.alignment={vertical:'middle',horizontal:'center'};
+  tCell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF5F6F0'}};
+  tCell.border={bottom:{style:'thin',color:{argb:'FFDDDDD5'}},left:{style:'thin',color:{argb:'FFDDDDD5'}},right:{style:'thin',color:{argb:'FFDDDDD5'}}};
+  ws.getRow(1).height=30;
+
+  // Header row
+  const hdr=ws.getRow(2);
+  hdr.height=22;
+  hdr.getCell(1).value='项目';
+  hdr.getCell(2).value='内容';
+  [1,2].forEach(i=>{
+    const cell=hdr.getCell(i);
+    cell.font={bold:true,color:{argb:'FFFFFFFF'},name:'Segoe UI',size:11};
+    cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF5B6ABF'}};
+    cell.alignment={vertical:'middle',horizontal:'center'};
+    cell.border={top:{style:'thin',color:{argb:'FF4A5AAE'}},bottom:{style:'thin',color:{argb:'FF4A5AAE'}},left:{style:'thin',color:{argb:'FF4A5AAE'}},right:{style:'thin',color:{argb:'FF4A5AAE'}}};
+  });
+
+  // Content rows - split by newline
+  const lines=content.split('\n').filter(l=>l.trim());
+  if(lines.length===0){
+    ws.addRow(['','']);
+  }else{
+    lines.forEach((line,idx)=>{
+      const row=ws.addRow(['',line]);
+      row.getCell(1).value='记录 '+(idx+1);
+      row.eachCell((cell,ci)=>{
+        cell.font={name:'Segoe UI',size:11,color:{argb:'FF2C2C28'}};
+        cell.border={bottom:{style:'thin',color:{argb:'FFDDDDD5'}},left:{style:'thin',color:{argb:'FFDDDDD5'}},right:{style:'thin',color:{argb:'FFDDDDD5'}}};
+        cell.alignment={vertical:'middle'};
+        cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:idx%2===0?'FFFFFFFF':'FFF5F6F0'}};
+      });
+    });
+  }
+
+  return ws;
+}
+
+// ═══════════════════════════════════════════════════
+//  EMAIL — Send via SMTP
+// ═══════════════════════════════════════════════════
+
+// ── Transport mode detection (file:// vs http/https) ──
+const IS_FILE_MODE = window.location.protocol === 'file:';
+
+// ── postMessage bridge for file:// mode ──
+var _mailProxyIframe = null;
+var _mailProxyReady = false;
+var _mailRequestId = 0;
+var _mailPending = {};
+
+function _initMailIframe() {
+  if (_mailProxyIframe) return;
+  _mailProxyIframe = document.createElement('iframe');
+  _mailProxyIframe.style.display = 'none';
+  _mailProxyIframe.src = 'http://localhost:8080/proxy.html';
+  document.body.appendChild(_mailProxyIframe);
+}
+
+window.addEventListener('message', function(event) {
+  if (IS_FILE_MODE && event.origin !== 'http://localhost:8080') return;
+  var data = event.data || {};
+  if (data.action === 'proxyReady') { _mailProxyReady = true; return; }
+  if (data.requestId && _mailPending[data.requestId]) {
+    var handler = _mailPending[data.requestId];
+    delete _mailPending[data.requestId];
+    if (data.ok) handler.resolve(data.result);
+    else handler.reject(new Error(data.error || '未知错误'));
+  }
+});
+
+function sendMailViaBridge(payload) {
+  return new Promise(function(resolve, reject) {
+    _initMailIframe();
+    if (!_mailProxyReady) {
+      var readyTimeout = setTimeout(function() {
+        reject(new Error('本地邮件服务未启动。请先运行: node mail_server.js'));
+      }, 5000);
+      var readyCheck = setInterval(function() {
+        if (_mailProxyReady) {
+          clearTimeout(readyTimeout);
+          clearInterval(readyCheck);
+          doSend();
+        }
+      }, 200);
+    } else {
+      doSend();
+    }
+    function doSend() {
+      var requestId = ++_mailRequestId;
+      _mailPending[requestId] = { resolve: resolve, reject: reject };
+      setTimeout(function() {
+        if (_mailPending[requestId]) {
+          delete _mailPending[requestId];
+          reject(new Error('邮件发送超时'));
+        }
+      }, 30000);
+      _mailProxyIframe.contentWindow.postMessage({
+        requestId: requestId,
+        action: 'sendmail',
+        data: payload
+      }, 'http://localhost:8080');
+    }
+  });
+}
+
+async function sendEmail(){
+  const toInput=document.getElementById('emailTo').value.trim();
+  if(!toInput){ alert('请输入收件人邮箱地址'); return; }
+  const btn=document.getElementById('sendEmailBtn');
+  btn.disabled=true;
+  btn.textContent='⏳ 发送中…';
+
+  try{
+    // Parse recipients
+    const recipients=toInput.split(/[,;，；]/).map(s=>s.trim()).filter(Boolean);
+    if(!recipients.length){ alert('请输入有效的收件人邮箱地址'); btn.disabled=false; btn.textContent='📧 发送邮件'; return; }
+
+    // Validate emails
+    const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    for(const r of recipients){
+      if(!emailRe.test(r)){ alert('邮箱格式无效: '+r); btn.disabled=false; btn.textContent='📧 发送邮件'; return; }
+    }
+
+    // Generate Excel
+    const title=document.getElementById('reportTitle').value.trim()||'服务器配置清单';
+    const wb=new ExcelJS.Workbook();
+    await createBasicInfoSheet(wb, basicInfo);
+    // Get selected columns for server sheets (default to all if not configured)
+    const selList=document.getElementById('selectedColumns');
+    let exportItems=Array.from(selList.querySelectorAll('.export-list-item'));
+    if(!exportItems.length){
+      // Use all columns as default
+      exportItems=columnDefs.map(c=>document.createElement('div'));
+      exportItems.forEach((item,i)=>{item.dataset.key=columnDefs[i].key;});
+    }
+    const cols=exportItems.map(item=>columnDefs.find(c=>c.key===item.dataset.key)).filter(Boolean);
+    await createSheet(wb,'测试环境',testData,cols,title);
+    await createSheet(wb,'生产环境',prodData,cols,title);
+    const buffer=await wb.xlsx.writeBuffer();
+
+    // Convert to base64
+    const bytes=new Uint8Array(buffer);
+    let binary='';
+    for(let i=0;i<bytes.length;i++) binary+=String.fromCharCode(bytes[i]);
+    const base64=btoa(binary);
+    const filename=(title.replace(/[/\\*?:"<>|]/g,'_')||'服务器配置清单')+'.xlsx';
+
+    // Common payload for both modes
+    var mailPayload = {
+      to: recipients,
+      subject: title,
+      body: '您好，请查收附件中的服务器配置清单。\n\n此邮件由系统自动发送。',
+      attachment: base64,
+      filename: filename
+    };
+
+    // Send via transport matching current mode
+    var result;
+    if (IS_FILE_MODE) {
+      result = await sendMailViaBridge(mailPayload);
+    } else {
+      var resp = await fetch('/api/sendmail', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json; charset=utf-8'},
+        body: JSON.stringify(mailPayload)
+      });
+      result = await resp.json();
+    }
+    if(result.ok){
+      showToast('邮件发送成功！收件人：'+recipients.join(', '));
+    }else{
+      throw new Error(result.error||'服务器响应异常');
+    }
+  }catch(e){
+    console.error('Email send error:', e);
+    alert('邮件发送失败：'+e.message);
+  }finally{
+    btn.disabled=false;
+    btn.textContent='📧 发送邮件';
+  }
 }
 
 // ═══════════════════════════════════════════════════

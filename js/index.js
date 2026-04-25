@@ -529,7 +529,7 @@ server {
         items: [
             { category: "🛠️Tools",text:"查看出口ip", url: "https://cip.cc/", desc: "公网IP"},
             
-            { category: "🛠️Tools",text:"generate password", url: "./passwd.html", desc: "生产密码"},
+            { category: "🛠️Tools",text:"generate password", url: "./infra/passwd.html", desc: "生产密码"},
             { category: "🛠️Tools",text:"ip check", url: "https://www.ip138.com/", desc: ""},
             { category: "🛠️Tools",text:"1024tools", url: "https://1024tools.com/uuid", desc: "各种格式转换,加解密,网络工具"},
             { category: "🛠️Tools",text:"ssl-check", url: "https://www.ssllabs.com/ssltest/analyze.html", desc: ""},
@@ -552,7 +552,7 @@ server {
             { category:"📚Doc",text:"Nginx升级方法", url: "https://xd20al46gl.feishu.cn/docx/Bdo2ddv4LoLkAvx1BfjcgOW0ndh", desc: "4N11294&"},
             { category: "📚Doc",text: "Nginx Docs", url: "http://nginx.org/en/docs/", desc: "Nginx文档" },
             { category: "📚Doc",text: "MDN Web Docs", url: "https://developer.mozilla.org/", desc: "Web开发"},
-            { category: "📚Doc",text:"镜像版本列表", url: "./imagelist.html", desc: ""},
+            { category: "📚Doc",text:"镜像版本列表", url: "./infra/imagelist.html", desc: ""},
             
             { category: "📚Doc",text:"rocky-os-下载", url: "https://rockylinux.org/zh-CN/download", desc: ""},
             
