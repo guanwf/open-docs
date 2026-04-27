@@ -516,9 +516,16 @@ server {
             { cmd: "kubectl run -it --rm dns-test --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28 --restart=Never -- nslookup www.baidu.com", desc: "#测试pod访问外网是否正常.镜像2M,用完删除.",doc:"" },
                         
             { cmd: "kubectl -n roc-uat debug -it dble-pos-7655bd6f46-z77bs --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/redis:7.2.0 --target=dble-pos -- bash", desc: "#debug,进入pod调试",doc:"" },            
-            { cmd: "kubectl -n roc-uat logs roc-goods-794ccfdd79-2zwtm -c roc-goods --previous", desc: "查看上一次被杀死的容器的日志(-c roc-goods表示指定容器),专门用来查：Pod 为什么崩溃、为什么重启、为什么被 kill",doc:"" }
-            
-            
+            { cmd: "kubectl -n roc-uat logs roc-goods-794ccfdd79-2zwtm -c roc-goods --previous", desc: "查看上一次被杀死的容器的日志(-c roc-goods表示指定容器),专门用来查：Pod 为什么崩溃、为什么重启、为什么被 kill",doc:"" },
+            { cmd: `kubectl get pods -n roc-uat -o=jsonpath='{range .items[*]}{"Pod: kubectl -n roc-uat set image deployment "}{.metadata.labels.app}{" "}{.metadata.labels.app}{"="}{range .spec.containers[*]}{.image}{"\n"}{end}{"\n"}{end}' > roc-image.log`, desc: "生成所有deployment的镜像更新命令,并存放在roc-image.log文件中",doc:"" },
+{ cmd: `
+#!/bin/bash
+#把所有service打印出来
+for svc in $(kubectl -n pos-uat get svc | awk 'NR>1 {print $1}'); do
+  echo "kubectl -n pos-uat scale deployment "$svc" --replicas=1"
+done
+`, desc: "把所有service打印出来.",doc:"" },
+
         ]
     },
     {
