@@ -1346,8 +1346,8 @@ async function exportToExcel(){
   const title=document.getElementById('reportTitle').value.trim()||'服务器配置清单';
 
   const wb=new ExcelJS.Workbook();
-  // Create "基本信息" sheet first
-  await createBasicInfoSheet(wb, basicInfo);
+  // Create "基本信息" sheet first (pass title for consistent header)
+  await createBasicInfoSheet(wb, basicInfo, title);
   await createSheet(wb,'测试环境',testData,cols,title);
   await createSheet(wb,'生产环境',prodData,cols,title);
 
@@ -1449,42 +1449,28 @@ async function createSheet(wb,sheetName,data,cols,title){
 }
 
 // ── Create "基本信息" Sheet ──
-async function createBasicInfoSheet(wb, content){
-  const ws=wb.addWorksheet('基本信息',{properties:{tabColor:{argb:'FF5B6ABF'}}});
-  ws.columns=[{header:'项目',key:'item',width:20},{header:'内容',key:'content',width:80}];
+async function createBasicInfoSheet(wb, content, title){
+  const ws=wb.addWorksheet('基本信息',{properties:{tabColor:{argb:'FF2D8C5E'}}});
+  ws.columns=[{header:'',key:'content',width:100}];
 
-  // Title row
+  // Title row (same style as createSheet)
   ws.spliceRows(1,0,[]);
-  ws.mergeCells(1,1,1,2);
+  ws.mergeCells(1,1,1,1);
   const tCell=ws.getCell(1,1);
   tCell.value='基本信息';
-  tCell.font={bold:true,size:14,name:'Segoe UI',color:{argb:'FF5B6ABF'}};
+  tCell.font={bold:true,size:14,name:'Segoe UI',color:{argb:'FF2D5C4E'}};
   tCell.alignment={vertical:'middle',horizontal:'center'};
   tCell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF5F6F0'}};
   tCell.border={bottom:{style:'thin',color:{argb:'FFDDDDD5'}},left:{style:'thin',color:{argb:'FFDDDDD5'}},right:{style:'thin',color:{argb:'FFDDDDD5'}}};
   ws.getRow(1).height=30;
 
-  // Header row
-  const hdr=ws.getRow(2);
-  hdr.height=22;
-  hdr.getCell(1).value='项目';
-  hdr.getCell(2).value='内容';
-  [1,2].forEach(i=>{
-    const cell=hdr.getCell(i);
-    cell.font={bold:true,color:{argb:'FFFFFFFF'},name:'Segoe UI',size:11};
-    cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF5B6ABF'}};
-    cell.alignment={vertical:'middle',horizontal:'center'};
-    cell.border={top:{style:'thin',color:{argb:'FF4A5AAE'}},bottom:{style:'thin',color:{argb:'FF4A5AAE'}},left:{style:'thin',color:{argb:'FF4A5AAE'}},right:{style:'thin',color:{argb:'FF4A5AAE'}}};
-  });
-
-  // Content rows - split by newline
+  // Content rows - split by newline, no header row / "项目" labels
   const lines=content.split('\n').filter(l=>l.trim());
   if(lines.length===0){
-    ws.addRow(['','']);
+    ws.addRow(['']);
   }else{
     lines.forEach((line,idx)=>{
-      const row=ws.addRow(['',line]);
-      row.getCell(1).value='记录 '+(idx+1);
+      const row=ws.addRow([line]);
       row.eachCell((cell,ci)=>{
         cell.font={name:'Segoe UI',size:11,color:{argb:'FF2C2C28'}};
         cell.border={bottom:{style:'thin',color:{argb:'FFDDDDD5'}},left:{style:'thin',color:{argb:'FFDDDDD5'}},right:{style:'thin',color:{argb:'FFDDDDD5'}}};
@@ -1586,7 +1572,7 @@ async function sendEmail(){
     // Generate Excel
     const title=document.getElementById('reportTitle').value.trim()||'服务器配置清单';
     const wb=new ExcelJS.Workbook();
-    await createBasicInfoSheet(wb, basicInfo);
+    await createBasicInfoSheet(wb, basicInfo, title);
     // Get selected columns for server sheets (default to all if not configured)
     const selList=document.getElementById('selectedColumns');
     let exportItems=Array.from(selList.querySelectorAll('.export-list-item'));

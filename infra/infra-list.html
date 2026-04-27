@@ -574,16 +574,19 @@ const STATUS = {
 };
 
 let data = [
-  { id:1,  name:'Kubernetes', category:'container', version:'1.29.2', ports:'6443,10250,10255,30000-32767', updated:'2024-11-01', status:'ok',   links:'Dashboard:http://k8s.local', note:'生产集群，3 master 5 node' },
+  { id:1,  name:'Kubernetes', category:'container', version:'1.29.4', ports:'6443,10250,10255,30000-32767', updated:'2024-11-01', status:'ok',   links:'Dashboard:http://k8s.local', note:'生产集群，3 master 5 node' },
   { id:2,  name:'Redis',      category:'storage',   version:'7.2.4',  ports:'6379,16379',                  updated:'2025-01-15', status:'ok',   links:'RedisInsight:http://192.168.1.10:8001,文档:https://redis.io', note:'主从集群，Sentinel 模式' },
-  { id:3,  name:'RocketMQ',   category:'message',   version:'5.1.4',  ports:'9876,10911,10912',            updated:'2024-12-10', status:'ok',   links:'控制台:http://mq.local:8080,文档:https://rocketmq.apache.org', note:'双 Broker 部署' },
+  { id:3,  name:'RocketMQ',   category:'message',   version:'5.4.0',  ports:'9876,10911,10912',            updated:'2024-12-10', status:'ok',   links:'控制台:http://mq.local:8080,文档:https://rocketmq.apache.org', note:'双 Broker 部署' },
   { id:4,  name:'MinIO',      category:'storage',   version:'RELEASE.2024-10-02', ports:'9000,9001',       updated:'2024-10-10', status:'ok',   links:'控制台:http://minio.local:9001,文档:https://min.io/docs', note:'对象存储，纠删码 4+2' },
-  { id:5,  name:'OceanBase',  category:'db',        version:'4.3.1',  ports:'2881,2882',                   updated:'2025-02-20', status:'warn', links:'文档:https://www.oceanbase.com/docs', note:'3节点，注意内存压力告警' },
-  { id:6,  name:'Nginx',      category:'network',   version:'1.26.0', ports:'80,443,8080',                 updated:'2025-03-01', status:'ok',   links:'配置文档:http://wiki.local/nginx', note:'统一入口，upstream 动态配置' },
+  { id:5,  name:'OceanBase',  category:'db',        version:'4.2.5',  ports:'2881,2882',                   updated:'2025-02-20', status:'warn', links:'文档:https://www.oceanbase.com/docs', note:'3节点，注意内存压力告警' },
+  { id:5,  name:'OceanBase',  category:'db',        version:'4.3.5',  ports:'2881,2882',                   updated:'2025-02-20', status:'warn', links:'文档:https://www.oceanbase.com/docs', note:'3节点，注意内存压力告警' },  
+  { id:6,  name:'Nginx',      category:'network',   version:'1.29.0', ports:'80,443,8080',                 updated:'2025-03-01', status:'ok',   links:'配置文档:http://wiki.local/nginx', note:'统一入口，upstream 动态配置' },
   { id:7,  name:'SFTP',       category:'network',   version:'OpenSSH 9.6', ports:'22,2222',                updated:'2024-09-05', status:'ok',   links:'', note:'专用数据交换节点' },
-  { id:8,  name:'MongoDB',    category:'db',        version:'7.0.8',  ports:'27017,27018,27019',           updated:'2025-01-20', status:'ok',   links:'Compass:mongodb://192.168.1.30:27017,文档:https://www.mongodb.com/docs', note:'3节点 ReplicaSet' },
+  { id:8,  name:'MongoDB',    category:'db',        version:'4.2.7',  ports:'27017,27018,27019',           updated:'2025-01-20', status:'ok',   links:'Compass:mongodb://192.168.1.30:27017,文档:https://www.mongodb.com/docs', note:'3节点 ReplicaSet' },
   { id:9,  name:'MQTT(EMQX)', category:'message',   version:'5.6.0',  ports:'1883,8083,8084,18083',        updated:'2025-04-01', status:'ok',   links:'Dashboard:http://emqx.local:18083,文档:https://docs.emqx.com', note:'IoT 接入层，TLS 单向认证' },
-  { id:10, name:'Java (JDK)', category:'runtime',   version:'OpenJDK 21.0.3', ports:'',                   updated:'2025-03-15', status:'ok',   links:'发布说明:https://openjdk.org/projects/jdk/21', note:'统一基础镜像版本' },
+  { id:10, name:'Java', category:'runtime',   version:'1.8.0.0', ports:'',                   updated:'2025-03-15', status:'ok',   links:'发布说明:https://openjdk.org/projects/jdk/21', note:'统一基础镜像版本' },
+  { id:10, name:'Java', category:'runtime',   version:'1.11.0.0', ports:'',                   updated:'2025-03-15', status:'ok',   links:'发布说明:https://openjdk.org/projects/jdk/21', note:'统一基础镜像版本' },  
+  { id:10, name:'Java', category:'runtime',   version:'1.17.0.3', ports:'',                   updated:'2025-03-15', status:'ok',   links:'发布说明:https://openjdk.org/projects/jdk/21', note:'统一基础镜像版本' },  
   { id:11, name:'Loki',       category:'monitor',   version:'3.0.0',  ports:'3100,9095',                   updated:'2025-04-10', status:'ok',   links:'Grafana:http://grafana.local:3000,文档:https://grafana.com/docs/loki', note:'与 Promtail + Grafana 联动' },
 ];
 let nextId = 20;
