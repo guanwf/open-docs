@@ -486,6 +486,113 @@
   /* ── Server Panel (show/hide wrapper) ── */
   .server-panel { display: block; }
   .server-panel.hidden { display: none; }
+
+  /* ── Mobile More Button (hidden on desktop) ── */
+  .mobile-more-btn {
+    display: none; height: 30px; width: 30px; padding: 0;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text);
+    cursor: pointer; font-size: 18px; font-weight: 700;
+    line-height: 28px; text-align: center; transition: all .12s;
+  }
+  .mobile-more-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+
+  /* ── Mobile Dropdown Panel ── */
+  .mobile-dropdown {
+    display: none; position: fixed; top: 48px; right: 10px; z-index: 100;
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: var(--radius-lg); box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    min-width: 220px; padding: 12px;
+  }
+  .mobile-dropdown.open { display: block; }
+  .md-item { margin-bottom: 10px; }
+  .md-item:last-child { margin-bottom: 0; }
+  .md-label { font-size: 11px; color: var(--hint); display: block; margin-bottom: 4px; }
+  .md-title-text { font-size: 13px; font-weight: 600; color: var(--text); }
+  .md-title-input {
+    width: 100%; height: 32px; padding: 0 8px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text); font-size: 13px; font-weight: 600;
+    outline: none; font-family: inherit; transition: border-color .15s;
+  }
+  .md-title-input:focus { border-color: var(--accent); }
+  .md-theme-btn {
+    width: 100%; height: 32px; font-size: 12px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text);
+    cursor: pointer; transition: all .12s;
+  }
+  .md-theme-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+  .md-action-btn {
+    width: 100%; height: 32px; font-size: 12px; font-weight: 500;
+    border: none; border-radius: var(--radius); cursor: pointer;
+    transition: opacity .15s;
+  }
+  .md-action-btn.btn-export { background: var(--warn); color: #fff; }
+  .md-action-btn:hover { opacity: .88; }
+  .md-email-input {
+    width: 100%; height: 32px; padding: 0 8px; margin-bottom: 4px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--surface2); color: var(--text); font-size: 12px;
+    outline: none; transition: border-color .15s; font-family: inherit;
+  }
+  .md-email-input:focus { border-color: var(--accent); }
+  .md-email-input::placeholder { color: var(--hint); font-size: 11px; }
+  .md-send-btn {
+    width: 100%; height: 32px; font-size: 12px; font-weight: 500;
+    border: none; border-radius: var(--radius);
+    background: #5b6abf; color: #fff; cursor: pointer;
+    transition: opacity .15s;
+  }
+  .md-send-btn:hover { opacity: .88; }
+
+  /* ── Mobile Responsive ── */
+  @media (max-width: 768px) {
+    .topbar { padding: 0 10px; gap: 6px; height: 48px; }
+    .topbar-title { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; }
+    .title-input { display: none; }
+    .search-wrap input { width: 100px; font-size: 12px; }
+    .search-wrap input:focus { width: 140px; }
+    .email-input { display: none; }
+    .btn-send-email { display: none; }
+    .theme-group { display: none; }
+    .btn-export { display: none; }
+    .action-btn.btn-add { padding: 0 8px; font-size: 11px; height: 28px; }
+    .mobile-more-btn { display: block; flex-shrink: 0; }
+    .tabbar { padding: 0 10px; top: 48px; }
+    .tab { padding: 8px 10px; font-size: 12px; }
+    .templatebar { padding: 8px 10px; gap: 6px; top: 89px; }
+    .templatebar select { min-width: 80px; font-size: 12px; height: 28px; }
+    .tbtn { font-size: 11px; height: 28px; padding: 0 8px; }
+    .inline-stat { font-size: 10px; }
+    .stats-row { padding: 10px 10px 0; gap: 6px; }
+    .stat-card { padding: 6px 10px; }
+    .stat-num { font-size: 15px; }
+    .stat-lbl { font-size: 10px; }
+    .tbl-wrap { margin: 8px 10px 10px; border-radius: var(--radius); }
+    th { padding: 6px 5px; font-size: 10px; }
+    td { padding: 6px 5px; font-size: 12px; }
+    .act-btn { height: 22px; padding: 0 4px; font-size: 10px; }
+    .sname { font-size: 12px; }
+    .ip-addr { font-size: 11px; }
+    .note-cell { max-width: 80px; }
+    .basic-info-panel { margin: 10px; }
+    .basic-info-card { padding: 16px; }
+    .basic-info-card textarea { min-height: 200px; font-size: 12px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .modal { padding: 16px; }
+    .grid-4, .grid-5 { grid-template-columns: 1fr 1fr; }
+    .k8s-section { padding: 8px; }
+    .k8s-section .grid-4,
+    .k8s-section .grid-5 { grid-template-columns: 1fr 1fr; }
+    .export-lists-container { flex-direction: column; height: auto; }
+    .export-list-container { height: 160px; }
+    .export-list-buttons { flex-direction: row; width: auto; padding: 8px 0; }
+    .export-move-btn { width: 36px; height: 36px; }
+    .tmpl-item { flex-wrap: wrap; }
+    .tmpl-acts { width: 100%; justify-content: flex-end; margin-top: 4px; }
+    .toast { bottom: 12px; right: 12px; left: 12px; text-align: center; }
+  }
 </style>
 </head>
 <body>
@@ -509,6 +616,26 @@
   </div>
   <button class="action-btn btn-export" onclick="openExportModal()">📤 导出</button>
   <button class="action-btn btn-add" onclick="openModal()">＋ 新增</button>
+  <button class="mobile-more-btn" id="mobileMoreBtn" onclick="toggleMobileMenu()" title="更多">⋯</button>
+</div>
+
+<!-- ═══ Mobile Dropdown Panel ═══ -->
+<div class="mobile-dropdown" id="mobileDropdown" onclick="event.stopPropagation()">
+  <div class="md-item">
+    <span class="md-label">标题</span>
+    <input type="text" class="md-title-input" id="mdTitleInput" value="xxx客户的服务器配置清单" oninput="syncMobileTitle()">
+  </div>
+  <div class="md-item">
+    <span class="md-label">主题</span>
+    <button class="md-theme-btn" onclick="cycleTheme()" id="mdThemeBtn">☀ 日间</button>
+  </div>
+  <div class="md-item">
+    <button class="md-action-btn btn-export" onclick="closeMobileMenu();openExportModal()">📤 导出</button>
+  </div>
+  <div class="md-item">
+    <input type="text" class="md-email-input" id="mdEmailTo" placeholder="收件人邮箱，多个用逗号分隔">
+    <button class="md-send-btn" onclick="closeMobileMenu();sendEmail()">📧 发送</button>
+  </div>
 </div>
 
 <!-- ═══ Tab bar ═══ -->
@@ -858,6 +985,9 @@ function setTheme(t) {
   if (t==='eyecare') document.body.classList.add('eyecare');
   ['light','eyecare','dark'].forEach(k => document.getElementById('t-'+k).classList.toggle('active',k===t));
   localStorage.setItem('theme',t);
+  // Sync mobile dropdown theme button
+  var mdBtn=document.getElementById('mdThemeBtn');
+  if(mdBtn) mdBtn.textContent={'light':'☀ 日间','eyecare':'🍃 护眼','dark':'🌙 夜间'}[t]||'☀ 日间';
 }
 (function(){ const t=localStorage.getItem('theme'); if(t) setTheme(t); })();
 
@@ -917,6 +1047,9 @@ function switchTab(tab) {
 }
 
 function render() {
+  // Sync mobile dropdown title
+  var mt=document.getElementById('mdTitleInput');
+  if(mt && document.activeElement!==mt) mt.value=document.getElementById('reportTitle').value;
   // Skip table rendering for basic tab
   if(currentTab==='basic'){
     document.getElementById('badge-test').textContent=testData.length;
@@ -1283,6 +1416,7 @@ function createExportListItem(col,includeCheckbox){
 }
 
 function openExportModal(){
+  closeMobileMenu();
   const avail=document.getElementById('availableColumns');
   const sel=document.getElementById('selectedColumns');
   avail.innerHTML=''; sel.innerHTML='';
@@ -1552,6 +1686,11 @@ function sendMailViaBridge(payload) {
 }
 
 async function sendEmail(){
+  // Sync mobile email to desktop field if submitted from mobile dropdown
+  var mdEmail=document.getElementById('mdEmailTo');
+  if(mdEmail && mdEmail.value.trim()){
+    document.getElementById('emailTo').value=mdEmail.value.trim();
+  }
   const toInput=document.getElementById('emailTo').value.trim();
   if(!toInput){ alert('请输入收件人邮箱地址'); return; }
   const btn=document.getElementById('sendEmailBtn');
@@ -1715,6 +1854,45 @@ function initColumnResize(){
     st=null;
   });
 }
+
+// ═══════════════════════════════════════════════════
+//  MOBILE — More dropdown
+// ═══════════════════════════════════════════════════
+
+function syncMobileTitle(){
+  var val=document.getElementById('mdTitleInput').value;
+  document.getElementById('reportTitle').value=val;
+}
+
+function toggleMobileMenu(){
+  var dd=document.getElementById('mobileDropdown');
+  var opening=!dd.classList.contains('open');
+  dd.classList.toggle('open');
+  if(opening){
+    // Sync values from desktop fields
+    document.getElementById('mdEmailTo').value=document.getElementById('emailTo').value;
+    document.getElementById('mdTitleInput').value=document.getElementById('reportTitle').value;
+  }
+}
+
+function closeMobileMenu(){
+  document.getElementById('mobileDropdown').classList.remove('open');
+}
+
+function cycleTheme(){
+  var current=localStorage.getItem('theme')||'light';
+  var next={light:'eyecare', eyecare:'dark', dark:'light'};
+  setTheme(next[current]);
+}
+
+// Close mobile dropdown when clicking outside
+document.addEventListener('click',function(e){
+  var dd=document.getElementById('mobileDropdown');
+  var btn=document.getElementById('mobileMoreBtn');
+  if(dd.classList.contains('open') && !dd.contains(e.target) && e.target!==btn){
+    closeMobileMenu();
+  }
+});
 
 // ═══════════════════════════════════════════════════
 //  INIT
