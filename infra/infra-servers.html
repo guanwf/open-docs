@@ -906,14 +906,38 @@ let templates = [
 ];
 let tmplNextId = 100;
 
-// ── Environment Data ──
-let testData = [
+// ── Environment Data (with localStorage persistence) ──
+const DEFAULT_TEST_DATA = [
   { id:1, name:'app-server-01', ip:'', category:'中间件类', function:'应用服务', os:'Linux', count:2, cpu:8, memory:16, sysDisk:100, dataDisk:200, note:'应用服务器集群' },
   { id:2, name:'mysql-test-01', ip:'', category:'数据库类', function:'数据处理', os:'Linux', count:1, cpu:8, memory:32, sysDisk:200, dataDisk:500, note:'MySQL测试库' },
   { id:3, name:'redis-test-01', ip:'', category:'数据库类', function:'数据处理', os:'Linux', count:1, cpu:4, memory:8,  sysDisk:100, dataDisk:200, note:'Redis缓存' },
 ];
-let prodData = [];
-let nextId = 100;
+
+function loadData(){
+  try{
+    var saved=JSON.parse(localStorage.getItem('infraServerData'));
+    if(saved){
+      testData=saved.testData||[];
+      prodData=saved.prodData||[];
+      nextId=saved.nextId||100;
+      return;
+    }
+  }catch(e){}
+  testData=JSON.parse(JSON.stringify(DEFAULT_TEST_DATA));
+  prodData=[];
+  nextId=100;
+}
+
+function saveData(){
+  localStorage.setItem('infraServerData',JSON.stringify({
+    testData:testData,
+    prodData:prodData,
+    nextId:nextId
+  }));
+}
+
+let testData=[], prodData=[], nextId=100;
+loadData();
 
 let currentTab = 'test';
 let editId = null;
@@ -1161,7 +1185,6 @@ function openModal(id) {
 }
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-document.getElementById('modalOverlay').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
 
 function saveItem() {
   const name=document.getElementById('f-name').value.trim();
@@ -1186,7 +1209,7 @@ function saveItem() {
   }else{
     data.push({id:nextId++,...obj});
   }
-  closeModal(); render();
+  saveData(); closeModal(); render();
   showToast(editId?'已更新：'+name:'已新增：'+name);
 }
 
@@ -1197,7 +1220,7 @@ function delItem(id) {
   if(!confirm('确认删除「'+d.name+'」？')) return;
   const idx=data.findIndex(x=>x.id===id);
   if(idx>-1) data.splice(idx,1);
-  render();
+  saveData(); render();
   showToast('已删除：'+d.name);
 }
 
@@ -1208,7 +1231,7 @@ function moveRow(id,dir) {
   const target=idx+dir;
   if(target<0||target>=data.length) return;
   [data[idx],data[target]]=[data[target],data[idx]];
-  render();
+  saveData(); render();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1257,7 +1280,7 @@ function applyTemplate() {
     }
     showToast(`已应用模板「${tmpl.name}」：${tmpl.count} 台`);
   }
-  render();
+  saveData(); render();
 }
 
 // ── Template Management ──
@@ -1267,7 +1290,6 @@ function openTemplateMgr() {
   document.getElementById('tmplMgrOverlay').classList.add('open');
 }
 function closeTemplateMgr() { document.getElementById('tmplMgrOverlay').classList.remove('open'); }
-document.getElementById('tmplMgrOverlay').addEventListener('click',function(e){ if(e.target===this) closeTemplateMgr(); });
 
 function renderTemplateList() {
   const container=document.getElementById('tmplList');
@@ -1328,7 +1350,6 @@ function openTemplateEdit(id) {
 }
 
 function closeTemplateEdit() { document.getElementById('tmplEditOverlay').classList.remove('open'); }
-document.getElementById('tmplEditOverlay').addEventListener('click',function(e){ if(e.target===this) closeTemplateEdit(); });
 
 function toggleTmplType() {
   const type=document.getElementById('tf-type').value;
@@ -1424,7 +1445,6 @@ function openExportModal(){
   document.getElementById('exportModalOverlay').classList.add('open');
 }
 function closeExportModal(){ document.getElementById('exportModalOverlay').classList.remove('open'); }
-document.getElementById('exportModalOverlay').addEventListener('click',function(e){ if(e.target===this) closeExportModal(); });
 
 function selectAll(list,checked){
   const container=document.getElementById(list==='available'?'availableColumns':'selectedColumns');
