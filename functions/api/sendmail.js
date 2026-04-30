@@ -19,12 +19,24 @@ export async function onRequest(context) {
 
   try {
     var data = await request.json();
+
+    // Send a quick wake-up request to cold-start the Render backend
+    await fetch(backendUrl + '/api/sendmail', {
+      method: 'OPTIONS',
+      signal: AbortSignal.timeout(8000)
+    }).catch(function(){});
+
+    // Send actual email request with extended timeout
     var resp = await fetch(backendUrl + '/api/sendmail', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      signal: AbortSignal.timeout(25000)
     });
-    var result = await resp.json();
+    var respText = await resp.text();
+    var result;
+    try { result = JSON.parse(respText); }
+    catch(e) { throw new Error('后端响应异常: ' + respText.substring(0, 100)); }
     return new Response(JSON.stringify(result), {
       headers: { 'Content-Type': 'application/json; charset=utf-8' }
     });
