@@ -44,6 +44,9 @@ async function sendMail(toList, subject, bodyText, attachmentBase64, attachmentN
             user: SMTP_USER,
             pass: password,
         },
+
+        //2026-04-30 强制底层网络请求只走 IPv4 路线
+        family: 4
     });
 
     const mailOptions = {
