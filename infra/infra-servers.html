@@ -1771,7 +1771,12 @@ async function sendEmail(){
         headers: {'Content-Type':'application/json; charset=utf-8'},
         body: JSON.stringify(mailPayload)
       });
-      result = await resp.json();
+      var respText = await resp.text();
+      try { result = JSON.parse(respText); }
+      catch(parseErr){
+        if(!resp.ok) throw new Error('邮件服务异常 (HTTP '+resp.status+')，请稍后重试');
+        throw new Error('服务响应格式异常: '+respText.substring(0,100));
+      }
     }
     if(result.ok){
       showToast('邮件发送成功！收件人：'+recipients.join(', '));
