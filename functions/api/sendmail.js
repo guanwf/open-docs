@@ -20,18 +20,18 @@ export async function onRequest(context) {
   try {
     var data = await request.json();
 
-    // Send a quick wake-up request to cold-start the Render backend
-    await fetch(backendUrl + '/api/sendmail', {
+    // Fire-and-forget wake-up to cold-start the Render backend (don't await — we don't want to burn our 30s budget)
+    fetch(backendUrl + '/api/sendmail', {
       method: 'OPTIONS',
-      signal: AbortSignal.timeout(8000)
+      signal: AbortSignal.timeout(5000)
     }).catch(function(){});
 
-    // Send actual email request with extended timeout
+    // Send actual email request with near-platform-limit timeout
     var resp = await fetch(backendUrl + '/api/sendmail', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-      signal: AbortSignal.timeout(25000)
+      signal: AbortSignal.timeout(28000)
     });
     var respText = await resp.text();
     var result;

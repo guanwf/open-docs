@@ -1766,17 +1766,7 @@ async function sendEmail(){
     if (IS_FILE_MODE) {
       result = await sendMailViaBridge(mailPayload);
     } else {
-      var resp = await fetch('/api/sendmail', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json; charset=utf-8'},
-        body: JSON.stringify(mailPayload)
-      });
-      var respText = await resp.text();
-      try { result = JSON.parse(respText); }
-      catch(parseErr){
-        if(!resp.ok) throw new Error('邮件服务异常 (HTTP '+resp.status+')，请稍后重试');
-        throw new Error('服务响应格式异常: '+respText.substring(0,100));
-      }
+      result = await sendMailWithRetry(mailPayload);
     }
     if(result.ok){
       showToast('邮件发送成功！收件人：'+recipients.join(', '));
@@ -1790,6 +1780,38 @@ async function sendEmail(){
     btn.disabled=false;
     btn.textContent='📧 发送邮件';
   }
+}
+
+async function sendMailWithRetry(payload) {
+  var lastError;
+  for (var attempt = 0; attempt < 2; attempt++) {
+    try {
+      var resp = await fetch('/api/sendmail', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json; charset=utf-8'},
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(35000)
+      });
+      var respText = await resp.text();
+      var result;
+      try { result = JSON.parse(respText); }
+      catch(parseErr){
+        if(!resp.ok) throw new Error('邮件服务异常 (HTTP '+resp.status+')，请稍后重试');
+        throw new Error('服务响应格式异常: '+respText.substring(0,100));
+      }
+      return result;
+    } catch(e) {
+      lastError = e;
+      var isTimeout = e.message && (e.message.includes('timeout') || e.message.includes('aborted'));
+      if (isTimeout && attempt === 0) {
+        showToast('正在唤醒邮件服务，请稍候…');
+        await new Promise(function(r){setTimeout(r, 10000);});
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw lastError;
 }
 
 
