@@ -54,7 +54,7 @@ const database = [
             { cmd: "dmesg -T | grep -i 'out of memory'", desc: "检查系统日志是否有OOM记录." },
 
             { cmd: "dos2unix filename", desc: "format file" },
-            { cmd: ":set ff=unix", desc: "vi format file" },
+            { cmd: "set ff=unix", desc: "vi format file" },
 
             { cmd: "echo 'alias kb='kubectl'' >> ~/.bashrc && source ~/.bashrc", desc: "建立kb命令." },
             { cmd: "tail -f /var/log/messages", desc: "实时系统日志" },
@@ -78,7 +78,9 @@ const database = [
             { cmd: "docker run -m 512m --memory-swap 1g my_image", desc: "#docker,限制内存使用：可以在创建容器时设置内存限制" },
             { cmd: "docker inspect rmqbroker --format='{{.State.OOMKilled}}'", desc: "#docker,检查容器是否因 OOM 被杀" },
             { cmd: "docker-compose ps -q | xargs docker inspect -f '{{.Name}}: {{.RestartCount}} 次重启'", desc: "#docker-compose,查看重启次数" },
-            
+            { cmd: "docker update --memory=13g --memory-swap=26g mysql84", desc: "#docker,更新容器内存限制，docker inspect mysql84 | grep -i memory" },
+            { cmd: "docker update --restart unless-stopped mongodb", desc: "#docker,更新容器重启策略" },
+
             { cmd: `建立pos用户,目录，分配权限，切换sudo权限
 mkdir -p /data/pos-work
 groupadd posgroup
@@ -117,9 +119,6 @@ dmesg -T | grep -i "oom\|killed"
 
                 `, desc: "dmesg是查看 Linux 内核日志的命令，专门用来查：系统级别的硬件、驱动、内存、进程被杀、网络、IO 等底层问题。" },
 
-                
-
-
         ]
     },
     {
@@ -135,7 +134,7 @@ firewall-cmd --reload
             { cmd: "telnet 192.168.0.1 9999", desc: "探测端口" },
             { cmd: "netstat -ntlp", desc: "查看监听端口" },
             { cmd: "netstat -anop|grep 9999", desc: "查看监听指定端口" },
-            { cmd: `timeout 10 bash -c "</dev/tcp/192.168.0.1/9999" 2>/dev/null && echo "通" || echo "不通"`, desc: "查看监听端口" },            
+            { cmd: `timeout 10 bash -c "</dev/tcp/192.168.0.1/9999" 2>/dev/null && echo "通" || echo "不通"`, desc: "查看监听端口" },
             { cmd: "ifconfig -a", desc: "网卡详情,window: ipconfig -a " },
             { cmd: "nslookup 域名", desc: "域名解析,example:nslookup itor.westlakeerp.com 8.8.8.8, nslookup g.cn 172.17.1.250",doc:"https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/nslookup"},
             { cmd: "traceroute 192.168.0.1", desc: "traceroute [目标主机/IP],诊断网络连接问题" },
@@ -461,7 +460,29 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }` 
-            },                        
+            },
+            {
+                desc: "tcp proxy",
+                cmd: `
+stream {
+    #需要安装--with-stream 
+    upstream cloud_redis {
+        server 172.17.0.116:6379;
+    }
+
+    server {
+        listen 6379; # Java客户端连接Nginx的这个端口
+        
+        # 纯粹转发，去掉所有 proxy_ssl 相关的配置！
+        proxy_pass cloud_redis;
+        
+        # 保持长连接不中断
+        proxy_timeout 24h;
+        proxy_connect_timeout 10s;
+    }
+}
+` 
+            },                               
         ]
     },            
     {
@@ -525,6 +546,13 @@ for svc in $(kubectl -n pos-uat get svc | awk 'NR>1 {print $1}'); do
   echo "kubectl -n pos-uat scale deployment "$svc" --replicas=1"
 done
 `, desc: "把所有service打印出来.",doc:"" },
+{ cmd: `
+#使用 Ephemeral Containers (临时容器) 抓包
+kubectl debug -it <pod-name> --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/netshoot:0.15-- target <container-name>
+
+#进入后执行：
+tcpdump -i any port <缓存端口> -vvv
+`, desc: "debug-k8s-pod-network.",doc:"https://xd20al46gl.feishu.cn/docx/PCEbdjNNYo702GxeJlIcnFcAnbd" },
 
         ]
     },
@@ -587,6 +615,7 @@ done
             { category: "❄️K8s",text:"K8s Pod YAML 生成器", url: "./infra/k8s-pod-yaml-generator.html", desc: ""},
             
             { category: "❄️K8s",text:"k8s-kubeadm集群证书过期更换方法", url: "https://xd20al46gl.feishu.cn/docx/GaDrdYRvuoTnT4xaMvNczu9TnId", desc: ""},            
+            { category: "❄️K8s",text:"k8s-网络-debug", url: "https://xd20al46gl.feishu.cn/docx/PCEbdjNNYo702GxeJlIcnFcAnbd", desc: ""},
 
             { category: "📚DB",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
             { category: "📚DB",text:"ob-oms-调优", url: "https://xd20al46gl.feishu.cn/docx/HcURd9NSAoWvBPxUfyccuFNznTc", desc: ""},
@@ -616,6 +645,7 @@ done
 
             { category: "⚽️NetWork",text:"Wireshark", url: "https://www.wireshark.org/docs/relnotes/", desc: "抓包分析"},
             { category: "⚽️NetWork",text:"itdog", url: "https://www.itdog.cn/", desc: "itdog-网速检测"},
+            { category: "⚽️NetWork",text:"TCP抓包分析", url: "https://xd20al46gl.feishu.cn/docx/UzL7dnZFfow325xCk4ocz11knQg", desc: ""},
             // https://mp.weixin.qq.com/s/47AWj_IBKjoT71eL8dALug
             
 
