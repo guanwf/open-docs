@@ -15,6 +15,8 @@ const k8sNamespaces = [
     "pos-prod",
     "wms-uat",
     "wms-prod",
+    "jstore-uat",
+    "jstore-prod",
     "myshop-uat",
     "myshop-prod"
 ];
