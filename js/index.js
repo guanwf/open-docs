@@ -8,11 +8,11 @@ const k8sNamespaces = [
     "roc-v2-test",
     "roc-uat",
     "roc-prod",
-    "pos-pbs",    
-    "pos-poc",
+    "pos-pbs",
     "pos-sit",
     "pos-uat",
     "pos-prod",
+    "pos-preprod",
     "wms-uat",
     "wms-prod",
     "jstore-uat",
@@ -97,6 +97,103 @@ sudo visudo -c && echo "pos ALL=(ALL:ALL) ALL" | tee -a /etc/sudoers && echo "po
 
             { cmd: "dd if=/dev/zero of=/tmp/test_iops bs=4k count=10000 oflag=direct", desc: "#iops=总操作次数/总耗时; 普通机械硬盘 (HDD): 顺序写入通常在 100 MB/s - 200 MB/s;  SATA SSD: 通常在 450 MB/s - 550 MB/s;  NVMe SSD: 通常在 1500 MB/s - 7000 MB/s。" },
             { cmd: "fio -name=randwrite -ioengine=libaio -iodepth=1 -rw=randwrite -bs=4k -direct=1 -size=512M -numjobs=1 -runtime=60 -group_reporting", desc: "#iops 测试随机写入 IOPS (4k块大小)" },
+
+            // ── 系统服务管理 ──
+            { cmd: `systemctl status <service> --no-pager -l
+# 常用子命令:
+systemctl restart <service>   # 重启
+systemctl enable <service>    # 开机自启
+systemctl daemon-reload       # 重载systemd配置`, desc: "#systemctl,查看/管理服务状态; 常用子命令: start/stop/restart/enable/disable/daemon-reload", tags: ["系统"] },
+
+            { cmd: `journalctl -u <service> -f
+# 其他常用:
+journalctl -u <service> --since "10 min ago"
+journalctl -xe               # 查看最近错误日志`, desc: "#systemctl,查看服务日志; -f 实时跟踪; -xe 跳到末尾显示详细错误; --since/--until 时间过滤", tags: ["系统"] },
+
+            { cmd: `timedatectl set-timezone Asia/Shanghai
+hostnamectl set-hostname <new-hostname>`, desc: "#systemctl,系统时间/主机名配置; timedatectl 查看NTP同步状态; hostnamectl 查看当前主机信息", tags: ["系统"] },
+
+            // ── 磁盘 ──
+            { cmd: "lsblk -f", desc: "#disk,列出块设备及文件系统; lsblk 树形显示磁盘分区; -f 显示FS类型和UUID; -m 显示权限和属主", tags: ["磁盘"] },
+
+            // ── 网络诊断 ──
+            { cmd: "ss -tlnp", desc: "#net,查看所有监听TCP端口(现代替代netstat); ss -tunap 全部TCP/UDP连接; ss -s 统计概要", tags: ["网络"] },
+
+            { cmd: "ip addr show && ip route show", desc: "#net,查看IP地址和路由表(现代替代ifconfig/route); ip a s 简写; ip route add/del 增删路由; ip neigh 查看ARP表", tags: ["网络"] },
+
+            { cmd: `curl -v http://127.0.0.1:8080/api -H "Content-Type: application/json" -d '{"key":"val"}'
+# 其他常用:
+curl -I http://example.com                    # 仅获取响应头
+curl -k https://self-signed.badssl.com/       # 跳过SSL证书校验
+curl -o file.tar.gz http://example.com/file   # 下载文件
+curl -u user:pass http://example.com          # 基本认证`, desc: "#net,调试HTTP接口; -v 请求/响应详情; -I 仅响应头; -k 跳过SSL; -H 请求头; -d POST数据; -o 下载; -u 认证", tags: ["网络"] },
+
+            // ── 文件操作 ──
+            { cmd: `# 压缩: tar -czvf archive.tar.gz /path/to/folder
+# 解压: tar -xzvf archive.tar.gz -C /target/
+# 查看: tar -tzvf archive.tar.gz
+# 排除: tar -czvf a.tar.gz --exclude=logs /path`, desc: "#file,打包/压缩/解压; .tar.gz 用 z; .tar.bz2 用 j; .tar.xz 用 J; -C 指定解压目录; -c创建 -x解压 -t查看 -v详细", tags: ["文件"] },
+
+            { cmd: "chmod +x script.sh && chown -R user:group /path", desc: "#file,修改权限与所有者; 数字模式: chmod 755 dir / 644 file; 符号模式: u+x g-w o-r; 递归: -R", tags: ["文件"] },
+
+            { cmd: `rsync -avz --progress /source/ user@host:/dest/
+# 关键选项:
+rsync -avzn /src/ host:/dst/       # -n 干运行预览
+rsync -avz --delete /src/ /dst/    # --delete 同步删除目标多余文件`, desc: "#file,高效文件同步(增量传输); -a 归档保留属性; -v 详细; -z 压缩传输; -n 干运行; --delete 删除目标多余文件", tags: ["文件"] },
+
+            // ── 文本处理 ──
+            { cmd: `grep -rn "pattern" /path --include="*.log" --exclude-dir=node_modules
+# 常用选项:
+grep -rnil "keyword" /path    # -l 仅列出匹配文件名
+grep -rn -A 3 "keyword" file  # -A N 匹配行后N行
+grep -rn -B 2 "keyword" file  # -B N 匹配行前N行
+grep -rn -C 3 "keyword" file  # -C N 前后各N行`, desc: "#text,递归搜索文本; -r 递归; -n 行号; -i 忽略大小写; -w 全词匹配; -v 反向匹配; --include/--exclude-dir 过滤", tags: ["文本"] },
+
+            { cmd: `sed -i 's/old_text/new_text/g' file
+# 其他常用:
+sed -i.bak 's/old/new/g' file       # 备份原文件为 file.bak
+sed -i '/pattern/d' file             # 删除匹配行
+sed -i '3a\\new line' file            # 在第3行后插入新行`, desc: "#text,原地替换文本; -i 直接修改文件; -i.bak 备份后修改; g 全局替换; -r 启用扩展正则", tags: ["文本"] },
+
+            { cmd: `awk '{print $1, $NF, NR}' file
+# 常用示例:
+awk -F: '{print $1,$3}' /etc/passwd        # -F: 指定分隔符
+awk '$3>1000{print $1}' /etc/passwd        # 条件过滤
+awk '{sum+=$2}END{print sum}' data.txt     # 求和`, desc: "#text,列提取与文本处理; $1第一列 $NF最后一列 NR行号; -F指定分隔符; BEGIN/END三段式", tags: ["文本"] },
+
+            { cmd: `cat access.log | awk '{print $1}' | sort | uniq -c | sort -rn | head -n 10`, desc: "#text,统计频率Top N; 管道: 提取列 > sort排序 > uniq -c去重计数 > sort -rn逆序 > head取前N; 注: uniq -c必须先sort", tags: ["文本"] },
+
+            { cmd: `command 2>&1 | tee output.log
+# 追加模式:
+command 2>&1 | tee -a output.log`, desc: "#text,输出到终端同时保存到文件; tee -a 追加而非覆盖; 2>&1 合并stderr到stdout", tags: ["文本"] },
+
+            // ── 进程管理 ──
+            { cmd: "watch -n 2 -d 'command'", desc: "#process,每2秒刷新执行命令; -n 间隔秒数(最小0.1s); -d 高亮变化部分; -t 隐藏标题; Ctrl+C 退出", tags: ["进程"] },
+
+            { cmd: `history | grep keyword
+# 快捷复用:
+!123                          # 执行历史第123条命令
+!!                            # 重复上一条命令
+Ctrl+R                        # 交互式反向搜索(最常用)`, desc: "#process,搜索/复用命令历史; ~/.bash_history持久化; history -c清空当前会话", tags: ["进程"] },
+
+            { cmd: `pgrep -f "pattern"       # 按进程名/完整命令行查找PID
+pkill -f "pattern"       # 按进程名/完整命令行终止
+pgrep -l -u username     # 列出某用户所有进程`, desc: "#process,按名称查找/终止进程; pgrep输出PID列表; pkill发送信号(默认15); pkill -9 强制终止; -u按用户 -t按终端", tags: ["进程"] },
+
+            { cmd: `crontab -l        # 查看当前用户定时任务
+crontab -e        # 编辑定时任务
+# 格式: 分(0-59) 时(0-23) 日(1-31) 月(1-12) 周(0-7) command
+# 特殊: @reboot, @daily, @hourly, @yearly`, desc: "#process,查看/编辑定时任务; crontab -r 删除所有; crontab -u user 指定用户; 日志: /var/log/cron", tags: ["进程"] },
+
+            // ── 通用工具 ──
+            { cmd: `find . -name "*.log" -print0 | xargs -0 rm -f
+# 关键参数:
+... | xargs -n 10 command       # 每批最多10个参数
+... | xargs -P 4 command        # 并行4个进程
+... | xargs -I {} mv {} /bak/   # 用{}占位替换`, desc: "#tool,管道输入转为命令行参数; -n 每批N个; -P 并行数; -I {} 占位; -0 处理含空格文件名(配合find -print0)", tags: ["工具"] },
+
+            { cmd: "which kubectl && type kubectl && command -v kubectl", desc: "#tool,定位命令路径/类型; which查PATH中可执行文件; type查shell解析(alias/function/builtin/file); command -v 最可移植", tags: ["工具"] },
+
             { cmd: "ps -aux | grep clear2 | grep -v grep | awk '{print $2}' | xargs kill -9", desc: "批量kill进程" },
             { cmd: `
 # 源机器
@@ -132,17 +229,45 @@ dmesg -T | grep -i "oom\|killed"
 firewall-cmd --zone=public --add-port=9999/tcp --permanent
 firewall-cmd --reload
 `, desc: "开防火墙端口" },
+            { cmd: `ping -c 4 192.168.0.1            # 发送4个ICMP包测试连通性
+ping -c 10 -i 0.2 192.168.0.1   # 快速发送10个包(间隔0.2秒)
+ping -s 1000 192.168.0.1        # 指定包大小1000字节
+ping -W 2 192.168.0.1           # 超时等待2秒
+ping -I eth0 192.168.0.1        # 指定源网卡`, desc: "#ping,最基础的连通性测试; -c 发包数; -i 间隔秒数; -s 包大小; -W 超时; -I 指定网卡; -f 洪水模式" },
             { cmd: "nc -v -z 192.168.0.1 9999", desc: "探测端口(nc)" },
             { cmd: "telnet 192.168.0.1 9999", desc: "探测端口" },
             { cmd: "netstat -ntlp", desc: "查看监听端口" },
             { cmd: "netstat -anop|grep 9999", desc: "查看监听指定端口" },
+            { cmd: `ss -tlnp                   # 查看所有监听TCP端口(现代替代netstat)
+ss -tunap                  # 查看全部TCP/UDP连接(含进程)
+ss -s                      # Socket统计概要
+ss -o state established    # 仅查看已建立的连接
+ss -tlnp | grep 8080       # 查看特定端口
+ss dst 192.168.0.1         # 查看目标IP的所有连接`, desc: "#ss,Socket统计工具(现代替代netstat,性能更好); -t tcp; -u udp; -l listening; -n numeric; -p process; -a all" },
             { cmd: `timeout 10 bash -c "</dev/tcp/192.168.0.1/9999" 2>/dev/null && echo "通" || echo "不通"`, desc: "查看监听端口" },
             { cmd: "ifconfig -a", desc: "网卡详情,window: ipconfig -a " },
+            { cmd: `arp -a                          # 查看ARP缓存表(旧)
+ip neigh show                   # 查看邻居表(现代替代arp)
+ip neigh add 192.168.0.1 lladdr xx:xx:xx dev eth0  # 添加静态ARP
+ip neigh del 192.168.0.1 dev eth0                  # 删除ARP条目
+arp -d 192.168.0.1              # 删除ARP缓存(旧)`, desc: "#arp,查看/管理ARP邻居表(二层网络排查); arp -a 查看; ip neigh 现代替代; 排查IP冲突/ARP欺骗" },
             { cmd: "nslookup 域名", desc: "域名解析,example:nslookup itor.westlakeerp.com 8.8.8.8, nslookup g.cn 172.17.1.250",doc:"https://learn.microsoft.com/zh-cn/windows-server/administration/windows-commands/nslookup"},
+            { cmd: `dig 域名
+dig @8.8.8.8 域名            # 指定DNS服务器查询
+dig 域名 ANY                  # 查询所有类型记录(A/AAAA/MX/NS等)
+dig 域名 +short               # 简洁输出(只显示结果)
+dig -x 192.168.0.1            # 反向解析(IP -> 域名)
+dig 域名 +trace               # 追踪DNS递归解析全过程
+dig 域名 +dnssec              # 查看DNSSEC信息`, desc: "#dig,DNS诊断利器(比nslookup信息更丰富); +short简洁; +trace追踪; -x反向解析; @指定DNS服务器" },
+            { cmd: "resolvectl status             # 查看DNS解析器全局状态\nresolvectl query 域名          # 查询域名解析\nresolvectl statistics          # 查看解析统计\ncat /etc/resolv.conf            # 直接查看DNS配置", desc: "#resolvectl,systemd DNS解析器状态查询(替代dig/nslookup的现代工具); 显示每个网卡的DNS服务器配置" },
             { cmd: "traceroute 192.168.0.1", desc: "traceroute [目标主机/IP],诊断网络连接问题" },
             { cmd: "traceroute -n -m 10 域名", desc: "路由追踪前10跳,对应Windows的tracert -d -h 10" },
 
-            { cmd: "tracepath  192.168.0.1", desc: "追踪数据包从本机到目标主机所经过的网络路由路径, tracepath [域名]" },    
+            { cmd: "tracepath  192.168.0.1", desc: "追踪数据包从本机到目标主机所经过的网络路由路径, tracepath [域名]" },
+
+            { cmd: `mtr -r -c 10 192.168.0.1     # -r报告模式 -c发包次数
+mtr 192.168.0.1                # 实时交互模式
+mtr -n 192.168.0.1             # 不解析主机名(更快)`, desc: "#mtr,结合ping+traceroute的网络质量诊断;显示每一跳丢包率/延迟;定位是哪一跳出了问题" },
 
             { cmd: "sar -n DEV 1", desc: "查看网卡是否打满.",doc:"https://xd20al46gl.feishu.cn/docx/RWH6dWc2Yobe1Exb1aGcXgvYnlc" },
             { cmd: "sar [选项] -f <日志文件路径>", desc: "sar -f /var/log/sa/sa02，查看网指定要读取的历史数据文件，必须配合日志文件使用卡是否打满." ,doc:"https://xd20al46gl.feishu.cn/docx/RWH6dWc2Yobe1Exb1aGcXgvYnlc" },
@@ -163,7 +288,19 @@ nc -l 9999
 nc -v 192.168.0.1 9999`, desc: "用nc临时测试2个主机的port是否通！" },
 
             { cmd: "tcpdump -i any port 9999 -n -v", desc: "抓取物理网卡上9999端口的包." },
-            { cmd: "iptables -A INPUT -p tcp --sport 3306 -j DROP", desc: "丢弃，阻止来自3306端口的入站TCP连接" }
+            { cmd: "iptables -A INPUT -p tcp --sport 3306 -j DROP", desc: "丢弃，阻止来自3306端口的入站TCP连接" },
+            { cmd: `iptables -L -n -v             # 查看所有规则(带计数器)
+iptables -L -n -v --line-numbers  # 带行号
+iptables -D INPUT 3                # 删除INPUT链第3条规则
+iptables -F INPUT                  # 清空INPUT链
+iptables -t nat -L -n -v           # 查看NAT表规则
+iptables-save > /etc/iptables.rules    # 保存规则
+iptables-restore < /etc/iptables.rules # 恢复规则`, desc: "#iptables,防火墙规则查看与管理; -L列出; -F清空; -D删除; -n不解析; -v详细; -t指定表(filter/nat/mangle)" },
+            { cmd: `curl -o /dev/null -s -w 'DNS解析:%{time_namelookup}s
+TCP握手:%{time_connect}s
+SSL握手:%{time_appconnect}s
+首字节:%{time_starttransfer}s
+总耗时:%{time_total}s\n' http://example.com`, desc: "#net,分析HTTP请求各阶段耗时;定位DNS慢、TCP慢还是服务器处理慢; 配合-o /dev/null只计时不下载" },
 
         ]
     },
@@ -278,10 +415,10 @@ ES_PASSWORD: ""
         title: { zh: "数据库", en: "Database" },
         type: "cmd",
         items: [
-             { cmd: "GRANT SELECT, INSERT,UPDATE,DELETE,CREATE,INDEX,ALTER,CREATE VIEW,SHOW VIEW ON reportdb.* TO roc;", desc: "分配权限" },
-             { cmd: "select * from information_schema.processlist;", desc: "查看所有连接,kill id值" },
-             { cmd: "SELECT * FROM information_schema.SESSION_STATUS;", desc: "会话状态" },
-             { cmd: "ELECT LEFT(HOST, INSTR(HOST, ':')-1) client_ip, COUNT(*) cnt FROM information_schema.processlist GROUP BY client_ip ORDER BY cnt DESC;;", desc: "根据ip看连接" },
+             { cmd: "GRANT SELECT, INSERT,UPDATE,DELETE,CREATE,INDEX,ALTER,CREATE VIEW,SHOW VIEW ON reportdb.* TO roc;", desc: "分配权限", tags: ["MySQL","权限"] },
+             { cmd: "select * from information_schema.processlist;", desc: "查看所有连接,kill id值", tags: ["MySQL","进程"] },
+             { cmd: "SELECT * FROM information_schema.SESSION_STATUS;", desc: "会话状态", tags: ["MySQL","状态"] },
+             { cmd: "SELECT LEFT(HOST, INSTR(HOST, ':')-1) client_ip, COUNT(*) cnt FROM information_schema.processlist GROUP BY client_ip ORDER BY cnt DESC;;", desc: "根据ip看连接", tags: ["MySQL","进程"] },
              { cmd: `
 单位：微秒
 SET ob_query_timeout=20000000;
@@ -293,7 +430,7 @@ set global ob_query_timeout=120000000;
 set global ob_query_timeout=3000000000;
 查看
 SHOW VARIABLES LIKE 'ob_query_timeout';
-             `, desc: "设置超时时间" },
+             `, desc: "设置超时时间", tags: ["OB","配置"] },
              { cmd: `
 select zone,concat(SVR_IP,':',SVR_PORT) observer,
 cpu_capacity_max cpu_total,cpu_assigned_max cpu_assigned,
@@ -309,9 +446,77 @@ round((data_disk_capacity/1024/1024/1024),2) as data_disk,
 round((data_disk_in_use/1024/1024/1024),2) as data_disk_used,
 round((data_disk_capacity-data_disk_in_use)/1024/1024/1024,2) as data_disk_free
 from gv$ob_servers;
-             `, desc: "在sys租户下面查询，查看租户的内存及磁盘使用情况." },
+             `, desc: "在sys租户下面查询，查看租户的内存及磁盘使用情况." , tags: ["OB","资源"]},
 
-        ]
+        	             { cmd: `SHOW DATABASES;                              # 查看所有数据库
+SHOW TABLES;                                # 查看当前库所有表
+DESC table_name;                            # 查看表结构(最简)
+SHOW COLUMNS FROM table_name;               # 查看表结构(含类型/键)
+SHOW CREATE TABLE table_name;               # 查看建表语句(含索引/约束)
+SHOW INDEX FROM table_name;                 # 查看索引信息`, desc: "#basic,MySQL基础查看; SHOW DATABASES/TABLES 看库表; DESC/SHOW COLUMNS 看结构; SHOW CREATE TABLE 看完整建表; SHOW INDEX 看索引" , tags: ["MySQL","基础"]},
+	             { cmd: `SHOW FULL PROCESSLIST;                       # 查看所有连接(含完整SQL文本,最常用)
+SELECT * FROM information_schema.processlist WHERE command != 'Sleep';  # 仅看活跃连接(排除Sleep)
+SELECT * FROM information_schema.processlist WHERE time > 60 ORDER BY time DESC;  # 执行超60s的查询
+SELECT CONCAT('KILL ', id, ';') FROM information_schema.processlist WHERE command != 'Sleep' AND time > 30;  # 生成批量KILL语句
+KILL <connection_id>;                        # 杀死指定连接(回滚事务)
+KILL QUERY <connection_id>;                  # 仅杀查询,不断连接`, desc: "#process,MySQL进程管理; FULL PROCESSLIST看完整SQL; 排除Sleep看活跃; time>60找长查询; SELECT CONCAT生成批量KILL; KILL杀连接; KILL QUERY仅杀查询" , tags: ["MySQL","进程"]},
+	             { cmd: `SELECT * FROM information_schema.INNODB_TRX;      # 当前活跃事务(含开始时间/持锁数)
+SELECT * FROM performance_schema.data_lock_waits;          # MySQL 8.0 查看锁等待关系
+SELECT * FROM information_schema.INNODB_LOCK_WAITS;        # MySQL 5.x 查看锁等待关系
+SHOW ENGINE INNODB STATUS;                                 # InnoDB总体状态(含最近死锁日志)
+SELECT @@transaction_isolation;                            # 查看当前事务隔离级别`, desc: "#lock,MySQL锁与事务排查; INNODB_TRX看活跃事务; data_lock_waits看阻塞链; INNODB STATUS看死锁详情; @@transaction_isolation看隔离级别" , tags: ["MySQL","锁事务"]},
+	             { cmd: `SHOW GLOBAL STATUS LIKE 'Threads%';                # 线程统计(connected当前连接/running执行中)
+SHOW GLOBAL STATUS LIKE '%Slow%';                          # 慢查询数量(Slow_queries累计值)
+SHOW GLOBAL STATUS LIKE 'Questions';                       # 查询总次数
+SHOW VARIABLES LIKE '%slow%';                              # 慢查询相关配置
+SHOW VARIABLES LIKE 'long_query_time';                     # 慢查询阈值(秒,默认10)
+SHOW VARIABLES LIKE 'max_connections';                     # 最大连接数配置
+SHOW VARIABLES LIKE '%timeout%';                           # 各类超时配置`, desc: "#status,MySQL状态变量与配置; SHOW STATUS运行指标; SHOW VARIABLES配置参数; Threads_connected当前连接; Slow_queries慢查累计; Questions查询总量" , tags: ["MySQL","配置"]},
+	             { cmd: `SELECT user,host FROM mysql.user;                   # 查看所有用户
+CREATE USER 'user'@'host' IDENTIFIED BY 'password';        # 创建用户
+DROP USER 'user'@'host';                                   # 删除用户
+ALTER USER 'user'@'host' IDENTIFIED BY 'new_password';     # 修改密码(MySQL 8.0+)
+SET PASSWORD FOR 'user'@'host' = PASSWORD('new_pwd');      # 修改密码(MySQL 5.x)
+SHOW GRANTS FOR 'user'@'host';                             # 查看用户权限
+REVOKE ALL PRIVILEGES ON *.* FROM 'user'@'host';           # 回收全部权限
+FLUSH PRIVILEGES;                                           # 刷新权限表(使生效)`, desc: "#user,MySQL用户权限管理; CREATE/DROP/ALTER USER用户生命周期; SHOW GRANTS看权限; GRANT/REVOKE授权回收; FLUSH PRIVILEGES刷新使生效" , tags: ["MySQL","权限"]},
+	             { cmd: `# 各库大小(GB) - 容量规划
+SELECT table_schema 库名, ROUND(SUM(data_length+index_length)/1024/1024/1024,2) 大小GB
+FROM information_schema.tables GROUP BY table_schema ORDER BY 大小GB DESC;
+
+# 指定库下各表大小(MB)
+SELECT table_name 表名, ROUND((data_length+index_length)/1024/1024,2) 大小MB
+FROM information_schema.tables WHERE table_schema='库名' ORDER BY (data_length+index_length) DESC;
+
+# Top 10 大表(GB)
+SELECT table_schema,table_name,ROUND((data_length+index_length)/1024/1024/1024,2) 大小GB
+FROM information_schema.tables ORDER BY (data_length+index_length) DESC LIMIT 10;`, desc: "#size,MySQL库表大小统计; data_length数据+index_length索引=总占用; GROUP BY table_schema按库汇总; WHERE table_schema看单库; ORDER BY找大表" , tags: ["MySQL","容量"]},
+	             { cmd: `SHOW PROCESSLIST;                                      # OB进程列表(同MySQL语法)
+# 活跃会话(含当前执行SQL, 最重要)
+SELECT * FROM gv$session WHERE state = 'ACTIVE';
+# 最后调用超过60秒的会话(可能长事务/慢SQL)
+SELECT * FROM gv$session WHERE last_call_et > 60;
+# 非后台会话概览
+SELECT sid,serial#,username,status,sql_id,last_call_et FROM gv$session WHERE type!='BACKGROUND';
+ALTER SYSTEM KILL SESSION '<sid>,<serial#>' IMMEDIATE;        # 强制杀会话(OB语法)
+ALTER SYSTEM CANCEL SQL '<sql_id>';                            # 取消指定SQL,不杀会话`, desc: "#OB-session,OceanBase会话管理; SHOW PROCESSLIST简洁; gv$session.state=ACTIVE看活跃; last_call_et最后调用时长(秒); KILL SESSION IMMEDIATE强制杀; CANCEL SQL温和取消" , tags: ["OB","进程"]},
+	             { cmd: `# SQL审计 - 排查历史SQL(OB核心排查工具)
+SELECT * FROM gv$sql_audit WHERE query_sql LIKE '%关键表名%' ORDER BY REQUEST_TIME DESC LIMIT 10;
+# 按执行时间排序(找慢SQL, elapsed_time单位微秒)
+SELECT * FROM gv$sql_audit WHERE tenant_name='租户名' AND elapsed_time > 1000000 ORDER BY elapsed_time DESC LIMIT 20;
+# OB锁等待(当前阻塞链)
+SELECT * FROM __all_virtual_lock_wait_stat;`, desc: "#OB-audit,OceanBase SQL审计与锁等待; gv$sql_audit存放历史SQL(受保留时长限制); elapsed_time微秒; __all_virtual_lock_wait_stat当前锁等待链" , tags: ["OB","审计"]},
+	             { cmd: `# 合并管理
+ALTER SYSTEM MAJOR FREEZE;                                    # 手动触发全量合并
+SELECT * FROM gv$merge_info ORDER BY START_TIME DESC LIMIT 5;  # 查看合并历史/进度
+# OB参数查询
+SHOW PARAMETERS LIKE '%timeout%';                             # 超时相关参数
+SHOW PARAMETERS LIKE '%memory%';                              # 内存相关参数
+# 执行计划
+EXPLAIN SELECT ...;                                           # 查看执行计划
+EXPLAIN EXTENDED SELECT ...;                                  # 详细执行计划(含更多细节)`, desc: "#OB-ops,OceanBase合并/参数/执行计划; MAJOR FREEZE手动合并; gv$merge_info合并历史; SHOW PARAMETERS查OB配置; EXPLAIN看执行计划" , tags: ["OB","运维"]},
+
+]
     },
     {
         id: "nginx",
@@ -493,68 +698,196 @@ stream {
         type: "k8s",
         layout: "grid", // 开启一行两个
         items: [
-            { cmd: "kubectl -n roc-uat get pod|grep abc", desc: "get pod,abc 改成需要的.",doc:"" },
-            { cmd: "kubectl rollout restart deploy -n roc-uat roc-goods", desc: "滚动重启" ,doc:"https://kubernetes.io/zh-cn/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/" },
-            { cmd: "kubectl -n roc-uat scale deployment roc-goods --replicas=1", desc: "缩容,设置pod为1份." },
-            { cmd: "kubectl -n roc-uat set image deployment roc-goods roc-goods=版本号", desc: "更新pod版本." },
-            { cmd: "kubectl -n roc-uat logs -f --tail 200 roc-goods", desc: "查看日志",doc:"" },
-            { cmd: "kubectl -n roc-uat exec -it roc-goods  -- sh", desc: "进入pod,如果有多个容器则要加参数 -c [容器名称].",doc:"" },            
-            { cmd: "kubectl -n roc-uat delete pod roc-goods", desc: "删除pod.",doc:"" },
-            { cmd: "kubectl -n roc-uat delete pod roc-goods --grace-period=0 --force --wait=false", desc: "强制删除pod",doc:"" },            
-            { cmd: "kubectl -n roc-uat describe pod roc-goods", desc: "查看pod明细",doc:"" },
-            { cmd: "kubectl -n roc-uat describe node [nodeName]", desc: "查看node明细",doc:"" },
+            { cmd: "kubectl -n roc-uat get pod|grep abc", desc: "get pod,abc 改成需要的.",doc:"",
+	            tags: ["资源"]
+	        },
+            { cmd: `kubectl -n roc-uat get all                # 查看所有资源(常用排查起手式)
+kubectl -n roc-uat get pods -o wide     # Pod带节点和IP信息
+kubectl -n roc-uat get svc              # 查看Service
+kubectl -n roc-uat get endpoints        # 查看Endpoints(Service后端Pod IP列表)
+kubectl -n roc-uat get ingress          # 查看Ingress路由规则
+kubectl -n roc-uat get pvc              # 查看持久化卷声明
+kubectl -n roc-uat get pv               # 查看持久化卷
+kubectl -n roc-uat get secrets          # 查看Secrets列表(仅名称)`, desc: "#get,常用资源查看; -o wide显示更多列; get all 查看该ns下一切资源; kubectl api-resources 查看所有支持的资源类型",
+	            tags: ["资源"]
+	        },
+            { cmd: "kubectl rollout restart deploy -n roc-uat roc-goods", desc: "滚动重启" ,doc:"https://kubernetes.io/zh-cn/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/",
+	            tags: ["部署"]
+	        },
+            { cmd: `kubectl -n roc-uat rollout undo deployment roc-goods      # 回滚到上一版本(必须)
+kubectl -n roc-uat rollout history deployment roc-goods   # 查看部署历史版本
+kubectl -n roc-uat rollout status deployment roc-goods    # 查看Deployment升级状态
+kubectl -n roc-uat rollout undo deployment roc-goods --to-revision=2   # 回滚到指定版本`, desc: "#rollout,部署回滚与状态查看; undo回滚; history查看所有revision; status看升级进度; --to-revision指定版本号",
+	            tags: ["部署"]
+	        },
+            { cmd: "kubectl -n roc-uat scale deployment roc-goods --replicas=1", desc: "缩容,设置pod为1份.",
+	            tags: ["部署"]
+	        },
+            { cmd: "kubectl -n roc-uat set image deployment roc-goods roc-goods=版本号", desc: "更新pod版本.",
+	            tags: ["部署"]
+	        },
+            { cmd: "kubectl -n roc-uat logs -f --tail 200 roc-goods", desc: "查看日志",doc:"",
+	            tags: ["Pod"]
+	        },
+            { cmd: "kubectl -n roc-uat exec -it roc-goods  -- sh", desc: "进入pod,如果有多个容器则要加参数 -c [容器名称].",doc:"",
+	            tags: ["Pod"]
+	        },            
+            { cmd: "kubectl -n roc-uat delete pod roc-goods", desc: "删除pod.",doc:"",
+	            tags: ["Pod"]
+	        },
+            { cmd: "kubectl -n roc-uat delete pod roc-goods --grace-period=0 --force --wait=false", desc: "强制删除pod",doc:"",
+	            tags: ["Pod"]
+	        },            
+            { cmd: "kubectl -n roc-uat describe pod roc-goods", desc: "查看pod明细",doc:"",
+	            tags: ["资源"]
+	        },
+            { cmd: "kubectl -n roc-uat describe node [nodeName]", desc: "查看node明细",doc:"",
+	            tags: ["节点"]
+	        },
+            { cmd: `kubectl get nodes -o wide                   # 节点详情(含IP/OS/内核/容器运行时)
+kubectl cordon node-1                       # 标记节点不可调度(已有Pod不受影响)
+kubectl uncordon node-1                     # 恢复节点为可调度
+kubectl drain node-1 --ignore-daemonsets --delete-emptydir-data  # 安全驱逐节点Pod
+kubectl taint nodes node-1 key=value:NoSchedule   # 添加污点(排斥Pod)
+kubectl taint nodes node-1 key=value:NoSchedule-  # 删除污点(末尾减号)`, desc: "#node,节点维护; get nodes -o wide详细; cordon封禁; drain迁走Pod; taint污点精细调度",
+	            tags: ["节点"]
+	        },
 
-            { cmd: "kubectl apply -f k8s-pod.yaml", desc: "重新Apply",doc:"" },
-            { cmd: "kubectl replace --force -f k8s-pod.yaml", desc: "强制替换 (Force Replace)",doc:"" },
+            { cmd: "kubectl apply -f k8s-pod.yaml", desc: "重新Apply",doc:"",
+	            tags: ["部署"]
+	        },
+            { cmd: "kubectl replace --force -f k8s-pod.yaml", desc: "强制替换 (Force Replace)",doc:"",
+	            tags: ["部署"]
+	        },
             
-            { cmd: "kubectl -n roc-uat get pods |grep Evicted | awk '{print $1}' | xargs kubectl -n roc-uat delete pod", desc: "删除大量evicted的pod.",doc:"" },
-            { cmd: "docker cp ab5593917446:/home/logs/error.log ./", desc: "ab5593917446=容器Id(通过docker ps可以查询到),从容器中复制文件到本地，反之则从本地复制到容器里面. >> docker cp [本地文件/目录路径] [容器名或容器ID]:[容器内目标路径]",doc:"" },
-            { cmd: "kubectl cp <namespace>/<pod>:<root_dir>/<parent_dir>/<file_name> ./<file_name>", desc: "从pod复制文件到本地",doc:"" },
-            { cmd: "kubectl cp ./<file_name> <namespace>/<pod>:<root_dir>/<parent_dir>/<file_name>", desc: "从本地复制到pod.",doc:"" },
+            { cmd: "kubectl -n roc-uat get pods |grep Evicted | awk '{print $1}' | xargs kubectl -n roc-uat delete pod", desc: "删除大量evicted的pod.",doc:"",
+	            tags: ["批量"]
+	        },
+            { cmd: "docker cp ab5593917446:/home/logs/error.log ./", desc: "ab5593917446=容器Id(通过docker ps可以查询到),从容器中复制文件到本地，反之则从本地复制到容器里面. >> docker cp [本地文件/目录路径] [容器名或容器ID]:[容器内目标路径]",doc:"",
+	            tags: ["Pod"]
+	        },
+            { cmd: "kubectl cp <namespace>/<pod>:<root_dir>/<parent_dir>/<file_name> ./<file_name>", desc: "从pod复制文件到本地",doc:"",
+	            tags: ["Pod"]
+	        },
+            { cmd: "kubectl cp ./<file_name> <namespace>/<pod>:<root_dir>/<parent_dir>/<file_name>", desc: "从本地复制到pod.",doc:"",
+	            tags: ["Pod"]
+	        },
 
-            { cmd: "docker rmi $(docker images -f 'dangling=true' -q)", desc: "批量删除这些标签为none的镜像",doc:"" },
-            { cmd: "kubectl -n roc-uat exec -it roc-goods  -- curl http://www.baidu.com", desc: "通过pod临时访问外部地址，测试是否能联通.",doc:"" },
+            { cmd: "docker rmi $(docker images -f 'dangling=true' -q)", desc: "批量删除这些标签为none的镜像",doc:"",
+	            tags: ["批量"]
+	        },
+            { cmd: "kubectl -n roc-uat exec -it roc-goods  -- curl http://www.baidu.com", desc: "通过pod临时访问外部地址，测试是否能联通.",doc:"",
+	            tags: ["网络"]
+	        },
 
-            { cmd: `kubectl -n roc-uat exec -it roc-goods  -- timeout 10 bash -c "</dev/tcp/192.168.0.1/8080" 2>/dev/null && echo "通" || echo "不通"`, desc: "通过pod测试,192.168.0.1:8080是否能通.",doc:"" },
+            { cmd: `kubectl -n roc-uat exec -it roc-goods  -- timeout 10 bash -c "</dev/tcp/192.168.0.1/8080" 2>/dev/null && echo "通" || echo "不通"`, desc: "通过pod测试,192.168.0.1:8080是否能通.",doc:"",
+	            tags: ["网络"]
+	        },
             
-            { cmd: `kubectl -n roc-uat get pods -o=jsonpath='{range .items[*]}{"kubectl rollout restart deploy -n roc-uat "}{.metadata.labels.app}{"\\n"}' | sort -u`, desc: "批量生成需要重启的pod命令.",doc:"" },
+            { cmd: `kubectl -n roc-uat get pods -o=jsonpath='{range .items[*]}{"kubectl rollout restart deploy -n roc-uat "}{.metadata.labels.app}{"\\n"}' | sort -u`, desc: "批量生成需要重启的pod命令.",doc:"",
+	            tags: ["批量"]
+	        },
 
-            { cmd: "kubectl -n roc-uat top pod --sort-by=memory", desc: "根据内存排序",doc:"" },
+            { cmd: "kubectl -n roc-uat top pod --sort-by=memory", desc: "根据内存排序",doc:"",
+	            tags: ["资源"]
+	        },
             
-            { cmd: "kubectl -n roc-uat top pod --sort-by=memory | tail -n +2 | sort -k3 -h", desc: "根据内存-升序",doc:"" },
-            { cmd: "kubectl -n roc-uat top pod --sort-by=memory | tail -n +2 | sort -k3 -h -r", desc: "根据内存-降序",doc:"" },
+            { cmd: "kubectl -n roc-uat top pod --sort-by=memory | tail -n +2 | sort -k3 -h", desc: "根据内存-升序",doc:"",
+	            tags: ["资源"]
+	        },
+            { cmd: "kubectl -n roc-uat top pod --sort-by=memory | tail -n +2 | sort -k3 -h -r", desc: "根据内存-降序",doc:"",
+	            tags: ["资源"]
+	        },
             
 
-            { cmd: "kubectl -n roc-uat get configmap", desc: "#cm,查找configMap-list",doc:"" },
-            { cmd: "kubectl -n roc-uat describe configmap common-config", desc: "#cm,详细查看具体common-config的内容.",doc:"" },
+            { cmd: "kubectl -n roc-uat get configmap", desc: "#cm,查找configMap-list",doc:"",
+	            tags: ["配置"]
+	        },
+            { cmd: "kubectl -n roc-uat describe configmap common-config", desc: "#cm,详细查看具体common-config的内容.",doc:"",
+	            tags: ["配置"]
+	        },
             
-            { cmd: "kubectl -n roc-uat get configmap common-config -o jsonpath='{.data.NACOS_SERVER}'", desc: "#cm,查询configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"" },
-            { cmd: `kubectl -n roc-uat patch configmap common-config -p '{"data":{"NACOS_SERVER":"http://nacos.pbs:8848"}}'`, desc: "#cm,设置configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"" },
-            { cmd: `kubectl -n roc-uat patch deployment roc-goods -p '{"spec":{"template":{"spec":{"containers":[{"name":"roc-goods","resources":{"limits":{"memory":"4Gi"}}}]}}}}'`, desc: "#deployment,设置deployment的资源限制",doc:"" },
+            { cmd: "kubectl -n roc-uat get configmap common-config -o jsonpath='{.data.NACOS_SERVER}'", desc: "#cm,查询configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"",
+	            tags: ["配置"]
+	        },
+            { cmd: `kubectl -n roc-uat patch configmap common-config -p '{"data":{"NACOS_SERVER":"http://nacos.pbs:8848"}}'`, desc: "#cm,设置configMap里面的NACOS_SERVER参数的值,其他参数类似.",doc:"",
+	            tags: ["配置"]
+	        },
+            { cmd: `kubectl -n roc-uat patch deployment roc-goods -p '{"spec":{"template":{"spec":{"containers":[{"name":"roc-goods","resources":{"limits":{"memory":"4Gi"}}}]}}}}'`, desc: "#deployment,设置deployment的资源限制",doc:"",
+	            tags: ["部署"]
+	        },
+            { cmd: `kubectl create configmap my-cm --from-file=app.properties -n roc-uat     # 从文件创建
+kubectl create configmap my-cm --from-literal=KEY=VALUE -n roc-uat   # 从键值对创建
+kubectl create secret generic my-secret --from-literal=user=admin -n roc-uat
+kubectl create secret docker-registry myreg --docker-server=registry.cn-hangzhou.aliyuncs.com --docker-username=xxx --docker-password=xxx -n roc-uat
+kubectl create secret tls my-tls --cert=cert.pem --key=key.pem -n roc-uat`, desc: "#create,创建ConfigMap/Secret; generic通用密钥; docker-registry镜像拉取密钥; tls TLS证书密钥",
+	            tags: ["配置"]
+	        },
 
-            { cmd: "kubectl port-forward --address 0.0.0.0 svc/kube-prometheus-stack-alertmanager -n monitoring 9093:9093", desc: "根据service直接代理给k8s-master机器的端口访问，如：http://192.168.227.102:9093/#/alerts",doc:"" },
+            { cmd: "kubectl port-forward --address 0.0.0.0 svc/kube-prometheus-stack-alertmanager -n monitoring 9093:9093", desc: "根据service直接代理给k8s-master机器的端口访问，如：http://192.168.227.102:9093/#/alerts",doc:"",
+	            tags: ["网络"]
+	        },
             
-            { cmd: "kubectl -n roc-uat logs -f --since=1h roc-goods > /tmp/roc-goods.log", desc: "#log,取1小时内的日志",doc:"" },
+            { cmd: "kubectl -n roc-uat logs -f --since=1h roc-goods > /tmp/roc-goods.log", desc: "#log,取1小时内的日志",doc:"",
+	            tags: ["Pod"]
+	        },
 
-            { cmd: "kubectl run -it --rm dns-test --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28 --restart=Never -- nslookup www.baidu.com", desc: "#测试pod访问外网是否正常.镜像2M,用完删除.",doc:"" },
+            { cmd: "kubectl run -it --rm dns-test --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/busybox:1.28 --restart=Never -- nslookup www.baidu.com", desc: "#测试pod访问外网是否正常.镜像2M,用完删除.",doc:"",
+	            tags: ["网络"]
+	        },
                         
-            { cmd: "kubectl -n roc-uat debug -it dble-pos-7655bd6f46-z77bs --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/redis:7.2.0 --target=dble-pos -- bash", desc: "#debug,进入pod调试",doc:"" },            
-            { cmd: "kubectl -n roc-uat logs roc-goods-794ccfdd79-2zwtm -c roc-goods --previous", desc: "查看上一次被杀死的容器的日志(-c roc-goods表示指定容器),专门用来查：Pod 为什么崩溃、为什么重启、为什么被 kill",doc:"" },
-            { cmd: `kubectl get pods -n roc-uat -o=jsonpath='{range .items[*]}{"Pod: kubectl -n roc-uat set image deployment "}{.metadata.labels.app}{" "}{.metadata.labels.app}{"="}{range .spec.containers[*]}{.image}{"\n"}{end}{"\n"}{end}' > roc-image.log`, desc: "生成所有deployment的镜像更新命令,并存放在roc-image.log文件中",doc:"" },
+            { cmd: "kubectl -n roc-uat debug -it dble-pos-7655bd6f46-z77bs --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/redis:7.2.0 --target=dble-pos -- bash", desc: "#debug,进入pod调试",doc:"",
+	            tags: ["Pod"]
+	        },            
+            { cmd: "kubectl -n roc-uat logs roc-goods-794ccfdd79-2zwtm -c roc-goods --previous", desc: "查看上一次被杀死的容器的日志(-c roc-goods表示指定容器),专门用来查：Pod 为什么崩溃、为什么重启、为什么被 kill",doc:"",
+	            tags: ["Pod"]
+	        },
+            { cmd: `kubectl get pods -n roc-uat -o=jsonpath='{range .items[*]}{"Pod: kubectl -n roc-uat set image deployment "}{.metadata.labels.app}{" "}{.metadata.labels.app}{"="}{range .spec.containers[*]}{.image}{"\n"}{end}{"\n"}{end}' > roc-image.log`, desc: "生成所有deployment的镜像更新命令,并存放在roc-image.log文件中",doc:"",
+	            tags: ["批量"]
+	        },
 { cmd: `
 #!/bin/bash
 #把所有service打印出来
 for svc in $(kubectl -n pos-uat get svc | awk 'NR>1 {print $1}'); do
   echo "kubectl -n pos-uat scale deployment "$svc" --replicas=1"
 done
-`, desc: "把所有service打印出来.",doc:"" },
+`, desc: "把所有service打印出来.",doc:"",
+	            tags: ["批量"]
+	        },
 { cmd: `
 #使用 Ephemeral Containers (临时容器) 抓包
 kubectl debug -it <pod-name> --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/netshoot:0.15-- target <container-name>
 
 #进入后执行：
 tcpdump -i any port <缓存端口> -vvv
-`, desc: "debug-k8s-pod-network.",doc:"https://xd20al46gl.feishu.cn/docx/PCEbdjNNYo702GxeJlIcnFcAnbd" },
+`, desc: "debug-k8s-pod-network.",doc:"https://xd20al46gl.feishu.cn/docx/PCEbdjNNYo702GxeJlIcnFcAnbd",
+	            tags: ["网络"]
+	        },
+    { cmd: `kubectl -n <命名空间> get <类型> <名称> -o yaml > 输出文件.yaml`, desc: "导出 Kubernetes 资源的 YAML 配置", doc: "",
+	            tags: ["批量"]
+	        },
+    { cmd: `kubectl api-resources                    # 列出所有API资源(含简称/API组)
+kubectl explain pod.spec.containers    # 查看资源字段说明(递归)
+kubectl auth can-i get pods --namespace roc-uat   # 检查当前用户权限
+kubectl auth can-i '*' '*' -n roc-uat             # 检查全部权限`, desc: "#info,API资源/权限/文档; api-resources查看ShortName; explain查看字段含义; auth can-i排查权限问题",
+	            tags: ["资源"]
+	        },
+    { cmd: `kubectl -n roc-uat get events --sort-by=.metadata.creationTimestamp  # 按时间排序
+kubectl -n roc-uat get events -w                                      # 实时Watch事件流
+kubectl -n roc-uat get events --field-selector involvedObject.name=roc-goods   # 过滤特定资源`, desc: "#events,集群事件排查; Pod启动失败/调度失败/OOM都会记录; -w实时监听; --field-selector过滤",
+	            tags: ["资源"]
+	        },
+    { cmd: `kubectl -n roc-uat edit deployment roc-goods    # 在线编辑资源(自动打开vi)
+kubectl diff -f k8s-pod.yaml                # 预览apply即将产生的变更(不会执行)
+kubectl create deploy my-app --image=nginx -n roc-uat --dry-run=client -o yaml`, desc: "#edit,在线编辑与对比; edit直接修改集群资源; diff预览变更(安全审查); --dry-run生成YAML不执行",
+	            tags: ["部署"]
+	        },
+    { cmd: `kubectl -n roc-uat label pod roc-goods env=prod        # 添加/修改标签
+kubectl -n roc-uat get pods -l app=roc-goods                   # 按标签筛选Pod
+kubectl -n roc-uat get pods --show-labels                      # 显示所有Pod标签
+kubectl -n roc-uat annotate pod roc-goods desc="my pod"        # 添加注解`, desc: "#label,标签与注解操作; -l 筛选; -l 'env in (prod,staging)' 多值; --show-labels 显示标签列",
+	            tags: ["配置"]
+	        },
 
         ]
     },
@@ -675,6 +1008,21 @@ const app = {
         this.render();
         this.applySettings();
         // this.checkNotification();
+        this.updateFooter();
+        this._footerTimer = setInterval(() => this.updateFooter(), 1000);
+    },
+
+    updateFooter() {
+        const now = new Date();
+        const lang = this.state.lang === 'zh' ? 'zh-CN' : 'en-US';
+        const dateStr = now.toLocaleDateString(lang, { year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' });
+        const timeStr = now.toLocaleTimeString(lang, { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const offset = -now.getTimezoneOffset() / 60;
+        const offsetStr = offset >= 0 ? `UTC+${offset}` : `UTC${offset}`;
+        const region = navigator.language || 'unknown';
+        document.getElementById('footer-datetime').textContent = `${dateStr} ${timeStr} ${tz} (${offsetStr})`;
+        document.getElementById('footer-locale').textContent = `Region: ${region}`;
     },
 
     // 🔴 第一步：新增这个转义函数（放在 render 函数上面）
