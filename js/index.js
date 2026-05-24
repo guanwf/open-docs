@@ -112,7 +112,7 @@ journalctl -xe               # 查看最近错误日志`, desc: "#systemctl,查�
 
             { cmd: `timedatectl set-timezone Asia/Shanghai
 hostnamectl set-hostname <new-hostname>`, desc: "#systemctl,系统时间/主机名配置; timedatectl 查看NTP同步状态; hostnamectl 查看当前主机信息", tags: ["系统"] },
-
+            { cmd: "timedatectl set-time \"2026-05-24 10:38:00\"", desc: "#systemctl,设置系统时间", tags: ["系统"] },
             // ── 磁盘 ──
             { cmd: "lsblk -f", desc: "#disk,列出块设备及文件系统; lsblk 树形显示磁盘分区; -f 显示FS类型和UUID; -m 显示权限和属主", tags: ["磁盘"] },
 
@@ -735,6 +735,9 @@ kubectl -n roc-uat rollout undo deployment roc-goods --to-revision=2   # 回滚�
             { cmd: "kubectl -n roc-uat delete pod roc-goods", desc: "删除pod.",doc:"",
 	            tags: ["Pod"]
 	        },
+            { cmd: "systemctl restart kubelet", desc: "重启kubelet服务,如果是节点问题导致的pod异常,可以尝试重启kubelet.",doc:"",
+	            tags: ["节点"]
+	        },
             { cmd: "kubectl -n roc-uat delete pod roc-goods --grace-period=0 --force --wait=false", desc: "强制删除pod",doc:"",
 	            tags: ["Pod"]
 	        },            
@@ -888,7 +891,11 @@ kubectl -n roc-uat get pods --show-labels                      # 显示所有Pod
 kubectl -n roc-uat annotate pod roc-goods desc="my pod"        # 添加注解`, desc: "#label,标签与注解操作; -l 筛选; -l 'env in (prod,staging)' 多值; --show-labels 显示标签列",
 	            tags: ["配置"]
 	        },
-
+    { cmd: `
+kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.name,REPLICAS:.spec.replicas" --no-headers | awk '{rep=$3; if(rep=="<none>") rep=1; printf "kubectl -n roc-uat scale %s %s --replicas=%s\n", tolower($1), $2, rep}' > roc-uat-pod-replicas.log
+`, desc: "#scale,批量生成缩容命令; custom-columns自定义输出列; --no-headers去掉表头; awk生成缩容命令并保存到文件",
+	            tags: ["资源"]
+	        },
         ]
     },
     {
