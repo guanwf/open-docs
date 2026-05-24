@@ -921,7 +921,7 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             { category: "🛠️Tools",text:"properties2yaml-在线格式转换", url: "https://www.bejson.com/devtools/properties2yaml/", desc: ""},
             { category: "🛠️Tools",text:"icon-getemoji", url: "https://getemoji.com/", desc: "icon"},
             { category: "🛠️Tools",text:"pdf转换", url: "https://tools.pdf24.org/zh/", desc: "pdf各种转换-免费"},
-
+            { category: "🛠️Tools",text:"中国气象局雷达图", url: "https://www.nmc.cn/publish/radar/chinaall.html", desc: ""},
             
             { category:"📚Doc",text:"FastDeploy&FastLink", url: "https://xd20al46gl.feishu.cn/docx/Hkhvdh1CkoHkYGxhe4Hc3oWqn7Z", desc: ""},
             { category:"📚Doc",text:"基础设施组件清单", url: "./infra/infra-list.html", desc: ""},
