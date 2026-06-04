@@ -935,8 +935,10 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             
             { category: "📚Doc",text:"Java所有版本下载", url: "https://adoptium.net/zh-CN/temurin/releases", desc: "Java所有版本下载-LTS"},
             { category: "📚Doc",text:"磁盘压测", url: "https://xd20al46gl.feishu.cn/docx/CxapdqUGxoF8Vtxi9nacifPonGd", desc: "IOPS压测."},
-            { category: "📚Doc",text:"多镜像仓库使用说明", url: "https://xd20al46gl.feishu.cn/docx/J17sdDzUVo4NfZxxupbcq6uSnoh", desc: ""},
-            
+            { category: "📚Doc",text:"多镜像仓库使用说明", url: "https://xd20al46gl.feishu.cn/docx/J17sdDzUVo4NfZxxupbcq6uSnoh", desc: ""},            
+            { category: "📚Doc",text:"使用minIO操作说明", url: "https://xd20al46gl.feishu.cn/docx/Z44pdIQkOoE2tDxEL2WcYx5EnIf", desc: ""},
+
+
             { category: "❄️K8s",text:"K8s日常操作", url: "https://xd20al46gl.feishu.cn/docx/TbnNda0dXom9C3xs8mNcYqTcnJe", desc: "418#48r5"},      
             { category: "❄️K8s",text: "K8s Docs", url: "https://kubernetes.io/docs/", desc: "官方文档"},
             
@@ -958,6 +960,8 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             
             { category: "❄️K8s",text:"k8s-kubeadm集群证书过期更换方法", url: "https://xd20al46gl.feishu.cn/docx/GaDrdYRvuoTnT4xaMvNczu9TnId", desc: ""},            
             { category: "❄️K8s",text:"k8s-网络-debug", url: "https://xd20al46gl.feishu.cn/docx/PCEbdjNNYo702GxeJlIcnFcAnbd", desc: ""},
+            
+            { category: "❄️K8s",text:"k8s-rancher增加集群管理", url: "https://xd20al46gl.feishu.cn/docx/EwEmdHyndovGXzxckU1cz4Cansd", desc: ""},
 
             { category: "📚DB",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
             { category: "📚DB",text:"ob-oms-调优", url: "https://xd20al46gl.feishu.cn/docx/HcURd9NSAoWvBPxUfyccuFNznTc", desc: ""},
