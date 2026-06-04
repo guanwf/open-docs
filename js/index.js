@@ -982,6 +982,7 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
             {category: "📊Monitor", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
 
+            
             { category: "⚽️NetWork",text:"wireguard", url: "https://www.wireguard.com/quickstart/", desc: "vpc"},
             { category: "⚽️NetWork",text:"centralops-DNS-Domain -Check-Traceroute", url: "https://centralops.net/", desc: ""},
             { category: "⚽️NetWork",text:"Visual Subnet Calculator", url: "https://www.davidc.net/sites/default/subnets/subnets.html", desc: "子网分配计算"},
