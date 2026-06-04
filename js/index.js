@@ -960,7 +960,7 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             
             { category: "❄️K8s",text:"k8s-kubeadm集群证书过期更换方法", url: "https://xd20al46gl.feishu.cn/docx/GaDrdYRvuoTnT4xaMvNczu9TnId", desc: ""},            
             { category: "❄️K8s",text:"k8s-网络-debug", url: "https://xd20al46gl.feishu.cn/docx/PCEbdjNNYo702GxeJlIcnFcAnbd", desc: ""},
-            
+
             { category: "❄️K8s",text:"k8s-rancher增加集群管理", url: "https://xd20al46gl.feishu.cn/docx/EwEmdHyndovGXzxckU1cz4Cansd", desc: ""},
 
             { category: "📚DB",text:"ob-入门到出门指引", url: "https://xd20al46gl.feishu.cn/docx/J0nDdW5cJoe1ByxrxJwcArDZnIb", desc: ""},
@@ -978,7 +978,6 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             { category: "📚DB",text:"ODP-数据库代理", url: "https://www.oceanbase.com/docs/odp-doc-cn", desc: ""},
             { category: "📚DB",text:"OB-发布版本记录", url: "https://www.oceanbase.com/product/oceanbase-database-community-rn/releaseNote#V4.2.5", desc: ""},
             { category: "📚DB",text:"SQL-生成器", url: "./infra/mysql-sql-generator.html", desc: ""},
-
 
             {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
             {category: "📊Monitor", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
