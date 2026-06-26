@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026年广东高考物理类 · 45个志愿黄金组合方案</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a; /* 深学术蓝 */
+            --secondary-color: #0d9488; /* 科技绿 */
+            --bg-color: #f8fafc; /* 浅底色 */
+            --text-color: #334155; /* 深灰文本 */
+            --border-color: #e2e8f0;
+            
+            /* 梯度标签颜色 */
+            --color-chong: #ef4444; /* 冲刺-红色 */
+            --bg-chong: #fef2f2;
+            --color-wen: #0d9488; /* 稳妥-绿色 */
+            --bg-wen: #f0fdf4;
+            --color-bao: #3b82f6; /* 保底-蓝色 */
+            --bg-bao: #eff6ff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 页眉设计 */
+        .header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 25px;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+
+        .candidate-info {
+            display: inline-flex;
+            gap: 20px;
+            background: #f1f5f9;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .candidate-info span strong {
+            color: var(--primary-color);
+        }
+
+        .intro-box {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            font-size: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* 板块卡片设计 */
+        .plate-section {
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .plate-header {
+            background: linear-gradient(135deg, var(--primary-color), #2563eb);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .plate-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .plate-feature {
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        /* 表格设计 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* 序号样式 */
+        .idx-badge {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background: #64748b;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* 梯度标签样式 */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .badge-chong {
+            background-color: var(--bg-chong);
+            color: var(--color-chong);
+        }
+
+        .badge-wen {
+            background-color: var(--bg-wen);
+            color: var(--color-wen);
+        }
+
+        .badge-bao {
+            background-color: var(--bg-bao);
+            color: var(--color-bao);
+        }
+
+        /* 战略指南样式 */
+        .guide-section {
+            background-color: #f0fdfa;
+            border: 1px solid #ccfbf1;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 40px;
+        }
+
+        .guide-section h3 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .guide-item {
+            margin-bottom: 15px;
+        }
+
+        .guide-item strong {
+            color: #0f172a;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 13px;
+            color: #94a3b8;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 页眉 -->
+    <div class="header">
+        <h1>2026年广东高考物理类 · “六大地区产业版图”志愿组合方案</h1>
+        <div class="candidate-info">
+            <span>考生姓名：<strong>子琪同学</strong></span>
+            <span>省排位：<strong>79,275 名</strong></span>
+            <span>高考总分：<strong>559 分</strong></span>
+            <span>选考科目：<strong>物、化、生</strong></span>
+        </div>
+    </div>
+
+    <!-- 前言 -->
+    <div class="intro-box">
+        <strong>📌 方案定位与核心策略：</strong><br>
+        本方案共设计 <strong>45个志愿（冲刺12个 + 稳妥20个 + 保底13个）</strong>。完全打破传统只按分数高低排列的混乱感，将高校按照“六大地区产业板块”进行分类规划。所有涉及专业组均为最安全的“物理+化学”或“物理+化生”组，极大降低了非生化相关专业的调剂风险。
+    </div>
+
+    <!-- 第一大板块 -->
+    <div class="plate-section">
+        <div class="plate-header">
+            <h2>第一大板块：【粤港澳大湾区（广/莞/佛）】</h2>
+            <div class="plate-feature">产业特色：临床医学检验、精细日化配方、电池能源新材料</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 7%">序号</th>
+                    <th style="width: 23%">推荐院校专业组</th>
+                    <th style="width: 10%">梯度定位</th>
+                    <th style="width: 15%">25年参考线</th>
+                    <th style="width: 20%">核心/第一专业建议</th>
+                    <th style="width: 25%">填报策略分析</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="idx-badge">01</span></td>
+                    <td><strong>广州中医药大学</strong> (204药学组)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 74,220 名</td>
+                    <td>药学、中药制药</td>
+                    <td>冲刺双一流。中药化学提取与现代药学合成，科研平台极佳。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">02</span></td>
+                    <td><strong>广州大学</strong> (化学化工组)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 75,046 名</td>
+                    <td>应用化学、化学工程与工艺</td>
+                    <td>本地重点。化学与化工为大类实力学科，大湾区就业率极高。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">03</span></td>
+                    <td><strong>汕头大学</strong> (化学组)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 73,500 名</td>
+                    <td>应用化学、生物技术</td>
+                    <td>资金极其充足，实验仪器在省属高校中堪称豪华，支持早进实验室。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">04</span></td>
+                    <td><strong>东莞理工学院</strong> (215联合学位组)</td>
+                    <td><span class="badge badge-wen">稳妥(首选)</span></td>
+                    <td><strong>80,517 名</strong></td>
+                    <td>应用化学(莞工)+药学(广医)</td>
+                    <td><strong>跨校强强联合</strong>。毕业拿双学士，兼顾化学工科与药理生物背景。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">05</span></td>
+                    <td><strong>东莞理工学院</strong> (202普通化学组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td><strong>80,557 名</strong></td>
+                    <td>应用化学、能源化学工程</td>
+                    <td>国家级一流专业，深度对接松山湖新能源与电子材料大厂。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">06</span></td>
+                    <td><strong>广东医科大学</strong> (207检验组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td><strong>82,980 名</strong></td>
+                    <td>医学检验技术、药学</td>
+                    <td>检验黄埔军校，医学检验技术为国家一流专业。医院检验科首选。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">07</span></td>
+                    <td><strong>佛山大学</strong> (普通化学组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td>约 85,000 名</td>
+                    <td>应用化学、材料化学</td>
+                    <td>成功更名“大学”，享受佛山精细化工、涂料高分子制造业红利。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">08</span></td>
+                    <td><strong>广东技术师范大学</strong> (师范组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td>约 87,411 名</td>
+                    <td>化学（师范）</td>
+                    <td>广州本地公办。如果未来想在大湾区当中学化学老师，属于稳妥之选。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">09</span></td>
+                    <td><strong>广东药科大学</strong> (202/203中山)</td>
+                    <td><span class="badge badge-bao">保底(高配)</span></td>
+                    <td>约 113,000 名</td>
+                    <td>化妆品科学与技术、制药工程</td>
+                    <td>其化妆品科学全国A+，您的排位进去可以直接锁定最王牌专业。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">10</span></td>
+                    <td><strong>五邑大学</strong> (江门化学组)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td>约 100,217 名</td>
+                    <td>应用化学、制药工程</td>
+                    <td>重点发展化学材料，学科ESI全球前1%，师资多海归，适合考研。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">11</span></td>
+                    <td><strong>仲恺农业工程学院</strong> (广州生化组)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td>约 132,071 名</td>
+                    <td>应用化学、生物技术</td>
+                    <td>广州本地老牌公办。偏向生态化学、植物农业保护生化应用。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">12</span></td>
+                    <td><strong>广东海洋大学</strong> (湛江化学组)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td>约 122,000 名</td>
+                    <td>食品质量与安全、制药工程</td>
+                    <td>偏向海洋生物化学、水产与食品防腐安全检测。</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 第二大板块 -->
+    <div class="plate-section">
+        <div class="plate-header">
+            <h2>第二大板块：【长三角沿海区（沪/苏/浙/皖）】</h2>
+            <div class="plate-feature">产业特色：外资日化总部、精细化工、现代医药研发</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 7%">序号</th>
+                    <th style="width: 23%">推荐院校专业组</th>
+                    <th style="width: 10%">梯度定位</th>
+                    <th style="width: 15%">25年参考线</th>
+                    <th style="width: 20%">核心/第一专业建议</th>
+                    <th style="width: 25%">填报策略分析</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="idx-badge">13</span></td>
+                    <td><strong>上海应用技术大学</strong> (203组)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 61,000 名</td>
+                    <td>化妆品技术与工程、香料香精</td>
+                    <td>调香与高端日化行业的黄埔军校。高含金量冲刺，极力推荐。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">14</span></td>
+                    <td><strong>上海海洋大学</strong> (207中外合作)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 74,905 名</td>
+                    <td>食品科学与工程（偏生化）</td>
+                    <td>上海双一流。合作组分数较温和，是留在上海发展的极佳跳板。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">15</span></td>
+                    <td><strong>扬州大学</strong> (江苏理学强校)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 74,905 名</td>
+                    <td>应用化学、制药工程</td>
+                    <td>农学与生命科学底蕴深，化学ESI前1%，学术保研氛围极好。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">16</span></td>
+                    <td><strong>南通大学</strong> (江苏生化组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td>约 83,617 名</td>
+                    <td>药学、高分子材料与工程</td>
+                    <td>江苏省属重点，药理学与化学双全球前1%，长三角药企认可度高。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">17</span></td>
+                    <td><strong>常州大学</strong> (江苏化工组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td>约 86,922 名</td>
+                    <td>应用化学、化学工程与工艺</td>
+                    <td>传统石化强校。常州新能源和半导体材料发达，应用技术极强。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">18</span></td>
+                    <td><strong>温州大学</strong> (浙江化学组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td>约 88,855 名</td>
+                    <td>应用化学、化学</td>
+                    <td>富庶浙江，化学ESI全球前1%，偏向轻工合成材料，就业极好。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">19</span></td>
+                    <td><strong>安徽工业大学</strong> (低分专业组)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td>约 98,771 名</td>
+                    <td>应用化学、化学工程与工艺</td>
+                    <td>传统冶金化工强校，位于南京一小时经济圈内，工科实力扎实。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">20</span></td>
+                    <td><strong>浙江海洋大学</strong> (浙江生化组)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td>约 108,000 名</td>
+                    <td>食品科学与工程（食品化学）</td>
+                    <td>位于舟山海滨，海洋食品生化分析在长三角颇具实力。</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 第三大板块 -->
+    <div class="plate-section">
+        <div class="plate-header">
+            <h2>第三大板块：【西部金三角（西部黑马类）】</h2>
+            <div class="plate-feature">产业特色：国防军工特种材料、石油天然气能源化学</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 7%">序号</th>
+                    <th style="width: 23%">推荐院校专业组</th>
+                    <th style="width: 10%">梯度定位</th>
+                    <th style="width: 15%">25年参考线</th>
+                    <th style="width: 20%">核心/第一专业建议</th>
+                    <th style="width: 25%">填报策略分析</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="idx-badge">21</span></td>
+                    <td><strong>西安理工大学</strong> (203组)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 69,444 名</td>
+                    <td>材料化学、应用化学</td>
+                    <td>军工与航天航空新材料、封装材料。用化学解决“卡脖子”技术。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">22</span></td>
+                    <td><strong>西南石油大学</strong> (双一流217组)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 71,682 名</td>
+                    <td>应用化学、能源化学工程</td>
+                    <td>国家双一流。中石油、中石化、中海油等大型央企直通车。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">23</span></td>
+                    <td><strong>成都理工大学</strong> (双一流化学组)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 68,983 名</td>
+                    <td>应用化学、生物工程</td>
+                    <td>国家双一流，偏向重工业、地球化学分析，国家级实验设备。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">24</span></td>
+                    <td><strong>重庆理工大学</strong> (213兵工组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td><strong>77,001 名</strong></td>
+                    <td>药学、化学工程与工艺</td>
+                    <td>深厚兵器工业背景。化学与药学在大西南认可度极高。等位高性价比。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">25</span></td>
+                    <td><strong>西华大学</strong> (四川生化组)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td>约 115,000 名</td>
+                    <td>应用化学、制药工程</td>
+                    <td>位于成都，重工业底子，生化应用偏向工程落地，安全性极高。</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 第四大板块 -->
+    <div class="plate-section">
+        <div class="plate-header">
+            <h2>第四大板块：【沿海海洋与海南自贸港】</h2>
+            <div class="plate-feature">产业特色：海洋资源提取、质检分析、自贸港医疗特区</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 7%">序号</th>
+                    <th style="width: 23%">推荐院校专业组</th>
+                    <th style="width: 10%">梯度定位</th>
+                    <th style="width: 15%">25年参考线</th>
+                    <th style="width: 20%">核心/第一专业建议</th>
+                    <th style="width: 25%">填报策略分析</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="idx-badge">26</span></td>
+                    <td><strong>华侨大学</strong> (厦门校区213/214)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 72,103 名</td>
+                    <td>应用化学、材料科学与工程</td>
+                    <td>国侨办直属，材料与化工学院位于美丽的厦门校区，环境极佳。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">27</span></td>
+                    <td><strong>厦门理工学院</strong> (208化学组)</td>
+                    <td><span class="badge badge-wen">稳妥(压线)</span></td>
+                    <td><strong>79,271 名</strong></td>
+                    <td>应用化学、新能源材料与器件</td>
+                    <td>录取排位与考生排位极其吻合，想去厦门发展的首选目标。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">28</span></td>
+                    <td><strong>海南医科大学</strong> (203化学组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td><strong>86,296 名</strong></td>
+                    <td>医学检验技术、药学、卫检</td>
+                    <td>自贸港唯一医学本科。203组不含护理，享受博鳌药械通道红利。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">29</span></td>
+                    <td><strong>集美大学</strong> (217化生组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td><strong>88,245 名</strong></td>
+                    <td>生物工程、食品质量与安全</td>
+                    <td>厦门集美学村百年名校，高分进入可挑选生物工程等王牌专业。</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 第五大板块 -->
+    <div class="plate-section">
+        <div class="plate-header">
+            <h2>第五大板块：【中北部学术与国家骨干区】</h2>
+            <div class="plate-feature">产业特色：国家级重点实验室、百年理学基础研究、前沿合成生物</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 7%">序号</th>
+                    <th style="width: 23%">推荐院校专业组</th>
+                    <th style="width: 10%">梯度定位</th>
+                    <th style="width: 15%">25年参考线</th>
+                    <th style="width: 20%">核心/第一专业建议</th>
+                    <th style="width: 25%">填报策略分析</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="idx-badge">30</span></td>
+                    <td><strong>北京工商大学</strong> (205组)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 60,388 名</td>
+                    <td>化妆品科学与技术</td>
+                    <td>北方日化最高地，拥有行业唯一的国家级化妆品重点实验室。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">31</span></td>
+                    <td><strong>湖北大学</strong> (生化组)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 73,500 名</td>
+                    <td>合成生物学、药学</td>
+                    <td>合成生物学是国家级优势特色，前沿细胞工厂合成技术方向。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">32</span></td>
+                    <td><strong>河南大学</strong> (双一流223组)</td>
+                    <td><span class="badge badge-wen">稳妥(压线)</span></td>
+                    <td><strong>78,000 名</strong></td>
+                    <td>应用化学、制药工程</td>
+                    <td>双一流、百年名校。学风淳朴，考研率极高，适合学术深造。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">33</span></td>
+                    <td><strong>中北大学</strong> (220物理化学组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td><strong>85,409 名</strong></td>
+                    <td>应用化学、化学工程与工艺</td>
+                    <td>“兵工七子”之一。军工经费充足，精细合成设备达到尖端标准。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">34</span></td>
+                    <td><strong>黑龙江大学</strong> (216化学组)</td>
+                    <td><span class="badge badge-bao">保底(高配)</span></td>
+                    <td><strong>108,634 名</strong></td>
+                    <td>化学（理学重点学科）</td>
+                    <td>化学是国家重点学科，全球前1%，去该校必进核心化学班。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">35</span></td>
+                    <td><strong>哈尔滨理工大学</strong> (生化组)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td>约 110,000 名</td>
+                    <td>应用化学、高分子材料</td>
+                    <td>老牌工业高校。精细高分子材料应用化学在北方工业界极具名声。</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 第六大板块 -->
+    <div class="plate-section">
+        <div class="plate-header">
+            <h2>第六大板块：【中西部资源、制药与兜底防线】</h2>
+            <div class="plate-feature">产业特色：湿法冶金、天然中草药化学提取、微量放射检验</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 7%">序号</th>
+                    <th style="width: 23%">推荐院校专业组</th>
+                    <th style="width: 10%">梯度定位</th>
+                    <th style="width: 15%">25年参考线</th>
+                    <th style="width: 20%">核心/第一专业建议</th>
+                    <th style="width: 25%">填报策略分析</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="idx-badge">36</span></td>
+                    <td><strong>贵州大学</strong> (211双一流)</td>
+                    <td><span class="badge badge-chong">冲刺</span></td>
+                    <td>约 71,500 名</td>
+                    <td>应用化学、精细化工</td>
+                    <td>211双一流。其绿色农药化学、精细合成全国知名，平台高。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">37</span></td>
+                    <td><strong>昆明理工大学</strong> (206化学组)</td>
+                    <td><span class="badge badge-wen">稳妥</span></td>
+                    <td>**87,411 — 94,952名**</td>
+                    <td>应用化学、制药工程</td>
+                    <td>偏向有色金属湿法冶金及云南特有中草药活性成分化学提取。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">38</span></td>
+                    <td><strong>东华理工大学</strong> (江西核化学)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td>约 110,000 名</td>
+                    <td>应用化学（全球前1%）</td>
+                    <td>中国核工业第一校。核化学与放射性微量分析在全国独具优势。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">39</span></td>
+                    <td><strong>河北科技大学</strong> (河北制药组)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td>约 110,000 名</td>
+                    <td>化学工程与工艺、制药工程</td>
+                    <td>传统生物与化学制药强校。其合成制药在华北地区享有高声誉。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">40</span></td>
+                    <td><strong>桂林理工大学</strong> (广西生化组)</td>
+                    <td><span class="badge badge-bao">保底</span></td>
+                    <td><strong>121,656 名</strong></td>
+                    <td>应用化学（全球前1%）</td>
+                    <td>化学ESI全球前1%。精细化工、无机材料和地质微量元素检测底蕴深。</td>
+                </tr>
+                <tr>
+                    <td><span class="idx-badge">41..</span></td>
+                    <td><strong>省内高品质本科独立学院</strong></td>
+                    <td><span class="badge badge-bao">绝对保底</span></td>
+                    <td>150,000+ 名</td>
+                    <td>药学、化妆品技术等</td>
+                    <td>如珠海科技学院等省内头部独立学院，用于极端情况下锁定本科席位。</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 战略指南 -->
+    <div class="guide-section">
+        <h3>📝 2026年志愿表战略执行指南（给子琪同学的落地交代）</h3>
+        <div class="guide-item">
+            <strong>1. “西部黑马类”的科学运用（21-25志愿）</strong><br>
+            这些学校因地缘稍偏，在广东省极易出现录取排位微降。将<strong>西安理工、西南石油、重庆理工</strong>排在冲刺后部和稳妥前部，能让您以高性价比直接斩落国家双一流、兵工强校的核心化学专业。
+        </div>
+        <div class="guide-item">
+            <strong>2. 江浙与大湾区的精妙互补（4-8、13-19志愿）</strong><br>
+            偏向毕业后在大湾区就业，<strong>东莞理工（215联合学位组）</strong>、<strong>广东医科大学（医学检验）</strong>须放在最黄金的稳妥位置；若偏向长三角外企研发，<strong>南通大学（药学）</strong>和<strong>常州大学（应化）</strong>是首选。
+        </div>
+        <div class="guide-item">
+            <strong>3. 终极保底的“黄金专业”策略（33-40志愿）</strong><br>
+            即便排在保底档，也必须填报最得意的生化王牌。例如：<strong>广东药科大学的【化妆品科学与技术】</strong>、<strong>东华理工的【应用化学】</strong>。即使滑落保底，依然是在行业顶尖专业里学习，为考研逆袭或直接进大厂打下扎实基础。
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2026年广东高考志愿科学填报 · 祝子琪同学落笔如神，前程似锦！
+    </div>
+</div>
+
+</body>
+</html>
