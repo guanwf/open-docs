@@ -206,6 +206,244 @@
             border-top: 1px solid var(--border-color);
             padding-top: 20px;
         }
+
+        /* ========== 移动端响应式优化 ========== */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                background-color: #f5f2ed; /* 暖灰底色，比纯白柔和 */
+            }
+
+            .container {
+                max-width: 100%;
+                margin: 0;
+                padding: 10px;
+                border-radius: 0;
+                box-shadow: none;
+                background: transparent;
+            }
+
+            /* 页眉 */
+            .header {
+                background: #fffef9;
+                padding: 14px 12px 12px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+                border-bottom: 2px solid #1e3a8a;
+            }
+
+            .header h1 {
+                font-size: 18px;
+                line-height: 1.4;
+            }
+
+            .candidate-info {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px 8px;
+                padding: 7px 10px;
+                font-size: 12px;
+                border-radius: 16px;
+                justify-content: center;
+                background: #f0ede6;
+            }
+
+            /* 前言 */
+            .intro-box {
+                padding: 10px 12px;
+                font-size: 13px;
+                margin-bottom: 12px;
+                background: #fffbeb;
+                border-left: 3px solid #0d9488;
+            }
+
+            /* 板块头部 */
+            .plate-section {
+                margin-bottom: 12px;
+                border: none;
+                border-radius: 6px;
+                overflow: hidden;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            }
+
+            .plate-header {
+                flex-direction: column;
+                gap: 3px;
+                padding: 9px 12px;
+                background: linear-gradient(135deg, #334155, #475569);
+            }
+
+            .plate-header h2 {
+                font-size: 15px;
+            }
+
+            .plate-feature {
+                font-size: 11px;
+                background: rgba(255,255,255,0.12);
+                padding: 2px 8px;
+            }
+
+            /* ===== 表格 → 紧凑卡片 ===== */
+            table {
+                border: none;
+                background: #fafaf7;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tbody {
+                display: block;
+                padding: 4px;
+            }
+
+            tr {
+                display: flex;
+                flex-wrap: wrap;
+                margin-bottom: 5px;
+                background: #fffef9;
+                border: 1px solid #e7e3da;
+                border-radius: 6px;
+                overflow: hidden;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+                position: relative;
+            }
+
+            tr:hover {
+                background: #fffef9;
+            }
+
+            /* 梯度左侧色条 — 柔和版 */
+            tr:has(.badge-chong) {
+                border-left: 3px solid #d9777f; /* 柔和红 */
+            }
+
+            tr:has(.badge-wen) {
+                border-left: 3px solid #5ea89a; /* 柔和绿 */
+            }
+
+            tr:has(.badge-bao) {
+                border-left: 3px solid #7b9fd4; /* 柔和蓝 */
+            }
+
+            td {
+                display: flex;
+                align-items: flex-start;
+                gap: 4px;
+                padding: 5px 10px;
+                border-bottom: none;
+                font-size: 13px;
+                line-height: 1.45;
+            }
+
+            /* 第一行：序号 + 院校名··· + 参考线(右上角) */
+            td:nth-child(1) {
+                order: 1;
+                width: auto;
+                padding: 5px 0 2px 8px;
+                align-items: center;
+            }
+
+            td:nth-child(2) {
+                order: 2;
+                flex: 1;
+                padding: 5px 2px 2px 2px;
+                align-items: center;
+                font-size: 13.5px;
+                min-width: 0;
+            }
+
+            /* 参考线 → 右上角 */
+            td:nth-child(4) {
+                order: 3;
+                width: auto;
+                padding: 5px 10px 2px 2px;
+                font-size: 11.5px;
+                color: #6b7280;
+                white-space: nowrap;
+                justify-content: flex-end;
+                align-items: center;
+            }
+
+            /* 梯度独占一行，紧凑 */
+            td:nth-child(3) {
+                order: 4;
+                width: 100%;
+                padding: 0 10px 2px;
+            }
+
+            /* 核心专业 */
+            td:nth-child(5) {
+                order: 5;
+                width: 100%;
+                padding: 1px 10px 2px;
+                border-top: 1px dotted #e8e4d8;
+            }
+
+            /* 策略分析 */
+            td:nth-child(6) {
+                order: 6;
+                width: 100%;
+                padding: 1px 10px 7px;
+                color: #6b7280;
+                font-size: 12.5px;
+                line-height: 1.5;
+            }
+
+            /* 隐藏所有伪元素标签 */
+            td::before {
+                display: none !important;
+            }
+
+            /* 序号badge缩小 */
+            .idx-badge {
+                width: 22px;
+                height: 22px;
+                line-height: 22px;
+                font-size: 11px;
+                background: #9ca3af;
+            }
+
+            /* 梯度badge缩小 */
+            .badge {
+                font-size: 11px;
+                padding: 2px 7px;
+            }
+
+            /* 分隔点 — 梯度与参考线之间 */
+            td:nth-child(3)::after {
+                content: "";
+            }
+
+            /* 战略指南 */
+            .guide-section {
+                padding: 12px;
+                margin-top: 14px;
+                background: #f0fdfa;
+                border: 1px solid #ccfbf1;
+                border-radius: 6px;
+            }
+
+            .guide-section h3 {
+                font-size: 15px;
+                margin-bottom: 10px;
+            }
+
+            .guide-item {
+                font-size: 13px;
+                margin-bottom: 10px;
+            }
+
+            /* 页脚 */
+            .footer {
+                margin-top: 16px;
+                padding-top: 12px;
+                font-size: 11px;
+                color: #a8a29e;
+                border-top: 1px solid #e7e3da;
+            }
+        }
     </style>
 </head>
 <body>
