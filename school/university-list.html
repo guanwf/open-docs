@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生化类志愿填报参考表</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #0d9488;
+            --bg-color: #f8fafc;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+            --color-chong: #ef4444;
+            --bg-chong: #fef2f2;
+            --color-wen: #0d9488;
+            --bg-wen: #f0fdf4;
+            --color-bao: #3b82f6;
+            --bg-bao: #eff6ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 25px;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .highlight { color: var(--color-chong); font-weight: bold; }
+
+        /* 梯度标签 */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .badge-chong { background-color: var(--bg-chong); color: var(--color-chong); }
+        .badge-wen   { background-color: var(--bg-wen);   color: var(--color-wen); }
+        .badge-bao   { background-color: var(--bg-bao);   color: var(--color-bao); }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        tr:hover { background-color: #f8fafc; }
+
+        /* ===== 搜索框 ===== */
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color .2s;
+            font-family: inherit;
+        }
+        .search-bar input:focus { border-color: var(--primary-color); }
+        .search-bar .search-count {
+            font-size: 13px;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .major-list span {
+            display: inline-block;
+            background-color: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 12px;
+        }
+
+        /* ========== 移动端 Grid 卡片 ========== */
+        @media screen and (max-width: 768px) {
+            body { padding: 0; background-color: #f5f2ed; }
+
+            .container {
+                padding: 10px;
+                border-radius: 0;
+                box-shadow: none;
+                background: transparent;
+            }
+
+            .header {
+                background: #fffef9;
+                padding: 14px 12px 12px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+                border-bottom: 2px solid #1e3a8a;
+            }
+
+            .header h1 { font-size: 18px; line-height: 1.4; }
+
+            .table-responsive { overflow-x: visible; }
+
+            table { border: none; background: transparent; }
+            thead { display: none; }
+            tbody { display: block; padding: 4px; }
+
+            tr {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                align-items: center;
+                margin-bottom: 5px;
+                background: #fffef9;
+                border: 1px solid #e7e3da;
+                border-radius: 6px;
+                overflow: hidden;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+                padding: 0;
+            }
+
+            tr:has(.badge-chong) { border-left: 3px solid #d9777f; }
+            tr:has(.badge-wen)   { border-left: 3px solid #5ea89a; }
+            tr:has(.badge-bao)   { border-left: 3px solid #7b9fd4; }
+            tr:hover { background: #fffef9; }
+
+            td {
+                display: block;
+                padding: 0;
+                border: none;
+                font-size: 13px;
+                line-height: 1.45;
+                box-sizing: border-box;
+            }
+
+            /* 行1: 序号 | 学校名 | 报考档次 */
+            .search-bar { margin-bottom: 10px; }
+            .search-bar input { padding: 8px 12px; font-size: 14px; }
+
+            td.cell-seq     { grid-row: 1; grid-column: 1; padding: 6px 0 2px 10px; }
+            td.cell-name     { grid-row: 1; grid-column: 2; padding: 6px 4px 2px 4px; font-size: 14px; font-weight: 600; min-width: 0; }
+            td.cell-category { grid-row: 1; grid-column: 3; padding: 6px 10px 2px 4px; justify-self: end; }
+
+            /* 行2: 分数(左) + 排位(右) */
+            td.cell-score { grid-row: 2; grid-column: 1 / 3; padding: 1px 4px 3px 10px; font-size: 12px; color: #475569; font-weight: 600; }
+            td.cell-rank  { grid-row: 2; grid-column: 3; padding: 1px 10px 3px 4px; font-size: 12px; color: #6b7280; justify-self: end; }
+
+            /* 行3: 核心专业 + 省/市(跨3列) */
+            td.cell-majors   { grid-row: 3; grid-column: 1 / 4; padding: 4px 10px 2px; margin-top: 2px; border-top: 1px dotted #e8e4d8; }
+            td.cell-province { display: none; }
+
+            /* 行4: 专业特点(跨3列) */
+            td.cell-features { grid-row: 4; grid-column: 1 / 4; padding: 2px 10px 8px; color: #6b7280; font-size: 12.5px; }
+
+            /* 行5: 后期就业路线(跨3列) */
+            td.cell-careers { grid-row: 5; grid-column: 1 / 4; padding: 2px 10px 2px; color: #6b7280; font-size: 12.5px; }
+            td.cell-careers::before { content: "就业：" ; color: #9ca3af; font-size: 11px; }
+
+            /* 行6: 详细地址(跨3列) */
+            td.cell-address { grid-row: 6; grid-column: 1 / 4; padding: 2px 10px 8px; color: #9ca3af; font-size: 11.5px; }
+
+            /* 隐藏列 */
+            td.cell-province { display: none; }
+
+            /* idx-badge 序号圆圈 */
+            .idx-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+                border-radius: 50%;
+                font-size: 11px;
+                font-weight: bold;
+                color: #fff;
+                background: #9ca3af;
+                text-align: center;
+            }
+            tr:has(.badge-chong) .idx-badge { background: #d9777f; }
+            tr:has(.badge-wen)   .idx-badge { background: #5ea89a; }
+            tr:has(.badge-bao)   .idx-badge { background: #7b9fd4; }
+
+            /* 梯度badge缩小 */
+            .badge { font-size: 11px; padding: 2px 7px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>生化类高校报考参考表</h1>
+    </div>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="输入关键字，搜索所有列（校名、城市、专业、特点、就业...）" autocomplete="off">
+        <span class="search-count" id="searchCount"></span>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:50px;">序</th>
+                    <th>大学名称</th>
+                    <th>省/市</th>
+                    <th>报考档次</th>
+                    <th>2025分数</th>
+                    <th>最低投档排位</th>
+                    <th>匹配核心专业</th>
+                    <th>专业特点</th>
+                    <th>后期就业路线</th>
+                    <th>详细地址</th>
+                </tr>
+            </thead>
+            <tbody id="data-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="university-list-data.js"></script>
+<script>
+var schoolData = window.LIST_DATA || [];
+
+// 梯度映射
+function getGradient(category) {
+    if (/冲刺/.test(category)) return { cls: 'chong', label: category };
+    if (/稳妥/.test(category)) return { cls: 'wen',   label: category };
+    return { cls: 'bao', label: category };
+}
+
+function cleanHtml(str) {
+    return str.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '').replace(/\[[\d,]+\]/g, '').replace(/\*\*/g, '');
+}
+
+function getSearchText(item) {
+    return [
+        String(item.id), item.name, item.province, item.city, item.category,
+        item.score, item.rank,
+        (item.majors || []).join(' '),
+        cleanHtml(item.features),
+        cleanHtml(item.careers),
+        cleanHtml(item.address)
+    ].join(' ').toLowerCase();
+}
+
+function renderTable(filteredData) {
+    var tbody = document.getElementById('data-body');
+    var rows = '';
+    filteredData.forEach(function(item) {
+        var g = getGradient(item.category);
+        var majorTags = item.majors.map(function(m) { return '<span>' + m + '</span>'; }).join('');
+        var rankText = item.rank.replace(/<br>/g, ' ').replace(/<[^>]*>/g, '');
+        var featuresText = cleanHtml(item.features);
+
+        rows +=
+            '<tr class="row-' + g.cls + '">' +
+            '<td class="cell-seq"><span class="idx-badge">' + item.id + '</span></td>' +
+            '<td class="cell-name"><strong>' + item.name + '</strong></td>' +
+            '<td class="cell-province">' + item.province + ' · ' + item.city + '</td>' +
+            '<td class="cell-category"><span class="badge badge-' + g.cls + '">' + g.label + '</span></td>' +
+            '<td class="cell-score">' + item.score + '</td>' +
+            '<td class="cell-rank">' + rankText + '</td>' +
+            '<td class="cell-majors major-list">' + majorTags + '</td>' +
+            '<td class="cell-features">' + featuresText + '</td>' +
+            '<td class="cell-careers">' + cleanHtml(item.careers).replace(/^暂无推荐路线$/, '') + '</td>' +
+            '<td class="cell-address">' + cleanHtml(item.address) + '</td>' +
+            '</tr>';
+    });
+    tbody.innerHTML = rows;
+}
+
+var searchInput = document.getElementById('searchInput');
+var searchCount = document.getElementById('searchCount');
+
+function doSearch() {
+    var keyword = searchInput.value.trim().toLowerCase();
+    if (!keyword) {
+        searchCount.textContent = '';
+        renderTable(schoolData);
+        return;
+    }
+    var filtered = [];
+    var keywords = keyword.split(/\s+/).filter(Boolean);
+    schoolData.forEach(function(item) {
+        var text = getSearchText(item);
+        var match = keywords.every(function(kw) { return text.indexOf(kw) !== -1; });
+        if (match) filtered.push(item);
+    });
+    searchCount.textContent = '找到 ' + filtered.length + ' / ' + schoolData.length + ' 条';
+    renderTable(filtered);
+}
+
+searchInput.addEventListener('input', doSearch);
+renderTable(schoolData);
+</script>
+</body>
+</html>

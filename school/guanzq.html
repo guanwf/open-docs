@@ -198,6 +198,24 @@
             color: #0f172a;
         }
 
+        .links-bar {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .links-bar h4 { color: #475569; margin: 0 0 10px 0; font-size: 14px; }
+        .links-bar a {
+            display: inline-block;
+            margin: 0 12px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .links-bar a:hover { text-decoration: underline; }
+
         .footer {
             text-align: center;
             margin-top: 40px;
@@ -365,6 +383,9 @@
             tr:has(.badge-bao)  { border-left: 3px solid #7b9fd4; }
             tr:hover { background: #7a7248; }
 
+            .links-bar { padding: 14px; margin-top: 14px; }
+            .links-bar a { margin: 4px 8px; font-size: 13px; }
+
             /* 战略指南 */
             .guide-section {
                 padding: 12px;
@@ -399,7 +420,7 @@
 
 <div class="container" id="app"></div>
 
-<script src="plandata.js"></script>
+<script src="guanzqplandata.js"></script>
 <script>
 (function() {
   var D = window.VOLUNTEER_DATA;
@@ -449,6 +470,9 @@
     '<div class="intro-box"><strong>📌 方案定位与核心策略：</strong><br>' + D.intro + '</div>' +
     D.plates.map(buildPlate).join('') +
     '<div class="guide-section"><h3>📝 2026年志愿表战略执行指南（给子琪同学的落地交代）</h3>' + guideItems + '</div>' +
+    '<div class="links-bar"><h4>🔗 相关页面</h4>' +
+      '<a href="university-list.html">🏫 生化类高校报考参考表</a>' +
+    '</div>' +
     '<div class="footer">' + D.footer + '</div>';
 
   document.getElementById('app').innerHTML = html;
