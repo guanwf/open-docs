@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026年广东高考物理类 · 45个志愿黄金组合方案</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a; /* 深学术蓝 */
+            --secondary-color: #0d9488; /* 科技绿 */
+            --bg-color: #f8fafc; /* 浅底色 */
+            --text-color: #334155; /* 深灰文本 */
+            --border-color: #e2e8f0;
+            
+            /* 梯度标签颜色 */
+            --color-chong: #ef4444; /* 冲刺-红色 */
+            --bg-chong: #fef2f2;
+            --color-wen: #0d9488; /* 稳妥-绿色 */
+            --bg-wen: #f0fdf4;
+            --color-bao: #3b82f6; /* 保底-蓝色 */
+            --bg-bao: #eff6ff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 页眉设计 */
+        .header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 25px;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+
+        .candidate-info {
+            display: inline-flex;
+            gap: 20px;
+            background: #f1f5f9;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .candidate-info span strong {
+            color: var(--primary-color);
+        }
+
+        .intro-box {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            font-size: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* 板块卡片设计 */
+        .plate-section {
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .plate-header {
+            background: linear-gradient(135deg, var(--primary-color), #2563eb);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .plate-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .plate-feature {
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        /* 表格设计 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* 序号样式 */
+        .idx-badge {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background: #64748b;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* 梯度标签样式 */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .badge-chong {
+            background-color: var(--bg-chong);
+            color: var(--color-chong);
+        }
+
+        .badge-wen {
+            background-color: var(--bg-wen);
+            color: var(--color-wen);
+        }
+
+        .badge-bao {
+            background-color: var(--bg-bao);
+            color: var(--color-bao);
+        }
+
+        /* 战略指南样式 */
+        .guide-section {
+            background-color: #f0fdfa;
+            border: 1px solid #ccfbf1;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 40px;
+        }
+
+        .guide-section h3 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .guide-item {
+            margin-bottom: 15px;
+        }
+
+        .guide-item strong {
+            color: #0f172a;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 13px;
+            color: #94a3b8;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        /* ========== 移动端响应式优化 ========== */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                background-color: #f5f2ed; /* 暖灰底色，比纯白柔和 */
+            }
+
+            .container {
+                max-width: 100%;
+                margin: 0;
+                padding: 10px;
+                border-radius: 0;
+                box-shadow: none;
+                background: transparent;
+            }
+
+            /* 页眉 */
+            .header {
+                background: #fffef9;
+                padding: 14px 12px 12px;
+                margin-bottom: 10px;
+                border-radius: 8px;
+                border-bottom: 2px solid #1e3a8a;
+            }
+
+            .header h1 {
+                font-size: 18px;
+                line-height: 1.4;
+            }
+
+            .candidate-info {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px 8px;
+                padding: 7px 10px;
+                font-size: 12px;
+                border-radius: 16px;
+                justify-content: center;
+                background: #f0ede6;
+            }
+
+            /* 前言 */
+            .intro-box {
+                padding: 10px 12px;
+                font-size: 13px;
+                margin-bottom: 12px;
+                background: #fffbeb;
+                border-left: 3px solid #0d9488;
+            }
+
+            /* 板块头部 */
+            .plate-section {
+                margin-bottom: 12px;
+                border: none;
+                border-radius: 6px;
+                overflow: hidden;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            }
+
+            .plate-header {
+                flex-direction: column;
+                gap: 3px;
+                padding: 9px 12px;
+                background: linear-gradient(135deg, #334155, #475569);
+            }
+
+            .plate-header h2 {
+                font-size: 15px;
+            }
+
+            .plate-feature {
+                font-size: 11px;
+                background: rgba(255,255,255,0.12);
+                padding: 2px 8px;
+            }
+
+            /* ===== 表格 → 紧凑卡片 ===== */
+            table {
+                border: none;
+                background: #fafaf7;
+            }
+
+            thead {
+                display: none;
+            }
+
+            tbody {
+                display: block;
+                padding: 4px;
+            }
+
+            td {
+                display: block;
+                padding: 0;
+                border-bottom: none;
+                font-size: 13px;
+                line-height: 1.45;
+                box-sizing: border-box;
+            }
+
+            /* Grid 卡片：4行 x 3列 */
+            tr {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                align-items: center;
+                margin-bottom: 5px;
+                background: #fffef9;
+                border: 1px solid #e7e3da;
+                border-radius: 6px;
+                overflow: hidden;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+                padding: 0;
+            }
+
+            /* ── 行1: 序号 | 院校名 | 梯度(右对齐) ── */
+            td:nth-child(1) { grid-row: 1; grid-column: 1; padding: 6px 0 2px 10px; }
+            td:nth-child(2) { grid-row: 1; grid-column: 2; padding: 6px 4px 2px 4px; font-size: 14px; font-weight: 600; min-width: 0; }
+            td:nth-child(3) { grid-row: 1; grid-column: 3; padding: 6px 10px 2px 4px; justify-self: end; }
+
+            /* ── 行2: 分数(左) | (空) | 排位(右对齐) ── */
+            td:nth-child(5) { grid-row: 2; grid-column: 1 / 3; padding: 1px 4px 3px 10px; font-size: 12px; color: #475569; font-weight: 600; }
+            td:nth-child(4) { grid-row: 2; grid-column: 3; padding: 1px 10px 3px 4px; font-size: 12px; color: #6b7280; justify-self: end; }
+
+            /* ── 行3: 核心专业(跨3列) ── */
+            td:nth-child(6) { grid-row: 3; grid-column: 1 / 4; padding: 4px 10px 2px; margin-top: 2px; border-top: 1px dotted #e8e4d8; }
+
+            /* ── 行4: 策略分析(跨3列) ── */
+            td:nth-child(7) { grid-row: 4; grid-column: 1 / 4; padding: 2px 10px 8px; color: #6b7280; font-size: 12.5px; }
+
+            /* 隐藏伪元素标签 */
+            td::before { display: none !important; }
+
+            /* 序号badge缩小 */
+            .idx-badge {
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+                font-size: 11px;
+                background: #9ca3af;
+            }
+
+            /* 序号颜色跟随梯度 */
+            tr:has(.badge-chong) .idx-badge { background: #d9777f; }
+            tr:has(.badge-wen)  .idx-badge { background: #5ea89a; }
+            tr:has(.badge-bao)  .idx-badge { background: #7b9fd4; }
+
+            /* 梯度badge缩小 */
+            .badge {
+                font-size: 11px;
+                padding: 2px 7px;
+            }
+
+            /* 梯度左侧色条 */
+            tr:has(.badge-chong) { border-left: 3px solid #d9777f; }
+            tr:has(.badge-wen)  { border-left: 3px solid #5ea89a; }
+            tr:has(.badge-bao)  { border-left: 3px solid #7b9fd4; }
+            tr:hover { background: #7a7248; }
+
+            /* 战略指南 */
+            .guide-section {
+                padding: 12px;
+                margin-top: 14px;
+                background: #f0fdfa;
+                border: 1px solid #ccfbf1;
+                border-radius: 6px;
+            }
+
+            .guide-section h3 {
+                font-size: 15px;
+                margin-bottom: 10px;
+            }
+
+            .guide-item {
+                font-size: 13px;
+                margin-bottom: 10px;
+            }
+
+            /* 页脚 */
+            .footer {
+                margin-top: 16px;
+                padding-top: 12px;
+                font-size: 11px;
+                color: #a8a29e;
+                border-top: 1px solid #e7e3da;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script src="plandata.js"></script>
+<script>
+(function() {
+  var D = window.VOLUNTEER_DATA;
+  if (!D) { document.getElementById('app').innerHTML = '<p style="text-align:center;padding:40px;color:red;">数据加载失败，请检查 data.js</p>'; return; }
+
+  function badgeClass(g) { return 'badge badge-' + g; }
+
+  function buildPlate(plate) {
+    var rows = plate.schools.map(function(s) {
+      var rowClass = '';
+      var rankHtml = s.rankLabel.replace(/^(\d[\d,]+)/, '<strong>$1</strong>');
+      var scoreHtml = s.score != null ? '<strong>' + s.score + '分</strong>' : s.score;
+      var strategyHtml = s.strategy;
+      return '<tr>' +
+        '<td><span class="idx-badge">' + s.id + '</span></td>' +
+        '<td><strong>' + s.name + '</strong>' + (s.group ? ' (' + s.group + ')' : '') + '</td>' +
+        '<td><span class="' + badgeClass(s.gradient) + '">' + s.gradientLabel + '</span></td>' +
+        '<td>' + rankHtml + '</td>' +
+        '<td>' + scoreHtml + '</td>' +
+        '<td>' + s.majors + '</td>' +
+        '<td>' + strategyHtml + '</td>' +
+        '</tr>';
+    }).join('');
+
+    return '<div class="plate-section">' +
+      '<div class="plate-header"><h2>' + plate.title + '</h2><div class="plate-feature">' + plate.feature + '</div></div>' +
+      '<table><thead><tr>' +
+        '<th style="width:6%">序号</th><th style="width:20%">推荐院校专业组</th><th style="width:9%">梯度定位</th><th style="width:12%">25年参考线</th><th style="width:8%">25年分数</th><th style="width:20%">核心/第一专业建议</th><th style="width:25%">填报策略分析</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '</div>';
+  }
+
+  var guideItems = D.guide.map(function(g, i) {
+    return '<div class="guide-item"><strong>' + (i+1) + '. ' + g.title + '</strong><br>' + g.content + '</div>';
+  }).join('');
+
+  var html = '' +
+    '<div class="header">' +
+      '<h1>2026年广东高考物理类 · "六大地区产业版图"志愿组合方案</h1>' +
+      '<div class="candidate-info">' +
+        '<span>考生姓名：<strong>' + D.candidate.name + '</strong></span>' +
+        '<span>省排位：<strong>' + D.candidate.rank.toLocaleString() + ' 名</strong></span>' +
+        '<span>高考总分：<strong>' + D.candidate.score + ' 分</strong></span>' +
+        '<span>选考科目：<strong>' + D.candidate.subjects + '</strong></span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="intro-box"><strong>📌 方案定位与核心策略：</strong><br>' + D.intro + '</div>' +
+    D.plates.map(buildPlate).join('') +
+    '<div class="guide-section"><h3>📝 2026年志愿表战略执行指南（给子琪同学的落地交代）</h3>' + guideItems + '</div>' +
+    '<div class="footer">' + D.footer + '</div>';
+
+  document.getElementById('app').innerHTML = html;
+})();
+</script>
+
+
+</body>
+</html>

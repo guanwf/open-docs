@@ -923,7 +923,8 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             { category: "🛠️Tools",text:"icon-getemoji", url: "https://getemoji.com/", desc: "icon"},
             { category: "🛠️Tools",text:"pdf转换", url: "https://tools.pdf24.org/zh/", desc: "pdf各种转换-免费"},
             { category: "🛠️Tools",text:"中国气象局雷达图", url: "https://www.nmc.cn/publish/radar/chinaall.html", desc: ""},
-            
+            { category: "🛠️Tools",text:"将html转成图片>screenshotmachine", url: "https://www.screenshotmachine.com/", desc: "在线截图工具"},
+
             { category:"📚Doc",text:"FastDeploy&FastLink", url: "https://xd20al46gl.feishu.cn/docx/Hkhvdh1CkoHkYGxhe4Hc3oWqn7Z", desc: ""},
             { category:"📚Doc",text:"基础设施组件清单", url: "./infra/infra-list.html", desc: ""},
             { category:"📚Doc",text:"服务器配置清单", url: "./infra/infra-servers.html", desc: ""},

@@ -397,7 +397,63 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="app"></div>
+
+<script src="data.js"></script>
+<script>
+(function() {
+  var D = window.VOLUNTEER_DATA;
+  if (!D) { document.getElementById('app').innerHTML = '<p style="text-align:center;padding:40px;color:red;">数据加载失败，请检查 data.js</p>'; return; }
+
+  function badgeClass(g) { return 'badge badge-' + g; }
+
+  function buildPlate(plate) {
+    var rows = plate.schools.map(function(s) {
+      var rowClass = '';
+      var rankHtml = s.rankLabel.replace(/^(\d[\d,]+)/, '<strong>$1</strong>');
+      var scoreHtml = s.score != null ? '<strong>' + s.score + '分</strong>' : s.score;
+      var strategyHtml = s.strategy;
+      return '<tr>' +
+        '<td><span class="idx-badge">' + s.id + '</span></td>' +
+        '<td><strong>' + s.name + '</strong>' + (s.group ? ' (' + s.group + ')' : '') + '</td>' +
+        '<td><span class="' + badgeClass(s.gradient) + '">' + s.gradientLabel + '</span></td>' +
+        '<td>' + rankHtml + '</td>' +
+        '<td>' + scoreHtml + '</td>' +
+        '<td>' + s.majors + '</td>' +
+        '<td>' + strategyHtml + '</td>' +
+        '</tr>';
+    }).join('');
+
+    return '<div class="plate-section">' +
+      '<div class="plate-header"><h2>' + plate.title + '</h2><div class="plate-feature">' + plate.feature + '</div></div>' +
+      '<table><thead><tr>' +
+        '<th style="width:6%">序号</th><th style="width:20%">推荐院校专业组</th><th style="width:9%">梯度定位</th><th style="width:12%">25年参考线</th><th style="width:8%">25年分数</th><th style="width:20%">核心/第一专业建议</th><th style="width:25%">填报策略分析</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '</div>';
+  }
+
+  var guideItems = D.guide.map(function(g, i) {
+    return '<div class="guide-item"><strong>' + (i+1) + '. ' + g.title + '</strong><br>' + g.content + '</div>';
+  }).join('');
+
+  var html = '' +
+    '<div class="header">' +
+      '<h1>2026年广东高考物理类 · "六大地区产业版图"志愿组合方案</h1>' +
+      '<div class="candidate-info">' +
+        '<span>考生姓名：<strong>' + D.candidate.name + '</strong></span>' +
+        '<span>省排位：<strong>' + D.candidate.rank.toLocaleString() + ' 名</strong></span>' +
+        '<span>高考总分：<strong>' + D.candidate.score + ' 分</strong></span>' +
+        '<span>选考科目：<strong>' + D.candidate.subjects + '</strong></span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="intro-box"><strong>📌 方案定位与核心策略：</strong><br>' + D.intro + '</div>' +
+    D.plates.map(buildPlate).join('') +
+    '<div class="guide-section"><h3>📝 2026年志愿表战略执行指南（给子琪同学的落地交代）</h3>' + guideItems + '</div>' +
+    '<div class="footer">' + D.footer + '</div>';
+
+  document.getElementById('app').innerHTML = html;
+})();
+</script>
     <!-- 页眉 -->
     <div class="header">
         <h1>2026年广东高考物理类 · "六大地区产业版图"志愿组合方案</h1>
