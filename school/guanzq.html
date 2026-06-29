@@ -154,7 +154,37 @@
             border-radius: 50%;
             font-weight: bold;
             font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+            transition: background .2s;
         }
+        .idx-badge:hover { opacity: 0.8; }
+        .idx-badge.checked {
+            background: #22c55e !important;
+            font-size: 10px;
+        }
+
+        .row-checked td { background-color: #f0fdf4; }
+        .row-checked:hover td { background-color: #dcfce7; }
+
+        .note-input {
+            width: 100%;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-family: inherit;
+            color: #475569;
+            background: transparent;
+            transition: border-color .2s;
+            box-sizing: border-box;
+        }
+        .note-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            background: #f8fdf9;
+        }
+        .note-input:hover { border-color: #e2e8f0; }
 
         /* 梯度标签样式 */
         .badge {
@@ -362,7 +392,10 @@
             td:nth-child(7) { grid-row: 4; grid-column: 1 / 4; padding: 4px 10px 2px; margin-top: 2px; border-top: 1px dotted #e8e4d8; }
 
             /* ── 行5: 策略分析(跨3列) ── */
-            td:nth-child(8) { grid-row: 5; grid-column: 1 / 4; padding: 2px 10px 8px; color: #6b7280; font-size: 12.5px; }
+            td:nth-child(8) { grid-row: 5; grid-column: 1 / 4; padding: 2px 10px 2px; color: #6b7280; font-size: 12.5px; }
+
+            /* ── 行6: 备注(跨3列) ── */
+            td:nth-child(9) { grid-row: 6; grid-column: 1 / 4; padding: 2px 10px 8px; }
 
             /* 隐藏伪元素标签 */
             td::before { display: none !important; }
@@ -374,7 +407,14 @@
                 line-height: 20px;
                 font-size: 11px;
                 background: #9ca3af;
+                cursor: pointer;
             }
+            .idx-badge.checked {
+                background: #22c55e !important;
+                font-size: 9px;
+            }
+
+            .note-input { font-size: 11px; padding: 3px 6px; }
 
             /* 序号颜色跟随梯度 */
             tr:has(.badge-chong) .idx-badge { background: #d9777f; }
@@ -440,26 +480,25 @@
 
   function buildPlate(plate) {
     var rows = plate.schools.map(function(s) {
-      var rowClass = '';
       var rankHtml = s.rankLabel.replace(/^(\d[\d,]+)/, '<strong>$1</strong>');
       var scoreHtml = s.score != null ? '<strong>' + s.score + '分</strong>' : s.score;
-      var strategyHtml = s.strategy;
-      return '<tr>' +
-        '<td><span class="idx-badge">' + s.id + '</span></td>' +
+      return '<tr data-id="' + s.id + '">' +
+        '<td><span class="idx-badge" data-id="' + s.id + '">' + s.id + '</span></td>' +
         '<td><strong>' + s.name + '</strong>' + (s.group ? ' (' + s.group + ')' : '') + '</td>' +
         '<td><span class="' + badgeClass(s.gradient) + '">' + s.gradientLabel + '</span></td>' +
         '<td>' + rankHtml + '</td>' +
         '<td>' + scoreHtml + '</td>' +
         '<td><span class="school-code">' + (s.code || '') + '</span></td>' +
         '<td>' + s.majors + '</td>' +
-        '<td>' + strategyHtml + '</td>' +
+        '<td>' + s.strategy + '</td>' +
+        '<td><input class="note-input" data-id="' + s.id + '" placeholder="备注..." value=""></td>' +
         '</tr>';
     }).join('');
 
     return '<div class="plate-section">' +
       '<div class="plate-header"><h2>' + plate.title + '</h2><div class="plate-feature">' + plate.feature + '</div></div>' +
       '<table><thead><tr>' +
-        '<th style="width:6%">序号</th><th style="width:19%">推荐院校专业组</th><th style="width:8%">梯度定位</th><th style="width:11%">25年参考线</th><th style="width:7%">25年分数</th><th style="width:8%">国标代码</th><th style="width:18%">核心/第一专业建议</th><th style="width:23%">填报策略分析</th>' +
+        '<th style="width:5%">序号</th><th style="width:17%">推荐院校专业组</th><th style="width:7%">梯度</th><th style="width:10%">25年参考线</th><th style="width:7%">分数</th><th style="width:7%">代码</th><th style="width:16%">核心专业</th><th style="width:21%">填报策略分析</th><th style="width:10%">备注</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table>' +
       '</div>';
   }
@@ -482,12 +521,66 @@
     D.plates.map(buildPlate).join('') +
     '<div class="guide-section"><h3>📝 2026年志愿表战略执行指南（给子琪同学的落地交代）</h3>' + guideItems + '</div>' +
     '<div class="links-bar"><h4>🔗 相关链接</h4>' +
-      '<a href="https://pg.eeagd.edu.cn/ks/h5/index.html#/xgk/ggxx" target="_blank">📋 广东省高考志愿填报系统</a></br>' +
+      '<a href="https://pg.eeagd.edu.cn/ks/h5/index.html#/xgk/ggxx" target="_blank">📋 广东省高考志愿填报系统</a>' +
+      '<a href="https://gaokao.chsi.com.cn/" target="_blank">🎓 阳光高考网</a>' +
+      '<a href="https://zyfz.eesc.com.cn/front6/" target="_blank">📖 广东省志愿填报指南</a>' +
       '<a href="university-list.html">🏫 生化类高校报考参考表</a>' +
     '</div>' +
     '<div class="footer">' + D.footer + '</div>';
 
   document.getElementById('app').innerHTML = html;
+
+  // ── 勾选 + 备注：sessionStorage 持久化 ──
+  function storageKey(id, type) { return 'gz_' + type + '_' + id; }
+
+  // 恢复状态
+  var checkboxes = document.querySelectorAll('.idx-badge');
+  for (var i = 0; i < checkboxes.length; i++) {
+    var el = checkboxes[i];
+    var id = el.getAttribute('data-id');
+    if (sessionStorage.getItem(storageKey(id, 'checked')) === '1') {
+      el.classList.add('checked');
+      el.textContent = '✓';
+      var tr = el.closest('tr');
+      if (tr) tr.classList.add('row-checked');
+    }
+    el.addEventListener('click', function(e) {
+      var id = this.getAttribute('data-id');
+      var key = storageKey(id, 'checked');
+      var isChecked = sessionStorage.getItem(key) === '1';
+      if (isChecked) {
+        sessionStorage.removeItem(key);
+        this.classList.remove('checked');
+        this.textContent = id;
+        var tr = this.closest('tr');
+        if (tr) tr.classList.remove('row-checked');
+      } else {
+        sessionStorage.setItem(key, '1');
+        this.classList.add('checked');
+        this.textContent = '✓';
+        var tr = this.closest('tr');
+        if (tr) tr.classList.add('row-checked');
+      }
+    });
+  }
+
+  // 恢复备注
+  var notes = document.querySelectorAll('.note-input');
+  for (var j = 0; j < notes.length; j++) {
+    var inp = notes[j];
+    var id = inp.getAttribute('data-id');
+    var saved = sessionStorage.getItem(storageKey(id, 'note'));
+    if (saved) inp.value = saved;
+    inp.addEventListener('input', function() {
+      var noteId = this.getAttribute('data-id');
+      var val = this.value.trim();
+      if (val) {
+        sessionStorage.setItem(storageKey(noteId, 'note'), val);
+      } else {
+        sessionStorage.removeItem(storageKey(noteId, 'note'));
+      }
+    });
+  }
 })();
 </script>
 
