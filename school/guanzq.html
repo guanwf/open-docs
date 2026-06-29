@@ -186,6 +186,29 @@
         }
         .note-input:hover { border-color: #e2e8f0; }
 
+        /* 排序箭头 */
+        .move-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background: #fff;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1;
+            user-select: none;
+            transition: all .15s;
+            vertical-align: middle;
+        }
+        .move-btn:hover { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+        .move-btn:first-child { margin-right: 2px; }
+        .move-btns { display: inline-flex; gap: 0; margin-left: 4px; vertical-align: middle; }
+        td.move-cell { white-space: nowrap; }
+
         /* 梯度标签样式 */
         .badge {
             display: inline-block;
@@ -394,8 +417,11 @@
             /* ── 行5: 策略分析(跨3列) ── */
             td:nth-child(8) { grid-row: 5; grid-column: 1 / 4; padding: 2px 10px 2px; color: #6b7280; font-size: 12.5px; }
 
-            /* ── 行6: 备注(跨3列) ── */
-            td:nth-child(9) { grid-row: 6; grid-column: 1 / 4; padding: 2px 10px 8px; }
+            /* ── 行6: 备注 + ↑↓(跨3列) ── */
+            td:nth-child(9) { grid-row: 6; grid-column: 1 / 4; padding: 2px 10px 8px; display: flex; gap: 4px; align-items: center; }
+            .move-cell .note-input { flex: 1; min-width: 0; }
+            .move-cell .move-btn { width: 28px; height: 24px; font-size: 14px; border-radius: 4px; }
+            .move-cell .move-btns { display: flex; gap: 2px; flex-shrink: 0; }
 
             /* 隐藏伪元素标签 */
             td::before { display: none !important; }
@@ -478,34 +504,88 @@
 
   function badgeClass(g) { return 'badge badge-' + g; }
 
-  function buildPlate(plate) {
-    var rows = plate.schools.map(function(s) {
-      var rankHtml = s.rankLabel.replace(/^(\d[\d,]+)/, '<strong>$1</strong>');
-      var scoreHtml = s.score != null ? '<strong>' + s.score + '分</strong>' : s.score;
-      return '<tr data-id="' + s.id + '">' +
-        '<td><span class="idx-badge" data-id="' + s.id + '">' + s.id + '</span></td>' +
-        '<td><strong>' + s.name + '</strong>' + (s.group ? ' (' + s.group + ')' : '') + '</td>' +
-        '<td><span class="' + badgeClass(s.gradient) + '">' + s.gradientLabel + '</span></td>' +
-        '<td>' + rankHtml + '</td>' +
-        '<td>' + scoreHtml + '</td>' +
-        '<td><span class="school-code">' + (s.code || '') + '</span></td>' +
-        '<td>' + s.majors + '</td>' +
-        '<td>' + s.strategy + '</td>' +
-        '<td><input class="note-input" data-id="' + s.id + '" placeholder="备注..." value=""></td>' +
-        '</tr>';
-    }).join('');
+  // 将 plate.schools 展平为全局数组，按 sessionStorage 排序
+  function getSortedSchools() {
+    var all = [];
+    D.plates.forEach(function(plate) {
+      plate.schools.forEach(function(s) {
+        all.push(s);
+      });
+    });
+    var orderKey = 'gz_order';
+    var stored = sessionStorage.getItem(orderKey);
+    if (stored) {
+      var orderIds = stored.split(',');
+      var map = {};
+      all.forEach(function(s) { map[s.id] = s; });
+      var sorted = [];
+      orderIds.forEach(function(id) {
+        if (map[id]) sorted.push(map[id]);
+      });
+      // 追加新学校（不在排序中）
+      all.forEach(function(s) {
+        if (orderIds.indexOf(s.id) === -1) sorted.push(s);
+      });
+      return sorted;
+    }
+    return all;
+  }
 
-    return '<div class="plate-section">' +
-      '<div class="plate-header"><h2>' + plate.title + '</h2><div class="plate-feature">' + plate.feature + '</div></div>' +
-      '<table><thead><tr>' +
-        '<th style="width:5%">序号</th><th style="width:17%">推荐院校专业组</th><th style="width:7%">梯度</th><th style="width:10%">25年参考线</th><th style="width:7%">分数</th><th style="width:7%">代码</th><th style="width:16%">核心专业</th><th style="width:21%">填报策略分析</th><th style="width:10%">备注</th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table>' +
-      '</div>';
+  function saveOrder(sorted) {
+    var ids = sorted.map(function(s) { return s.id; });
+    sessionStorage.setItem('gz_order', ids.join(','));
+  }
+
+  var sortedSchools = getSortedSchools();
+
+  function buildAllPlates() {
+    var groupMap = {};
+    sortedSchools.forEach(function(s) {
+      var pid = s._plateId;
+      if (!groupMap[pid]) groupMap[pid] = [];
+      groupMap[pid].push(s);
+    });
+    return D.plates.map(function(plate) {
+      var list = groupMap[plate.id] || [];
+      var rows = list.map(function(s) {
+        var rankHtml = s.rankLabel.replace(/^(\d[\d,]+)/, '<strong>$1</strong>');
+        var scoreHtml = s.score != null ? '<strong>' + s.score + '分</strong>' : s.score;
+        return '<tr data-id="' + s.id + '">' +
+          '<td><span class="idx-badge" data-id="' + s.id + '">' + s.id + '</span></td>' +
+          '<td><strong>' + s.name + '</strong>' + (s.group ? ' (' + s.group + ')' : '') + '</td>' +
+          '<td><span class="' + badgeClass(s.gradient) + '">' + s.gradientLabel + '</span></td>' +
+          '<td>' + rankHtml + '</td>' +
+          '<td>' + scoreHtml + '</td>' +
+          '<td><span class="school-code">' + (s.code || '') + '</span></td>' +
+          '<td>' + s.majors + '</td>' +
+          '<td>' + s.strategy + '</td>' +
+          '<td class="move-cell">' +
+            '<input class="note-input" data-id="' + s.id + '" placeholder="备注..." value="">' +
+            '<span class="move-btns">' +
+              '<button class="move-btn move-up" data-id="' + s.id + '" title="上移">▲</button>' +
+              '<button class="move-btn move-down" data-id="' + s.id + '" title="下移">▼</button>' +
+            '</span>' +
+          '</td>' +
+          '</tr>';
+      }).join('');
+
+      return '<div class="plate-section">' +
+        '<div class="plate-header"><h2>' + plate.title + '</h2><div class="plate-feature">' + plate.feature + '</div></div>' +
+        '<table><thead><tr>' +
+          '<th style="width:5%">序</th><th style="width:16%">推荐院校专业组</th><th style="width:7%">梯度</th><th style="width:10%">25年参考线</th><th style="width:6%">分数</th><th style="width:6%">代码</th><th style="width:15%">核心专业</th><th style="width:20%">填报策略分析</th><th style="width:15%">备注</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+        '</div>';
+    }).join('');
   }
 
   var guideItems = D.guide.map(function(g, i) {
     return '<div class="guide-item"><strong>' + (i+1) + '. ' + g.title + '</strong><br>' + g.content + '</div>';
   }).join('');
+
+  // 给每个 school 标记所属板块
+  D.plates.forEach(function(plate) {
+    plate.schools.forEach(function(s) { s._plateId = plate.id; });
+  });
 
   var html = '' +
     '<div class="header">' +
@@ -518,7 +598,7 @@
       '</div>' +
     '</div>' +
     '<div class="intro-box"><strong>📌 方案定位与核心策略：</strong><br>' + D.intro + '</div>' +
-    D.plates.map(buildPlate).join('') +
+    buildAllPlates() +
     '<div class="guide-section"><h3>📝 2026年志愿表战略执行指南（给子琪同学的落地交代）</h3>' + guideItems + '</div>' +
     '<div class="links-bar"><h4>🔗 相关链接</h4>' +
       '<a href="https://pg.eeagd.edu.cn/ks/h5/index.html#/xgk/ggxx" target="_blank">📋 广东省高考志愿填报系统</a>' +
@@ -581,6 +661,127 @@
       }
     });
   }
+
+  // ── ↑↓ 排序 ──
+  function moveRow(id, direction) {
+    var idx = -1;
+    for (var k = 0; k < sortedSchools.length; k++) {
+      if (sortedSchools[k].id === id) { idx = k; break; }
+    }
+    if (idx === -1) return;
+    var target = idx + direction;
+    if (target < 0 || target >= sortedSchools.length) return;
+    // swap
+    var tmp = sortedSchools[idx];
+    sortedSchools[idx] = sortedSchools[target];
+    sortedSchools[target] = tmp;
+    saveOrder(sortedSchools);
+    // re-render without full page reload — rebuild tbody content only
+    var groupMap = {};
+    sortedSchools.forEach(function(s) {
+      var pid = s._plateId;
+      if (!groupMap[pid]) groupMap[pid] = [];
+      groupMap[pid].push(s);
+    });
+    var allTbodies = document.querySelectorAll('table tbody');
+    var tbodyIndex = 0;
+    D.plates.forEach(function(plate) {
+      var list = groupMap[plate.id] || [];
+      if (tbodyIndex >= allTbodies.length) return;
+      var tbody = allTbodies[tbodyIndex];
+      tbodyIndex++;
+      var html = '';
+      list.forEach(function(s) {
+        var rankHtml = s.rankLabel.replace(/^(\d[\d,]+)/, '<strong>$1</strong>');
+        var scoreHtml = s.score != null ? '<strong>' + s.score + '分</strong>' : s.score;
+        html += '<tr data-id="' + s.id + '">' +
+          '<td><span class="idx-badge" data-id="' + s.id + '">' + s.id + '</span></td>' +
+          '<td><strong>' + s.name + '</strong>' + (s.group ? ' (' + s.group + ')' : '') + '</td>' +
+          '<td><span class="' + badgeClass(s.gradient) + '">' + s.gradientLabel + '</span></td>' +
+          '<td>' + rankHtml + '</td>' +
+          '<td>' + scoreHtml + '</td>' +
+          '<td><span class="school-code">' + (s.code || '') + '</span></td>' +
+          '<td>' + s.majors + '</td>' +
+          '<td>' + s.strategy + '</td>' +
+          '<td class="move-cell">' +
+            '<input class="note-input" data-id="' + s.id + '" placeholder="备注..." value="">' +
+            '<span class="move-btns">' +
+              '<button class="move-btn move-up" data-id="' + s.id + '" title="上移">▲</button>' +
+              '<button class="move-btn move-down" data-id="' + s.id + '" title="下移">▼</button>' +
+            '</span>' +
+          '</td>' +
+          '</tr>';
+      });
+      tbody.innerHTML = html;
+    });
+    rebindAll();
+  }
+
+  function rebindAll() {
+    // 重新绑定 ✓
+    var badges = document.querySelectorAll('.idx-badge');
+    for (var bi = 0; bi < badges.length; bi++) {
+      var b = badges[bi];
+      var bid = b.getAttribute('data-id');
+      if (sessionStorage.getItem(storageKey(bid, 'checked')) === '1') {
+        b.classList.add('checked');
+        b.textContent = '✓';
+        var row = b.closest('tr');
+        if (row) row.classList.add('row-checked');
+      }
+      b.onclick = null;
+      b.addEventListener('click', function(e) {
+        var cid = this.getAttribute('data-id');
+        var key = storageKey(cid, 'checked');
+        var isChecked = sessionStorage.getItem(key) === '1';
+        if (isChecked) {
+          sessionStorage.removeItem(key);
+          this.classList.remove('checked');
+          this.textContent = cid;
+          var tr = this.closest('tr');
+          if (tr) tr.classList.remove('row-checked');
+        } else {
+          sessionStorage.setItem(key, '1');
+          this.classList.add('checked');
+          this.textContent = '✓';
+          var tr = this.closest('tr');
+          if (tr) tr.classList.add('row-checked');
+        }
+      });
+    }
+    // 重新绑定备注
+    var allNotes = document.querySelectorAll('.note-input');
+    for (var nj = 0; nj < allNotes.length; nj++) {
+      var inp2 = allNotes[nj];
+      var nid = inp2.getAttribute('data-id');
+      var saved = sessionStorage.getItem(storageKey(nid, 'note'));
+      inp2.value = saved || '';
+      inp2.oninput = null;
+      inp2.addEventListener('input', function() {
+        var noteId = this.getAttribute('data-id');
+        var val = this.value.trim();
+        if (val) { sessionStorage.setItem(storageKey(noteId, 'note'), val); }
+        else { sessionStorage.removeItem(storageKey(noteId, 'note')); }
+      });
+    }
+    // 重新绑定 ↑↓
+    bindMoveButtons();
+  }
+
+  function bindMoveButtons() {
+    var ups = document.querySelectorAll('.move-up');
+    for (var ui = 0; ui < ups.length; ui++) {
+      ups[ui].onclick = null;
+      ups[ui].addEventListener('click', function(e) { e.preventDefault(); moveRow(this.getAttribute('data-id'), -1); });
+    }
+    var downs = document.querySelectorAll('.move-down');
+    for (var di = 0; di < downs.length; di++) {
+      downs[di].onclick = null;
+      downs[di].addEventListener('click', function(e) { e.preventDefault(); moveRow(this.getAttribute('data-id'), 1); });
+    }
+  }
+
+  bindMoveButtons();
 })();
 </script>
 
