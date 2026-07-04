@@ -960,7 +960,7 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             { category: "❄️K8s",text:"通过kubectl连接集群-hw-cce", url: "https://support.huaweicloud.com/intl/zh-cn/usermanual-cce/cce_10_0107.html", desc: ""},            
 
             { category: "❄️K8s",text:"获取yaml文件创建pod", url: "http://39.103.177.212:30008/", desc: "需要vpn"},
-            { category: "❄️K8s",text:"K8s Pod YAML 生成器", url: "./infra/k8s-pod-yaml-generator.html", desc: ""},
+            { category: "❄️K8s",text:"K8s Pod YAML 生成器", url: "./infra/k8s/k8s-pod-yaml-generator.html", desc: ""},
             
             { category: "❄️K8s",text:"k8s-kubeadm集群证书过期更换方法", url: "https://xd20al46gl.feishu.cn/docx/GaDrdYRvuoTnT4xaMvNczu9TnId", desc: ""},            
             { category: "❄️K8s",text:"k8s-网络-debug", url: "https://xd20al46gl.feishu.cn/docx/PCEbdjNNYo702GxeJlIcnFcAnbd", desc: ""},
