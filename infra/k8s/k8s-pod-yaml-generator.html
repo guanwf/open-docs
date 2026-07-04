@@ -69,6 +69,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .field { display: flex; flex-direction: column; gap: 3px; }
 .field.full { grid-column: 1 / -1; }
 label { font-size: 12px; color: #4b5563; font-weight: 500; }
+.req { color: #ef4444; margin-left: 2px; font-weight: 700; }
 input, select { font-size: 12px; height: 30px; border-radius: 7px; border: 1px solid #d1d5db; background: #fff; color: #1a1a1a; padding: 0 8px; width: 100%; outline: none; }
 input:focus, select:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.1); }
 .hint { font-size: 10px; color: #9ca3af; margin-top: 1px; }
@@ -80,9 +81,10 @@ input:focus, select:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99
 
 .col-header { display: grid; gap: 5px; margin-bottom: 3px; }
 .col-header span { font-size: 10px; color: #9ca3af; }
-.col-port { grid-template-columns: 1fr 84px 64px 26px; }
+.col-header .req { color: #ef4444; font-size: 10px; }
+.col-port { grid-template-columns: 184px 1fr 64px 26px; }
 .col-vol  { grid-template-columns: 1fr 1fr 1fr 26px; }
-.port-row { display: grid; grid-template-columns: 1fr 84px 64px 26px; gap: 5px; margin-bottom: 5px; align-items: center; }
+.port-row { display: grid; grid-template-columns: 184px 1fr 64px 26px; gap: 5px; margin-bottom: 5px; align-items: center; }
 .vol-row  { display: grid; grid-template-columns: 1fr 1fr 1fr 26px; gap: 5px; margin-bottom: 5px; align-items: center; }
 .kv-row { display: flex; gap: 5px; align-items: center; margin-bottom: 5px; }
 .kv-row input { flex: 1; min-width: 0; }
@@ -158,8 +160,27 @@ input:checked + .slider:before { transform: translateX(16px); }
 }
 
 .editor-body {
-  display: flex; flex: 1; overflow: auto;
+  display: flex; flex: 1; overflow: hidden;
   min-height: 400px;
+}
+.editor-code {
+  flex: 1; position: relative; overflow: hidden;
+}
+.editor-highlight {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  margin: 0; padding: 8px 10px;
+  font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 12.5px; line-height: 1.6;
+  white-space: pre; overflow-wrap: normal; tab-size: 2;
+  overflow: auto; pointer-events: none;
+  background: #1e1e2e; color: #cdd6f4;
+  border: none; border-radius: 0;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.editor-highlight::-webkit-scrollbar { display: none; }
+.editor-highlight code {
+  font-family: inherit; font-size: inherit;
+  color: inherit;
 }
 .line-nums {
   background: #252538; color: #555; text-align: right;
@@ -170,14 +191,29 @@ input:checked + .slider:before { transform: translateX(16px); }
   white-space: pre;
 }
 .editor-ta {
-  flex: 1; background: #1e1e2e; color: #cdd6f4;
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: transparent; color: transparent;
   border: none; outline: none; resize: none;
   padding: 8px 10px; line-height: 1.6;
   font-family: inherit; font-size: inherit;
   tab-size: 2; white-space: pre; overflow-wrap: normal;
-  overflow-x: auto; caret-color: #f5c2e7;
+  overflow: auto; z-index: 2;
 }
-.editor-ta::selection { background: #3a3a5c; }
+.editor-ta::selection { background: rgba(58,58,92,.5); }
+.editor-ta::placeholder { color: rgba(205,214,244,.15); }
+
+/* ── YAML 语法高亮颜色 ── */
+.hl-comment { color: #6c7086; font-style: italic; }
+.hl-key    { color: #89b4fa; }
+.hl-string { color: #a6e3a1; }
+.hl-bool   { color: #cba6f7; }
+.hl-num    { color: #fab387; }
+.hl-sep    { color: #f9e2af; font-weight: 600; }
+.hl-list   { color: #89b4fa; }
+.hl-tpl    { color: #94e2d5; }
+.hl-bold   { font-weight: 700; color: #f2cdcd; }
+.hl-probe  { color: #a6e3a1; }
+.hl-anchor { color: #f38ba8; }
 
 .status-bar {
   display: flex; align-items: center; gap: 14px;
@@ -272,11 +308,11 @@ input:checked + .slider:before { transform: translateX(16px); }
     <div class="sec-label">基本信息</div>
     <div class="field-row">
       <div class="field">
-        <label>Pod 名称</label>
-        <input id="podName" value="demo" placeholder="demo">
+        <label>Pod 名称<span class="req">*</span></label>
+        <input id="podName" value="roc-demo" placeholder="demo">
       </div>
       <div class="field">
-        <label>命名空间</label>
+        <label>命名空间<span class="req">*</span></label>
         <select id="namespace">
           <option value="pbs">pbs</option>
           <option value="roc-sit">roc-sit</option>
@@ -294,14 +330,12 @@ input:checked + .slider:before { transform: translateX(16px); }
         </select>
       </div>
       <div class="field full">
-        <label>镜像版本 *</label>
-        <input id="imageTag" value="nginx:latest" placeholder="nginx:1.25.3">
-        <div class="hint">格式：镜像地址:版本号，例如 my-registry/app:v2.0</div>
+        <label>镜像版本<span class="req">*</span></label>
+        <input id="imageTag" value="registry.cn-guangzhou.aliyuncs.com/rocv2/roc-demo:20260703.510" placeholder="nginx:1.25.3">
+        <div class="hint">格式：镜像地址:版本号，完整的镜像版本号！</div>
       </div>
-      <div class="field">
-        <label>容器名称</label>
-        <input id="containerName" placeholder="留空同 Pod 名称">
-      </div>
+      <!-- 重启策略默认 Always，无需输入 -->
+      <!--
       <div class="field">
         <label>重启策略</label>
         <select id="restartPolicy">
@@ -310,31 +344,55 @@ input:checked + .slider:before { transform: translateX(16px); }
           <option value="Never">Never</option>
         </select>
       </div>
+      -->
+    </div>
+
+    <div class="divider"></div>
+    <div class="sec-label">资源配置</div>
+    <div class="toggle-row">
+      <label class="toggle"><input type="checkbox" id="enableCpu" onchange="toggleCpu()"><span class="slider"></span></label>
+      <span class="toggle-label">启用 CPU 限制（默认关闭）</span>
+    </div>
+    <div id="cpuBlock" style="display:none">
+      <div class="field-row">
+        <div class="field">
+          <label>最小 CPU</label>
+          <input id="cpuMin" value="0.5" placeholder="0.5">
+        </div>
+        <div class="field">
+          <label>最大 CPU</label>
+          <input id="cpuMax" value="2" placeholder="2">
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>最小内存 (Mi)<span class="req">*</span></label>
+        <input id="memMin" value="500" placeholder="500">
+      </div>
+      <div class="field">
+        <label>最大内存 (Mi)<span class="req">*</span></label>
+        <input id="memMax" value="4096" placeholder="4096">
+      </div>
     </div>
 
     <div class="divider"></div>
     <div class="sec-label">端口配置</div>
     <div class="col-header col-port">
-      <span>容器端口</span><span>NodePort</span><span>协议</span><span></span>
+      <span>容器端口<span class="req">*</span></span><span>NodePort</span><span>协议</span><span></span>
     </div>
     <div id="ports"></div>
     <button class="add-btn" onclick="addPort()">+ 添加端口</button>
 
     <div class="divider"></div>
-    <div class="sec-label">资源限制</div>
-    <div class="toggle-row">
-      <label class="toggle"><input type="checkbox" id="enableResources" onchange="toggleResources()"><span class="slider"></span></label>
-      <span class="toggle-label">启用资源限制</span>
-    </div>
-    <div id="resourcesBlock" style="display:none">
-      <div class="probe-block">
-        <div class="probe-title">资源限制设置</div>
-        <div class="field-row">
-          <div class="field"><label>CPU 请求</label><input id="cpuReq" placeholder="100m"></div>
-          <div class="field"><label>CPU 限制</label><input id="cpuLim" placeholder="500m"></div>
-          <div class="field"><label>内存请求</label><input id="memReq" placeholder="128Mi"></div>
-          <div class="field"><label>内存限制</label><input id="memLim" placeholder="512Mi"></div>
-        </div>
+    <div class="sec-label">ROC专用配置（必填）</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Secret名称-对应镜像仓库</label>
+        <select id="rocSecret">
+          <option value="roc-secret">roc-secret</option>
+          <option value="roc-secret2">roc-secret2</option>
+        </select>
       </div>
     </div>
 
@@ -350,7 +408,7 @@ input:checked + .slider:before { transform: translateX(16px); }
     <div class="sec-label">健康探针</div>
     <div class="toggle-row">
       <label class="toggle"><input type="checkbox" id="enableLiveness" onchange="toggleProbe('liveness')"><span class="slider"></span></label>
-      <span class="toggle-label">启用存活探针 (livenessProbe)</span>
+      <span class="toggle-label">启用存活探针 (livenessProbe) roc的路径样式/msc-id/health，pos的路径样式/health</span>
     </div>
     <div id="livenessBlock" style="display:none">
       <div class="probe-block">
@@ -367,8 +425,9 @@ input:checked + .slider:before { transform: translateX(16px); }
           <div class="field" id="liveness_path_f"><label>路径</label><input id="livenessPath" value="/health"></div>
           <div class="field full" id="liveness_cmd_f" style="display:none"><label>命令</label><input id="livenessCmd" placeholder="cat /tmp/healthy"></div>
           <div class="field"><label>初始延迟(s)</label><input id="livenessInitial" value="15"></div>
-          <div class="field"><label>检测间隔(s)</label><input id="livenessPeriod" value="20"></div>
-          <div class="field"><label>超时(s)</label><input id="livenessTimeout" value="5"></div>
+          <div class="field"><label>检测间隔(s)</label><input id="livenessPeriod" value="15"></div>
+          <div class="field"><label>超时(s)</label><input id="livenessTimeout" value="3"></div>
+          <div class="field"><label>成功阈值</label><input id="livenessSuccess" value="1"></div>
           <div class="field"><label>失败阈值</label><input id="livenessFailure" value="3"></div>
         </div>
       </div>
@@ -395,7 +454,35 @@ input:checked + .slider:before { transform: translateX(16px); }
           <div class="field"><label>初始延迟(s)</label><input id="readinessInitial" value="5"></div>
           <div class="field"><label>检测间隔(s)</label><input id="readinessPeriod" value="10"></div>
           <div class="field"><label>超时(s)</label><input id="readinessTimeout" value="3"></div>
+          <div class="field"><label>成功阈值</label><input id="readinessSuccess" value="1"></div>
           <div class="field"><label>失败阈值</label><input id="readinessFailure" value="3"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <label class="toggle"><input type="checkbox" id="enableStartup" onchange="toggleProbe('startup')"><span class="slider"></span></label>
+      <span class="toggle-label">启用启动探针 (startupProbe)</span>
+    </div>
+    <div id="startupBlock" style="display:none">
+      <div class="probe-block">
+        <div class="probe-title">启动探针</div>
+        <div class="field-row">
+          <div class="field"><label>类型</label>
+            <select id="startupType" onchange="updateProbeFields('startup')">
+              <option value="httpGet">HTTP GET</option>
+              <option value="tcpSocket">TCP Socket</option>
+              <option value="exec">Exec 命令</option>
+            </select>
+          </div>
+          <div class="field" id="startup_port_f"><label>端口</label><input id="startupPort" value="8081"></div>
+          <div class="field" id="startup_path_f"><label>路径</label><input id="startupPath" value="/health"></div>
+          <div class="field full" id="startup_cmd_f" style="display:none"><label>命令</label><input id="startupCmd" placeholder="cat /tmp/healthy"></div>
+          <div class="field"><label>初始延迟(s)</label><input id="startupInitial" value="10"></div>
+          <div class="field"><label>检测间隔(s)</label><input id="startupPeriod" value="5"></div>
+          <div class="field"><label>超时(s)</label><input id="startupTimeout" value="3"></div>
+          <div class="field"><label>成功阈值</label><input id="startupSuccess" value="1"></div>
+          <div class="field"><label>失败阈值</label><input id="startupFailure" value="5"></div>
         </div>
       </div>
     </div>
@@ -449,14 +536,16 @@ input:checked + .slider:before { transform: translateX(16px); }
 
     <div class="editor-body">
       <div class="line-nums" id="lineNums">1</div>
-      <textarea class="editor-ta" id="yamlTa"
-        spellcheck="false"
-        oninput="onEditorInput()"
-        onscroll="syncScroll(this)"
-        onkeydown="handleTab(event)"
-        onclick="updateCursor()"
-        onkeyup="updateCursor()"
-        placeholder="点击「生成 YAML」后结果显示于此，支持直接编辑…"></textarea>
+      <div class="editor-code" id="editorCode">
+        <pre class="editor-highlight" id="yamlHighlight" aria-hidden="true"><code></code></pre>
+        <textarea class="editor-ta" id="yamlTa"
+          spellcheck="false"
+          oninput="onEditorInput()"
+          onscroll="syncScroll(this)"
+          onkeydown="handleTab(event)"
+          onclick="updateCursor()"
+          onkeyup="updateCursor()"></textarea>
+      </div>
     </div>
 
     <div class="status-bar">
@@ -490,7 +579,8 @@ input:checked + .slider:before { transform: translateX(16px); }
     <div class="ph-tip">
       <b>占位符：</b>
       {{name}} · {{namespace}} · {{imageTag}} · {{containerName}} · {{restartPolicy}}
-      · {{command}} · {{args}} · {{ports}} · {{env}} · {{labels}} · {{resources}} · {{probes}}
+      · {{secret}} · {{servicecode}} · {{minmemory}} · {{maxmemory}} · {{imagePullPolicy}}
+      · {{command}} · {{args}} · {{ports}} · {{env}} · {{labels}} · {{resources}} · {{rocResources}} · {{probes}} · {{startupProbe}}
       · {{volumeMounts}} · {{volumes}} · {{servicePorts}}
     </div>
     <div class="modal-foot">
@@ -509,30 +599,136 @@ input:checked + .slider:before { transform: translateX(16px); }
 // 内建模板
 // ─────────────────────────────────────────────
 const TPLS = [
+//   {
+//     name: 'Basic Pod',
+//     yaml: `apiVersion: v1
+// kind: Pod
+// metadata:
+//   name: {{name}}
+//   namespace: {{namespace}}
+//   labels:
+//     app: {{name}}
+// spec:
+//   restartPolicy: {{restartPolicy}}
+//   containers:
+//   - name: {{containerName}}
+//     image: {{imageTag}}
+// {{command}}
+// {{args}}
+// {{ports}}
+// {{env}}
+// {{resources}}
+// {{probes}}
+// {{volumeMounts}}
+// {{volumes}}`
+//   },
+
+
+
   {
-    name: 'Basic Pod',
-    yaml: `apiVersion: v1
-kind: Pod
+    name: 'roc-template',
+    yaml: `# {{servicecode}}-{{name}}
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: {{name}}
   namespace: {{namespace}}
-  labels:
-    app: {{name}}
 spec:
-  restartPolicy: {{restartPolicy}}
-  containers:
-  - name: {{containerName}}
-    image: {{imageTag}}
+  selector:
+    matchLabels:
+      app: {{name}}
+  replicas: 1
+  revisionHistoryLimit: 5
+  template:
+    metadata:
+      labels:
+        app: {{name}}
+    spec:
+      imagePullSecrets:
+        - name: {{secret}}
+      containers:
+      - name: {{containerName}}
+        image: {{imageTag}}
+        env:
+        - name: JAVA_OPTS
+          value: " -server -Xmx{{maxmemory}}M -Xms{{minmemory}}M -Xmn64M -XX:+UseParallelGC "
+        - name: NACOS_DATA_ID
+          value: "{{servicecode}}"
+        envFrom:
+        - configMapRef:
+            name: common-config
+{{env}}
+{{rocResources}}
+        imagePullPolicy: {{imagePullPolicy}}
 {{command}}
 {{args}}
 {{ports}}
-{{env}}
+{{probes}}
+{{startupProbe}}
+{{volumeMounts}}
+{{volumes}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{name}}
+  namespace: {{namespace}}
+spec:
+  selector:
+    app: {{name}}
+{{servicePorts}}`
+  },
+  {
+    name: 'pos-template',
+    yaml: `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{name}}
+  namespace: {{namespace}}
+spec:
+  selector:
+    matchLabels:
+      app: {{name}}
+  replicas: 1
+  revisionHistoryLimit: 5
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{name}}
+    spec:
+      containers:
+      - name: {{containerName}}
+        image: {{imageTag}}
+        env:
+        - name: SERVICE_NAME
+          value: {{name}}
+        - name: SW_AGENT_NAME
+          value: {{name}}
+        envFrom:
+        - configMapRef:
+            name: conf-env-center
+        imagePullPolicy: IfNotPresent
+{{ports}}
 {{resources}}
 {{probes}}
-{{volumeMounts}}
-{{volumes}}`
+{{startupProbe}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{name}}
+  namespace: {{namespace}}
+spec:
+  selector:
+    app: {{name}}
+{{servicePorts}}`
   },
-
   {
     name: 'Pod + NodePort Service',
     yaml: `apiVersion: v1
@@ -559,7 +755,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{name}}-svc
+  name: {{name}}
   namespace: {{namespace}}
 spec:
   type: NodePort
@@ -567,30 +763,29 @@ spec:
     app: {{name}}
 {{servicePorts}}`
   },
-
-  {
-    name: 'Pod + Resources',
-    yaml: `apiVersion: v1
-kind: Pod
-metadata:
-  name: {{name}}
-  namespace: {{namespace}}
-  labels:
-    app: {{name}}
-spec:
-  restartPolicy: {{restartPolicy}}
-  containers:
-  - name: {{containerName}}
-    image: {{imageTag}}
-{{command}}
-{{args}}
-{{ports}}
-{{env}}
-{{resources}}
-{{probes}}
-{{volumeMounts}}
-{{volumes}}`
-  },
+//   {
+//     name: 'Pod + Resources',
+//     yaml: `apiVersion: v1
+// kind: Pod
+// metadata:
+//   name: {{name}}
+//   namespace: {{namespace}}
+//   labels:
+//     app: {{name}}
+// spec:
+//   restartPolicy: {{restartPolicy}}
+//   containers:
+//   - name: {{containerName}}
+//     image: {{imageTag}}
+// {{command}}
+// {{args}}
+// {{ports}}
+// {{env}}
+// {{resources}}
+// {{probes}}
+// {{volumeMounts}}
+// {{volumes}}`
+//   },
 
   {
     name: 'Pod + Volume Mount',
@@ -649,6 +844,73 @@ let lastNs      = '';
 let lastPodName = '';
 
 // ─────────────────────────────────────────────
+// YAML 语法高亮
+// ─────────────────────────────────────────────
+function highlightYaml(text) {
+  // 1. 转义 HTML
+  let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (!html) { return ''; }
+  if (!html.endsWith('\n')) html += '\n';
+
+  const lines = html.split('\n');
+  return lines.map(line => {
+    if (!line.trim()) return line;
+
+    // 文档分隔符 --- / ...（最先检测）
+    if (/^(---|\.{3})$/.test(line.trim())) {
+      return '<span class="hl-sep">' + line + '</span>';
+    }
+
+    // 注释 (排除引号内的 #)
+    line = line.replace(/(^|\s)(#[^'"]*)$/, '$1<span class="hl-comment">$2</span>');
+
+    // 模板占位符
+    line = line.replace(/(\{\{.*?\}\})/g, '<span class="hl-tpl">$1</span>');
+
+    // 双引号字符串 & 单引号字符串
+    line = line.replace(/(&quot;[^&]*&quot;)/g, '<span class="hl-string">$1</span>');
+    line = line.replace(/('[^']*')/g, '<span class="hl-string">$1</span>');
+
+    // 布尔 / null
+    line = line.replace(/\b(true|false|yes|no|null|~)\b/g, '<span class="hl-bool">$1</span>');
+
+    // 数字（支持 Mi/Gi/Ki/m 后缀，排除已在 span 内的）
+    line = line.replace(/(?<!>)\b(\d+(?:\.\d+)?(?:Mi|Gi|Ki|m)?)\b/g, '<span class="hl-num">$1</span>');
+
+    // key: 冒号前的键名（通过计算前后 span 标签数避免匹配已高亮内容）
+    line = line.replace(/^((?:  )*)([\w.-]+)(:)(\s|$)/gm, function(m, indent, key, colon, after, offset) {
+      var before = line.substring(0, offset);
+      var open  = (before.match(/<span\b/g) || []).length;
+      var close = (before.match(/<\/span>/g) || []).length;
+      if (open > close) return m;
+      var cls = /^(liveness|readiness|startup)Probe$/.test(key) ? 'hl-probe' : 'hl-key';
+      return indent + '<span class="' + cls + '">' + key + '</span>' + colon + after;
+    });
+
+    // name / namespace 的值加粗
+    line = line.replace(/(<span class="hl-key">(?:name|namespace)<\/span>:\s+)(\S+)/g,
+      '$1<span class="hl-bold">$2</span>');
+
+    // 列表标记 "- "
+    line = line.replace(/^((?:  )*)(- )(?=\S)/gm, function(m, indent, dash, offset) {
+      var before = line.substring(0, offset);
+      var open  = (before.match(/<span\b/g) || []).length;
+      var close = (before.match(/<\/span>/g) || []).length;
+      if (open > close) return m;
+      return indent + '<span class="hl-list">' + dash + '</span>';
+    });
+
+    return line;
+  }).join('\n');
+}
+
+function renderHighlight() {
+  const ta = document.getElementById('yamlTa');
+  const pre = document.getElementById('yamlHighlight').querySelector('code');
+  pre.innerHTML = highlightYaml(ta.value);
+}
+
+// ─────────────────────────────────────────────
 // 编辑器：标尺 / 行号 / 光标
 // ─────────────────────────────────────────────
 function buildRuler() {
@@ -684,10 +946,12 @@ function updateLineNums() {
 
 function syncScroll(ta) {
   document.getElementById('lineNums').scrollTop = ta.scrollTop;
+  document.getElementById('yamlHighlight').scrollTop = ta.scrollTop;
 }
 
 function onEditorInput() {
   updateLineNums();
+  renderHighlight();
   updateCursor();
   setStatus('已编辑（未校验）', 'warn');
 }
@@ -720,6 +984,7 @@ function handleTab(e) {
     ta.selectionStart = ta.selectionEnd = start + 2;
   }
   updateLineNums();
+  renderHighlight();
 }
 
 function setStatus(msg, cls) {
@@ -866,6 +1131,12 @@ function deleteTemplate() {
 // ─────────────────────────────────────────────
 // 探针
 // ─────────────────────────────────────────────
+// CPU 开关
+function toggleCpu() {
+  document.getElementById('cpuBlock').style.display =
+    document.getElementById('enableCpu').checked ? 'block' : 'none';
+}
+
 function toggleProbe(type) {
   const cap = type.charAt(0).toUpperCase() + type.slice(1);
   document.getElementById(type + 'Block').style.display =
@@ -878,12 +1149,6 @@ function updateProbeFields(type) {
   document.getElementById(type + '_cmd_f' ).style.display = t === 'exec'    ? 'flex' : 'none';
 }
 
-// 资源限制开关
-function toggleResources() {
-  document.getElementById('resourcesBlock').style.display =
-    document.getElementById('enableResources').checked ? 'block' : 'none';
-}
-
 // ─────────────────────────────────────────────
 // 动态行
 // ─────────────────────────────────────────────
@@ -892,7 +1157,7 @@ function addPort(cp = '', np = '', proto = 'TCP') {
   const r = document.createElement('div');
   r.className = 'port-row';
   r.innerHTML = `
-    <input type="number" placeholder="容器端口" min="1" max="65535" value="${cp}">
+    <input type="number" placeholder="容器端口" min="1" max="65535" value="${cp}" oninput="syncProbePorts()">
     <input type="number" placeholder="30000-32767" min="30000" max="32767" value="${np}">
     <select>
       <option value="TCP"${proto === 'TCP' ? ' selected' : ''}>TCP</option>
@@ -900,6 +1165,16 @@ function addPort(cp = '', np = '', proto = 'TCP') {
     </select>
     <button class="rm" onclick="this.parentElement.remove()">×</button>`;
   d.appendChild(r);
+}
+
+function syncProbePorts() {
+  const rows = document.getElementById('ports').children;
+  if (rows.length === 0) return;
+  const port = rows[0].querySelector('input').value.trim();
+  if (!port) return;
+  document.getElementById('livenessPort').value = port;
+  document.getElementById('readinessPort').value = port;
+  document.getElementById('startupPort').value = port;
 }
 
 function addVolume(mountPath = '', source = '', type = 'hostPath') {
@@ -969,6 +1244,8 @@ function getKVs(id) {
 // ─────────────────────────────────────────────
 // YAML 片段构建
 // ─────────────────────────────────────────────
+let baseIndent = 4;  // 由 generate() 根据模板自动检测
+function ind(n) { return ' '.repeat(baseIndent + n); }
 function buildProbe(type) {
   const t       = document.getElementById(type + 'Type').value;
   const port    = document.getElementById(type + 'Port').value.trim()    || '8080';
@@ -977,51 +1254,51 @@ function buildProbe(type) {
   const init    = document.getElementById(type + 'Initial').value.trim() || '15';
   const period  = document.getElementById(type + 'Period').value.trim()  || '20';
   const timeout = document.getElementById(type + 'Timeout').value.trim() || '5';
+  const success = document.getElementById(type + 'Success').value.trim() || '1';
   const fail    = document.getElementById(type + 'Failure').value.trim() || '3';
-  const key     = type === 'liveness' ? 'livenessProbe' : 'readinessProbe';
-  let s = `    ${key}:\n`;
-  if (t === 'httpGet')     s += `      httpGet:\n        path: ${path}\n        port: ${port}\n`;
-  else if (t === 'tcpSocket') s += `      tcpSocket:\n        port: ${port}\n`;
-  else                     s += `      exec:\n        command:\n        - ${cmd}\n`;
-  s += `      initialDelaySeconds: ${init}\n`;
-  s += `      periodSeconds: ${period}\n`;
-  s += `      timeoutSeconds: ${timeout}\n`;
-  s += `      failureThreshold: ${fail}`;
+  const key     = type === 'liveness' ? 'livenessProbe' : type === 'readiness' ? 'readinessProbe' : 'startupProbe';
+  let s = `${ind(0)}${key}:\n`;
+  if (t === 'httpGet')     s += `${ind(2)}httpGet:\n${ind(4)}path: ${path}\n${ind(4)}port: ${port}\n`;
+  else if (t === 'tcpSocket') s += `${ind(2)}tcpSocket:\n${ind(4)}port: ${port}\n`;
+  else                     s += `${ind(2)}exec:\n${ind(4)}command:\n${ind(4)}- ${cmd}\n`;
+  s += `${ind(2)}initialDelaySeconds: ${init}\n`;
+  s += `${ind(2)}periodSeconds: ${period}\n`;
+  s += `${ind(2)}timeoutSeconds: ${timeout}\n`;
+  s += `${ind(2)}successThreshold: ${success}\n`;
+  s += `${ind(2)}failureThreshold: ${fail}`;
   return s;
 }
 
 function buildResources(cpuReq, cpuLim, memReq, memLim) {
-  const hasReq = cpuReq || memReq;
-  const hasLim = cpuLim || memLim;
-  if (!hasReq && !hasLim) return '';
-  let s = '    resources:';
-  if (hasReq) {
-    s += '\n      requests:';
-    if (cpuReq) s += `\n        cpu: "${cpuReq}"`;
-    if (memReq) s += `\n        memory: "${memReq}"`;
+  if (!cpuReq && !cpuLim && !memReq && !memLim) return '';
+  var s = `${ind(0)}resources:`;
+  if (cpuReq || memReq) {
+    s += `\n${ind(2)}requests:`;
+    if (cpuReq) s += `\n${ind(4)}cpu: ` + cpuReq;
+    if (memReq) s += `\n${ind(4)}memory: "` + memReq + 'Mi"';
   }
-  if (hasLim) {
-    s += '\n      limits:';
-    if (cpuLim) s += `\n        cpu: "${cpuLim}"`;
-    if (memLim) s += `\n        memory: "${memLim}"`;
+  if (cpuLim || memLim) {
+    s += `\n${ind(2)}limits:`;
+    if (cpuLim) s += `\n${ind(4)}cpu: ` + cpuLim;
+    if (memLim) s += `\n${ind(4)}memory: "` + memLim + 'Mi"';
   }
   return s;
 }
 
 function buildVolumeParts(vols, podName) {
   if (!vols.length) return { volumeMounts: '', volumes: '' };
-  let mounts = '    volumeMounts:';
-  let volDef = '  volumes:';
+  let mounts = ind(0) + 'volumeMounts:';
+  let volDef = ind(-2) + 'volumes:';
   vols.forEach((v, idx) => {
     const volName = `vol-${podName}-${idx + 1}`;
-    mounts += `\n    - name: ${volName}`;
-    mounts += `\n      mountPath: ${v.mountPath}`;
-    volDef += `\n  - name: ${volName}`;
-    if      (v.type === 'hostPath')  volDef += `\n    hostPath:\n      path: ${v.source || '/tmp'}`;
-    else if (v.type === 'pvc')       volDef += `\n    persistentVolumeClaim:\n      claimName: ${v.source || 'my-pvc'}`;
-    else if (v.type === 'emptyDir')  volDef += `\n    emptyDir: {}`;
-    else if (v.type === 'configMap') volDef += `\n    configMap:\n      name: ${v.source || 'my-configmap'}`;
-    else if (v.type === 'secret')    volDef += `\n    secret:\n      secretName: ${v.source || 'my-secret'}`;
+    mounts += `\n${ind(2)}- name: ${volName}`;
+    mounts += `\n${ind(4)}mountPath: ${v.mountPath}`;
+    volDef += `\n${ind(-2)}- name: ${volName}`;
+    if      (v.type === 'hostPath')  volDef += `\n${ind(0)}hostPath:\n${ind(2)}path: ${v.source || '/tmp'}`;
+    else if (v.type === 'pvc')       volDef += `\n${ind(0)}persistentVolumeClaim:\n${ind(2)}claimName: ${v.source || 'my-pvc'}`;
+    else if (v.type === 'emptyDir')  volDef += `\n${ind(0)}emptyDir: {}`;
+    else if (v.type === 'configMap') volDef += `\n${ind(0)}configMap:\n${ind(2)}name: ${v.source || 'my-configmap'}`;
+    else if (v.type === 'secret')    volDef += `\n${ind(0)}secret:\n${ind(2)}secretName: ${v.source || 'my-secret'}`;
   });
   return { volumeMounts: mounts, volumes: volDef };
 }
@@ -1053,54 +1330,76 @@ function generate() {
   const name    = document.getElementById('podName').value.trim()       || 'demo';
   const ns      = document.getElementById('namespace').value;
   const img     = document.getElementById('imageTag').value.trim();
-  const cname   = document.getElementById('containerName').value.trim() || name;
-  const restart = document.getElementById('restartPolicy').value;
-  const cpuReq  = document.getElementById('cpuReq').value.trim();
-  const cpuLim  = document.getElementById('cpuLim').value.trim();
-  const memReq  = document.getElementById('memReq').value.trim();
-  const memLim  = document.getElementById('memLim').value.trim();
+  const cname   = name.length > 15 ? name.slice(-15) : name;
+  const restart = 'Always';
+  // 共用资源字段
+  const useCpu = document.getElementById('enableCpu').checked;
+  const cpuMin = useCpu ? (document.getElementById('cpuMin').value.trim() || '0.5') : '';
+  const cpuMax = useCpu ? (document.getElementById('cpuMax').value.trim() || '2') : '';
+  const memMin = document.getElementById('memMin').value.trim();
+  const memMax = document.getElementById('memMax').value.trim();
   const ports   = getPorts();
   const vols    = getVolumes();
   const envs    = getKVs('envVars');
   const lbls    = getKVs('labels');
   const useLive = document.getElementById('enableLiveness').checked;
   const useReady= document.getElementById('enableReadiness').checked;
-  const useResources = document.getElementById('enableResources').checked;
+  const useStartup = document.getElementById('enableStartup').checked;
   const command = document.getElementById('command').value.trim();
   const args = document.getElementById('args').value.trim();
+  // ROC 字段
+  const rocSecret = document.getElementById('rocSecret').value || 'roc-secret';
+  const rocImgPullPolicy = 'IfNotPresent';
 
-  if (!img) { alert('请填写镜像版本'); return; }
+  if (!name)        { alert('请填写 Pod 名称'); return; }
+  if (!ports.length) { alert('请至少填写一个容器端口'); return; }
+  if (!img)         { alert('请填写镜像版本'); return; }
+  if (!memMin)      { alert('请填写最小内存'); return; }
+  if (!memMax)      { alert('请填写最大内存'); return; }
+
+  // 自动检测模板中容器属性的基准缩进（image 行前面的空格数）
+  const idx = parseInt(document.getElementById('tplSelect').value) || 0;
+  const imgMatch = templates[idx].yaml.match(/^([ ]*)image: \{\{imageTag\}\}/m);
+  baseIndent = imgMatch ? imgMatch[1].length : 4;
 
   const portsStr = ports.length
-    ? '    ports:\n' + ports.map(p => {
-        let l = `    - containerPort: ${p.cp}\n      protocol: ${p.proto}`;
-        if (p.np) l += `\n      hostPort: ${p.np}`;
+    ? ind(0) + 'ports:\n' + ports.map(p => {
+        let l = `${ind(2)}- containerPort: ${p.cp}\n${ind(4)}name: ${cname}\n${ind(4)}protocol: ${p.proto}`;
+        if (p.np) l += `\n${ind(4)}hostPort: ${p.np}`;
         return l;
       }).join('\n')
     : '';
 
   const envStr = envs.length
-    ? '    env:\n' + envs.map(e => `    - name: ${e.k}\n      value: "${e.v}"`).join('\n')
+    ? ind(0) + 'env:\n' + envs.map(e => `${ind(2)}- name: ${e.k}\n${ind(4)}value: "${e.v}"`).join('\n')
     : '';
 
   // 命令参数
-  const commandStr = command ? `    command: ["${command}"]` : '';
-  const argsStr = args ? `    args: ["${args.split(' ').filter(a => a).join('", "')}"]` : '';
+  const commandStr = command ? ind(0) + `command: ["${command}"]` : '';
+  const argsStr = args ? ind(0) + `args: ["${args.split(' ').filter(a => a).join('", "')}"]` : '';
 
   const extraLbls = lbls.length ? '\n' + lbls.map(l => `    ${l.k}: "${l.v}"`).join('\n') : '';
   const labelsStr = `  labels:\n    app: ${name}${extraLbls}`;
 
-  const resourcesStr = useResources ? buildResources(cpuReq, cpuLim, memReq, memLim) : '';
+  const resourcesStr = buildResources(cpuMin, cpuMax, memMin, memMax);
 
   const probesParts = [];
   if (useLive)  probesParts.push(buildProbe('liveness'));
   if (useReady) probesParts.push(buildProbe('readiness'));
   const probesStr = probesParts.join('\n');
 
+  const startupProbeStr = useStartup ? buildProbe('startup') : '';
+
   const { volumeMounts: vmStr, volumes: volStr } = buildVolumeParts(vols, name);
   const servicePortsStr = buildServicePorts(ports);
 
-  const idx  = parseInt(document.getElementById('tplSelect').value) || 0;
+  // ROC 专用资源
+  var rocResourcesStr = ind(0) + 'resources:\n' + ind(2) + 'requests:';
+  if (useCpu) rocResourcesStr += '\n' + ind(4) + 'cpu: ' + cpuMin;
+  rocResourcesStr += '\n' + ind(4) + 'memory: "' + memMin + 'Mi"';
+  rocResourcesStr += '\n' + ind(2) + 'limits:';
+  if (useCpu) rocResourcesStr += '\n' + ind(4) + 'cpu: ' + cpuMax;
+  rocResourcesStr += '\n' + ind(4) + 'memory: "' + memMax + 'Mi"';
   let   yaml = templates[idx].yaml;
 
   yaml = yaml
@@ -1109,6 +1408,12 @@ function generate() {
     .replace(/\{\{imageTag\}\}/g,      img)
     .replace(/\{\{containerName\}\}/g, cname)
     .replace(/\{\{restartPolicy\}\}/g, restart)
+    .replace(/\{\{secret\}\}/g,        rocSecret)
+    .replace(/\{\{servicecode\}\}/g,   name)
+    .replace(/\{\{minmemory\}\}/g,     memMin)
+    .replace(/\{\{maxmemory\}\}/g,     memMax)
+    .replace(/\{\{imagePullPolicy\}\}/g, rocImgPullPolicy)
+    .replace(/\{\{rocResources\}\}/g,  rocResourcesStr)
     .replace(/\{\{command\}\}/g,      commandStr)
     .replace(/\{\{args\}\}/g,         argsStr)
     .replace(/\{\{labels\}\}/g,        labelsStr)
@@ -1116,6 +1421,7 @@ function generate() {
     .replace(/\{\{env\}\}/g,           envStr)
     .replace(/\{\{resources\}\}/g,     resourcesStr)
     .replace(/\{\{probes\}\}/g,        probesStr)
+    .replace(/\{\{startupProbe\}\}/g,  startupProbeStr)
     .replace(/\{\{volumeMounts\}\}/g,  vmStr)
     .replace(/\{\{volumes\}\}/g,       volStr)
     .replace(/\{\{servicePorts\}\}/g,  servicePortsStr);
@@ -1128,6 +1434,7 @@ function generate() {
   const ta = document.getElementById('yamlTa');
   ta.value  = yaml;
   updateLineNums();
+  renderHighlight();
   setStatus('✓ 生成完成', 'ok');
   document.getElementById('editorLabel').textContent = `${ns}-${name}.yaml（可直接编辑）`;
 }
@@ -1299,6 +1606,7 @@ setInterval(updateDateTime, 1000);
 renderTplSelect();
 buildRuler();
 addPort('8080', '', 'TCP');
+syncProbePorts();
 updateLineNums();
 
 </script>

@@ -1,0 +1,56 @@
+#{{servicecode}}-{{servicename}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{podname}}
+  namespace: {{namespace}}
+spec:
+  selector:
+    matchLabels:
+      app: {{podname}}
+  replicas: 1
+  revisionHistoryLimit: 5
+  template:
+    metadata:
+      labels:
+        app: {{podname}}
+    spec:
+      imagePullSecrets:
+        - name: {{secret}}
+      containers:
+      - name: {{podname}}
+        image: {{image}}
+        env:
+        - name: JAVA_OPTS
+          value: " -server -Xmx4096M -Xms500M -Xmn64M -XX:+UseParallelGC "
+        - name: NACOS_DATA_ID
+          value: "{{servicecode}}"
+        envFrom:
+        - configMapRef:
+            name: common-config
+        resources:
+          requests:
+#            cpu: 2
+            memory: "{{minmemory}}Mi"
+          limits:
+#            cpu: 2
+            memory: "{{maxmemory}}Mi"
+        imagePullPolicy: IfNotPresent
+#        command: [ "/bin/bash", "-ce", "tail -f /dev/null" ]
+        ports:
+        - containerPort: {{serviceport}}
+          name: {{podname}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{podname}}
+  namespace: {{namespace}}
+spec:
+  selector:
+    app: {{podname}}
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: {{serviceport}}
+---
