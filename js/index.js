@@ -843,7 +843,7 @@ kubectl create secret tls my-tls --cert=cert.pem --key=key.pem -n roc-uat`, desc
             { cmd: "kubectl -n roc-uat debug -it dble-pos-7655bd6f46-z77bs --image=registry.cn-zhangjiakou.aliyuncs.com/abtv/redis:7.2.0 --target=dble-pos -- bash", desc: "#debug,进入pod调试",doc:"",
 	            tags: ["Pod"]
 	        },            
-            { cmd: "kubectl -n roc-uat logs roc-goods-794ccfdd79-2zwtm --previous", desc: "查看上一次被杀死的容器的日志(-c roc-goods表示指定容器),专门用来查：Pod 为什么崩溃、为什么重启、为什么被 kill",doc:"",
+            { cmd: "kubectl -n roc-uat logs roc-goods-794ccfdd79-2zwtm -c roc-goods --previous", desc: "查看上一次被杀死的容器的日志(-c roc-goods表示指定容器),专门用来查：Pod 为什么崩溃、为什么重启、为什么被 kill",doc:"",
 	            tags: ["Pod"]
 	        },
             { cmd: `kubectl get pods -n roc-uat -o=jsonpath='{range .items[*]}{"Pod: kubectl -n roc-uat set image deployment "}{.metadata.labels.app}{" "}{.metadata.labels.app}{"="}{range .spec.containers[*]}{.image}{"\n"}{end}{"\n"}{end}' > roc-image.log`, desc: "生成所有deployment的镜像更新命令,并存放在roc-image.log文件中",doc:"",
