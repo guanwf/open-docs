@@ -392,6 +392,8 @@ input:checked + .slider:before { transform: translateX(16px); }
         <select id="rocSecret">
           <option value="roc-secret">roc-secret</option>
           <option value="roc-secret2">roc-secret2</option>
+          <option value="roc-secret3">roc-secret3</option>
+          <option value="roc-oy">roc-oy</option>
         </select>
       </div>
     </div>
@@ -758,7 +760,6 @@ metadata:
   name: {{name}}
   namespace: {{namespace}}
 spec:
-  type: NodePort
   selector:
     app: {{name}}
 {{servicePorts}}`
@@ -1305,7 +1306,10 @@ function buildVolumeParts(vols, podName) {
 
 function buildServicePorts(ports) {
   if (!ports.length) return '  ports: []';
-  let s = '  ports:';
+  const hasNodePort = ports.some(p => p.np);
+  let s = '';
+  if (hasNodePort) s += '  type: NodePort\n';
+  s += '  ports:';
   ports.forEach(p => {
     s += `\n  - port: ${p.cp}`;
     s += `\n    targetPort: ${p.cp}`;
@@ -1364,8 +1368,7 @@ function generate() {
 
   const portsStr = ports.length
     ? ind(0) + 'ports:\n' + ports.map(p => {
-        let l = `${ind(2)}- containerPort: ${p.cp}\n${ind(4)}name: ${cname}\n${ind(4)}protocol: ${p.proto}`;
-        if (p.np) l += `\n${ind(4)}hostPort: ${p.np}`;
+        let l = `${ind(2)}- containerPort: ${p.cp}\n${ind(4)}name: ${cname}`;
         return l;
       }).join('\n')
     : '';
