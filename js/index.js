@@ -789,6 +789,10 @@ kubectl taint nodes node-1 key=value:NoSchedule-  # 删除污点(末尾减号)`,
             { cmd: "kubectl -n roc-uat get pods |grep Evicted | awk '{print $1}' | xargs kubectl -n roc-uat delete pod", desc: "删除大量evicted的pod.",doc:"",
 	            tags: ["批量"]
 	        },
+            { cmd: "kubectl -n roc-uat get pods |grep Terminating | awk '{print $1}' | xargs kubectl -n roc-uat delete pod --grace-period=0 --force", desc: "强制删除大量terminating的pod.",doc:"",
+	            tags: ["强制批量删除"]
+	        },
+
             { cmd: "docker cp ab5593917446:/home/logs/error.log ./", desc: "ab5593917446=容器Id(通过docker ps可以查询到),从容器中复制文件到本地，反之则从本地复制到容器里面. >> docker cp [本地文件/目录路径] [容器名或容器ID]:[容器内目标路径]",doc:"",
 	            tags: ["Pod"]
 	        },
