@@ -1014,6 +1014,7 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             { category: "📚DB",text:"SQL-生成器", url: "./infra/mysql-sql-generator.html", desc: ""},
             { category: "📚DB",text:"OB-调优方法汇集", url: "https://xd20al46gl.feishu.cn/docx/ILozdpq2Tom7uWx4Cwxc3dlOnrd", desc: "9B284&38"},
 
+            
             {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
             {category: "📊Monitor", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
             {category: "📊Monitor", text:"监控操作说明", url: "https://xd20al46gl.feishu.cn/docx/DsMfd4awdowgeLx0HNecUQYxnzb", desc: "监控操作说明"},
