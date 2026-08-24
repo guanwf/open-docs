@@ -1032,7 +1032,6 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             { category: "⚽️NetWork",text:"speedtest.net-网络速度测试", url: "https://www.speedtest.net/zh-Hans", desc: "网络速度测试"},
             
             // https://mp.weixin.qq.com/s/47AWj_IBKjoT71eL8dALug
-            
 
         ]
     }
