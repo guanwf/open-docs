@@ -218,6 +218,8 @@ dmesg -T | grep -i "oom\|killed"
 
                 `, desc: "dmesg是查看 Linux 内核日志的命令，专门用来查：系统级别的硬件、驱动、内存、进程被杀、网络、IO 等底层问题。" },
 
+            { cmd: "ls -l | awk '$1~/^d/ && $6!='Aug'{print \"rm -rf \\\"\"$9\"\\\"\"}' > del.sh", desc: "生成除8月之外的删除脚本" }
+            
         ]
     },
     {
@@ -1010,6 +1012,7 @@ kubectl get deploy,sts -n roc-uat -o custom-columns="KIND:.kind,NAME:.metadata.n
             { category: "📚DB",text:"ODP-数据库代理", url: "https://www.oceanbase.com/docs/odp-doc-cn", desc: ""},
             { category: "📚DB",text:"OB-发布版本记录", url: "https://www.oceanbase.com/product/oceanbase-database-community-rn/releaseNote#V4.2.5", desc: ""},
             { category: "📚DB",text:"SQL-生成器", url: "./infra/mysql-sql-generator.html", desc: ""},
+            { category: "📚DB",text:"OB-调优方法汇集", url: "https://xd20al46gl.feishu.cn/docx/ILozdpq2Tom7uWx4Cwxc3dlOnrd", desc: "9B284&38"},
 
             {category: "📊Monitor", text: "Prometheus", url: "http://prometheus.local", desc: "监控大盘" },
             {category: "📊Monitor", text: "Grafana", url: "http://grafana.local", desc: "图表展示"},
