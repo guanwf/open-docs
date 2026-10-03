@@ -82,6 +82,8 @@ const database = [
             { cmd: "docker-compose ps -q | xargs docker inspect -f '{{.Name}}: {{.RestartCount}} 次重启'", desc: "#docker-compose,查看重启次数" },
             { cmd: "docker update --memory=13g --memory-swap=26g mysql84", desc: "#docker,更新容器内存限制，docker inspect mysql84 | grep -i memory" },
             { cmd: "docker update --restart unless-stopped mongodb", desc: "#docker,更新容器重启策略" },
+            { cmd: "docker update --restart always mongodb", desc: "#docker,更新容器重启策略" },
+            { cmd: "docker inspect mongodb --format '{{.HostConfig.RestartPolicy.Name}}'", desc: "#docker,查看容器重启策略" },
 
             { cmd: `建立pos用户,目录，分配权限，切换sudo权限
 mkdir -p /data/pos-work
